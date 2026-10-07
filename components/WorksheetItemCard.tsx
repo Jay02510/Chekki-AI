@@ -162,7 +162,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
               )}
               <p
                 className={`mt-2 flex items-center gap-1.5 text-[13px] font-bold ${
-                  isWrong ? 'text-wrong' : isRight ? 'text-right' : 'text-line-ink'
+                  isWrong ? 'text-wrong' : isRight ? 'text-correct' : 'text-line-ink'
                 }`}
               >
                 {isRight ? <Check size={14} weight="bold" /> : null}
@@ -234,12 +234,12 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                             </p>
                             <p
                               className={`mt-0.5 font-extrabold break-words ${isAnswerLong ? 'text-xl' : 'text-[28px] leading-tight'} ${
-                                speechResult?.id === item.id ? (speechResult.success ? 'text-right' : 'text-wrong') : 'text-ink'
+                                speechResult?.id === item.id ? (speechResult.success ? 'text-correct' : 'text-wrong') : 'text-ink'
                               }`}
                             >
                               {answerText}
                               {speechResult?.id === item.id && speechResult.success && (
-                                <span className="ml-2 align-middle text-[15px] font-bold text-right">
+                                <span className="ml-2 align-middle text-[15px] font-bold text-correct">
                                   {ko ? '잘 말했어요!' : 'Well said!'}
                                 </span>
                               )}

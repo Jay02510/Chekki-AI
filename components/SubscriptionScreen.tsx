@@ -11,6 +11,7 @@ import { revenueCatService } from '../services/revenueCatService';
 import { LegalModal } from './LegalModal';
 import { AppleLogo } from './AppleLogo';
 import { SCREENSHOT_MODE } from '../config';
+import { Check, ChatCircleText, DeviceMobile, Lightbulb, MagicWand, Microphone, Sparkle } from '@phosphor-icons/react';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -23,8 +24,8 @@ const getContextualCopy = (
     return {
       headline:
         language === 'ko'
-          ? '엄마표 티칭 스크립트 잠금 해제 💌'
-          : "Unlock Mom's Teaching Scripts 💌",
+          ? '엄마표 티칭 스크립트 잠금 해제'
+          : "Unlock Mom's Teaching Scripts",
       subtext:
         language === 'ko'
           ? '눈물 없이도 이 핵심 문법을 설명할 수 있는 단계별 이중언어 스크립트를 만나보세요.'
@@ -33,7 +34,7 @@ const getContextualCopy = (
   }
   if (paywallContext === 'guide') {
     return {
-      headline: language === 'ko' ? '티칭 가이드 잠금 해제 💡' : 'Unlock the Teaching Guide 💡',
+      headline: language === 'ko' ? '티칭 가이드 잠금 해제' : 'Unlock the Teaching Guide',
       subtext:
         language === 'ko'
           ? '정확하고 완벽한 해설과 가이드라인을 제공하여 아이를 안심하고 지도할 수 있습니다.'
@@ -48,8 +49,8 @@ const getContextualCopy = (
     return {
       headline:
         language === 'ko'
-          ? '원어민 발음 & 스피킹 코치 잠금 해제 🎤'
-          : 'Unlock Speaking Coach & Audio 🎤',
+          ? '원어민 발음 & 스피킹 코치 잠금 해제'
+          : 'Unlock Speaking Coach & Audio',
       subtext:
         language === 'ko'
           ? '원어민의 생생한 음성을 듣고, 아이가 직접 말하며 실시간 발음 피드백을 받을 수 있습니다.'
@@ -58,7 +59,7 @@ const getContextualCopy = (
   }
   if (paywallContext === 'refinement') {
     return {
-      headline: language === 'ko' ? 'AI 상세 설명 기능 잠금 해제 ⚡' : 'Unlock AI Explanations ⚡',
+      headline: language === 'ko' ? 'AI 상세 설명 기능 잠금 해제' : 'Unlock AI Explanations',
       subtext:
         language === 'ko'
           ? '추가 질문을 통해 어떤 문제든 단계별로 깊이 있게 설명해주는 AI 튜터를 만나보세요.'
@@ -67,7 +68,7 @@ const getContextualCopy = (
   }
   if (paywallContext === 'practice_sheet') {
     return {
-      headline: language === 'ko' ? '복습 문제지 무제한 생성 🪄' : 'Unlock Practice Sheets 🪄',
+      headline: language === 'ko' ? '복습 문제지 무제한 생성' : 'Unlock Practice Sheets',
       subtext:
         language === 'ko'
           ? '아이의 오답 패턴을 분석하여 맞춤형 복습 문제지를 즉시 생성하고 확인하세요.'
@@ -189,8 +190,8 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <div className="w-10 h-10 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-        <p className="text-zinc-400 text-sm font-bold">{t('sub_loading')}</p>
+        <div className="w-10 h-10 border-4 border-line/30 border-t-line rounded-full animate-spin" />
+        <p className="text-ink-3 text-[15px] font-semibold">{t('sub_loading')}</p>
       </div>
     );
   }
@@ -198,10 +199,10 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
   if (error && products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center space-y-6">
-        <p className="text-zinc-400 text-sm font-medium max-w-xs">{error}</p>
+        <p className="text-ink-2 text-[15px] max-w-xs break-keep">{error}</p>
         <button
           onClick={fetchProducts}
-          className={`px-8 py-3 rounded-md ${'bg-sunken border-rule text-ink'} border font-black text-xs hover:opacity-80 transition-all`}
+          className="btn-press px-8 min-h-12 rounded-md bg-surface ring-1 ring-inset ring-rule text-ink font-bold text-[15px] hover:ring-ink-3"
         >
           {t('sub_retry')}
         </button>
@@ -209,14 +210,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
     );
   }
 
-  const features = [
-    { icon: '♾️', key: 'bene_unlimited' },
-    { icon: '📝', key: 'bene_tutor' },
-    { icon: '📖', key: 'bene_scripts' },
-    { icon: '✨', key: 'bene_overlays' },
-    { icon: '🎤', key: 'bene_pronounce' },
-    { icon: '🛡️', key: 'bene_anytime' },
-  ];
+  const features = ['bene_unlimited', 'bene_tutor', 'bene_scripts', 'bene_overlays', 'bene_pronounce', 'bene_anytime'];
 
   const getDisclosureText = (text: string) => {
     if (!isIOS) {
@@ -231,65 +225,52 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
   return (
     <div className="space-y-5">
       <div className="text-center space-y-2 pb-2">
-        <div className="inline-flex items-center gap-2 bg-line/15 border border-orange-500/30 rounded-full px-4 py-1.5 mb-1">
-          <span className="text-line-ink text-xs font-black">
-            {language === 'ko' ? '🎉 7일 무료 체험' : '🎉 7-Day Free Trial'}
-          </span>
-        </div>
-        <h2
-          className={`text-2xl md:text-3xl font-black ${'text-ink'} leading-tight break-keep`}
-        >
+        <span className="inline-flex items-center rounded-full bg-line-soft px-3 py-1 text-[13px] font-bold text-line-ink">
+          {language === 'ko' ? '7일 무료 체험' : '7-day free trial'}
+        </span>
+        <h2 className="text-[24px] md:text-[28px] font-extrabold tracking-[-0.02em] text-ink leading-tight break-keep">
           {getContextualCopy(paywallContext, language, t).headline}
         </h2>
-        <p className="text-zinc-400 text-sm font-medium leading-relaxed max-w-sm mx-auto break-keep">
+        <p className="text-ink-2 text-[15px] leading-relaxed max-w-sm mx-auto break-keep">
           {getContextualCopy(paywallContext, language, t).subtext}
         </p>
       </div>
 
-      <div
-        className={`${'bg-sunken border-rule'} rounded-md p-5 md:p-6 border`}
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 sm:gap-x-6">
-          {features.map((item) => (
-            <div key={item.key} className="flex items-center gap-3 group">
-              <div className="w-8 h-8 md:w-9 md:h-9 rounded-md bg-line/10 flex items-center justify-center text-base flex-shrink-0 group-hover:scale-110 transition-transform shadow-inner">
-                {item.icon}
-              </div>
-              <span
-                className={`text-xs md:text-sm font-bold ${'text-ink-2'} leading-tight break-keep`}
-              >
-                {t(item.key as any)}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-2.5 sm:gap-x-6 rounded-md bg-sunken p-5">
+        {features.map((key) => (
+          <li key={key} className="flex items-start gap-2.5 text-[15px] font-semibold text-ink break-keep">
+            <Check size={18} weight="bold" className="mt-0.5 shrink-0 text-line-ink" />
+            {t(key as any)}
+          </li>
+        ))}
+      </ul>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
         <button
           onClick={() => setSelectedProduct(yearlyProductIdentifier)}
-          className={`text-left rounded-md p-5 md:p-7 border-2 transition-all relative overflow-hidden group flex flex-col gap-1 lg:order-first ${
+          aria-pressed={selectedProduct === yearlyProductIdentifier}
+          className={`text-left rounded-md p-5 transition-colors relative flex flex-col gap-1 lg:order-first ${
             selectedProduct === yearlyProductIdentifier
-              ? `bg-gradient-to-br ${'from-line-soft to-line-soft border-line'}`
-              : `${'bg-surface border-rule'} hover:border-orange-500/30`
+              ? 'bg-line-soft ring-2 ring-inset ring-line'
+              : 'bg-surface ring-1 ring-inset ring-rule hover:ring-ink-3'
           }`}
         >
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs md:text-xs bg-emerald-500 text-white px-2.5 py-0.5 rounded-full font-black shadow-lg shadow-emerald-500/20">
+            <span className="text-xs bg-sign text-on-sign px-2.5 py-0.5 rounded-full font-bold">
               {t('sub_bestValue')}
             </span>
-            <span className="text-xs md:text-xs bg-line/20 text-line-ink border border-orange-500/30 px-2.5 py-0.5 rounded-full font-black">
+            <span className="text-xs bg-surface text-line-ink ring-1 ring-inset ring-line/40 px-2.5 py-0.5 rounded-full font-bold">
               {t('sub_trial_badge')}
             </span>
           </div>
 
-          <p className="text-xs md:text-[11px] font-black text-zinc-400">
+          <p className="text-[14px] font-bold text-ink-2">
             {t('sub_yearly')}
           </p>
 
           <div className="flex items-baseline gap-1.5">
             <p
-              className={`font-black ${'text-ink'} text-3xl md:text-4xl`}
+              className="font-extrabold text-ink text-[30px] num"
             >
               {SCREENSHOT_MODE
                 ? t('sub_yearly')
@@ -298,42 +279,43 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
                   (language === 'ko' ? '₩99,000' : '$69.99')}
             </p>
             {!SCREENSHOT_MODE && (
-              <p className="text-sm font-bold text-zinc-400">{t('sub_perYear')}</p>
+              <p className="text-[14px] font-semibold text-ink-3">{t('sub_perYear')}</p>
             )}
           </div>
 
           {!SCREENSHOT_MODE && (
-            <p className="text-xs md:text-[11px] text-emerald-500 font-black uppercase tracking-wide mt-0.5">
-              ✓ {t('sub_save_yearly')}
+            <p className="text-[13px] text-line-ink font-bold mt-0.5">
+              {t('sub_save_yearly')}
             </p>
           )}
 
           {selectedProduct === yearlyProductIdentifier && (
-            <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-line flex items-center justify-center">
-              <span className="text-white text-xs">✓</span>
-            </div>
+            <span className="absolute top-3 right-3 w-6 h-6 rounded-full bg-line text-[#2b211a] flex items-center justify-center">
+              <Check size={14} weight="bold" />
+            </span>
           )}
         </button>
 
         <button
           onClick={() => setSelectedProduct(monthlyProductIdentifier)}
-          className={`text-left rounded-md p-4 md:p-5 border-2 transition-all relative overflow-hidden group flex flex-col gap-1 ${
+          aria-pressed={selectedProduct === monthlyProductIdentifier}
+          className={`text-left rounded-md p-5 transition-colors relative flex flex-col gap-1 ${
             selectedProduct === monthlyProductIdentifier
-              ? `bg-line/10 border-orange-500 ${''}`
-              : `${'bg-surface border-rule'} hover:border-orange-500/30`
+              ? 'bg-line-soft ring-2 ring-inset ring-line'
+              : 'bg-surface ring-1 ring-inset ring-rule hover:ring-ink-3'
           }`}
         >
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-xs bg-line/20 text-line-ink border border-orange-500/30 px-2 py-0.5 rounded-full font-black">
+            <span className="text-xs bg-surface text-line-ink ring-1 ring-inset ring-line/40 px-2.5 py-0.5 rounded-full font-bold">
               {t('sub_trial_badge')}
             </span>
           </div>
-          <p className="text-xs font-black text-zinc-400">
+          <p className="text-[14px] font-bold text-ink-2">
             {t('sub_monthly')}
           </p>
           <div className="flex items-baseline gap-1">
             <p
-              className={`font-black ${'text-ink'} text-2xl md:text-3xl`}
+              className="font-extrabold text-ink text-[26px] num"
             >
               {SCREENSHOT_MODE
                 ? t('sub_monthly')
@@ -342,14 +324,14 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
                   (language === 'ko' ? '₩9,900' : '$6.99')}
             </p>
             {!SCREENSHOT_MODE && (
-              <p className="text-xs font-bold text-zinc-400">{t('sub_perMonth')}</p>
+              <p className="text-[14px] font-semibold text-ink-3">{t('sub_perMonth')}</p>
             )}
           </div>
 
           {selectedProduct === monthlyProductIdentifier && (
-            <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-line flex items-center justify-center">
-              <span className="text-white text-xs">✓</span>
-            </div>
+            <span className="absolute top-3 right-3 w-6 h-6 rounded-full bg-line text-[#2b211a] flex items-center justify-center">
+              <Check size={14} weight="bold" />
+            </span>
           )}
         </button>
       </div>
@@ -358,14 +340,14 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
         <button
           onClick={handleSubscribe}
           disabled={isProcessing}
-          className="w-full py-5 rounded-md bg-line  disabled:bg-zinc-200 disabled:text-zinc-500 text-black font-black text-lg shadow-2xl shadow-orange-500/40 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+          className="btn-press w-full min-h-14 rounded-md bg-line disabled:opacity-50 text-[#2b211a] font-extrabold text-[17px] flex items-center justify-center gap-2"
         >
           {isProcessing ? (
-            <div className="w-5 h-5 border-[3px] border-white/20 border-t-white rounded-full animate-spin" />
+            <div className="w-5 h-5 border-[3px] border-[#2b211a]/25 border-t-[#2b211a] rounded-full animate-spin" />
           ) : (
             <>
               <span>{t('sub_cta_trial')}</span>
-              <span className="text-orange-200 text-sm font-bold">
+              <span className="text-[#2b211a]/70 text-[14px] font-bold">
                 —{' '}
                 {selectedProduct === yearlyProductIdentifier
                   ? language === 'ko'
@@ -380,7 +362,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
         </button>
 
         {error && (
-          <p className="text-center text-red-500 text-xs font-black">
+          <p role="alert" className="text-center text-wrong text-[14px] font-semibold">
             {error}
           </p>
         )}
@@ -393,9 +375,9 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
           ].map((item) => (
             <span
               key={item.key}
-              className="text-xs md:text-xs text-zinc-400 font-bold flex items-center gap-1"
+              className="text-[13px] text-ink-3 font-semibold flex items-center gap-1"
             >
-              <span>{item.icon}</span>
+              <span aria-hidden="true">{item.icon}</span>
               {getDisclosureText(t(item.key as any))}
             </span>
           ))}
@@ -406,19 +388,17 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
         <button
           onClick={handleRestore}
           disabled={isProcessing}
-          className="text-zinc-400 hover:text-line-ink font-black text-xs transition-colors"
+          className="min-h-11 px-3 text-ink-2 hover:text-line-ink font-bold text-[14px] underline"
         >
           {t('sub_restore')}
         </button>
 
-        <div
-          className={`${'bg-sunken border-rule'} rounded-md p-5 border space-y-4 w-full`}
-        >
-          <p className="text-xs text-zinc-400 leading-relaxed text-center font-medium break-keep">
+        <div className="rounded-md bg-sunken p-5 space-y-4 w-full">
+          <p className="text-[13px] text-ink-3 leading-relaxed text-center break-keep">
             {getDisclosureText(t('sub_disclosure_trial'))}
           </p>
 
-          <div className="flex justify-center gap-4 text-xs font-black">
+          <div className="flex justify-center gap-4 text-[13px] font-bold">
             <button
               onClick={() =>
                 window.dispatchEvent(new CustomEvent('show-legal', { detail: 'privacy' }))
@@ -427,7 +407,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
             >
               {language === 'ko' ? '개인정보 처리방침' : 'Privacy Policy'}
             </button>
-            <span className="text-zinc-800/20">|</span>
+            <span className="text-rule" aria-hidden="true">|</span>
             <button
               onClick={() =>
                 window.dispatchEvent(new CustomEvent('show-legal', { detail: 'terms' }))
@@ -437,7 +417,7 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
               {language === 'ko' ? '이용약관' : 'Terms of Use'}
             </button>
           </div>
-          <p className="text-xs text-zinc-600 text-center uppercase tracking-tight">
+          <p className="text-xs text-ink-3 text-center">
             Subscription follows {isIOS ? 'Apple Standard EULA' : 'Google Play Terms of Service'}
           </p>
         </div>
@@ -446,63 +426,45 @@ const NativeSubscriptionView: React.FC<{ onClose?: () => void; isNight?: boolean
   );
 };
 
-const WebSubscriptionView: React.FC<{ isNight?: boolean }> = ({ isNight = true }) => {
+const WebSubscriptionView: React.FC<{ isNight?: boolean }> = () => {
   const { language, t } = useLanguage();
   const { paywallContext } = useAuth();
   const copy = getWebContextualCopy(paywallContext, language, t);
 
-  const getContextIcon = () => {
-    if (paywallContext === 'moms_scripts') return '💌';
-    if (paywallContext === 'guide') return '💡';
-    if (
-      paywallContext === 'speaking_coach' ||
-      paywallContext === 'pronunciation' ||
-      paywallContext === 'audio'
-    )
-      return '🎤';
-    if (paywallContext === 'refinement') return '⚡';
-    if (paywallContext === 'practice_sheet') return '🪄';
-    return '📱';
-  };
+  const ContextIcon =
+    paywallContext === 'moms_scripts' || paywallContext === 'refinement'
+      ? ChatCircleText
+      : paywallContext === 'guide'
+        ? Lightbulb
+        : paywallContext === 'speaking_coach' || paywallContext === 'pronunciation' || paywallContext === 'audio'
+          ? Microphone
+          : paywallContext === 'practice_sheet'
+            ? MagicWand
+            : paywallContext
+              ? Sparkle
+              : DeviceMobile;
 
   return (
-    <div className="flex flex-col items-center justify-center text-center py-6 space-y-6">
-      <div
-        className={`w-16 h-16 md:w-20 md:h-20 rounded-md ${'bg-line-soft border-transparent'} border flex items-center justify-center text-3xl md:text-4xl `}
+    <div className="flex flex-col items-center text-center py-4">
+      <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-line-soft text-line-ink">
+        <ContextIcon size={30} weight="bold" />
+      </span>
+      <h3 className="mt-4 text-[20px] font-extrabold tracking-[-0.02em] text-ink leading-tight break-keep">{copy.headline}</h3>
+      <p className="mt-2 max-w-sm text-[15px] leading-relaxed text-ink-2 break-keep">{copy.subtext}</p>
+
+      <a
+        href="/subscribe"
+        className="btn-press mt-6 flex min-h-12 w-full max-w-xs items-center justify-center rounded-md bg-line text-[15px] font-bold text-[#2b211a]"
       >
-        {getContextIcon()}
-      </div>
-      <div className="px-4">
-        <h3
-          className={`text-lg md:text-xl font-black ${'text-ink'} mb-2 leading-tight`}
-        >
-          {copy.headline}
-        </h3>
-        <p className="text-[11px] md:text-xs text-zinc-400 max-w-[280px] mx-auto leading-relaxed">
-          {copy.subtext}
-        </p>
-      </div>
-
-      <div className="w-full max-w-xs space-y-3 px-4">
-        <a
-          href="/subscribe"
-          className="w-full py-4 rounded-md bg-line text-[#2b211a] font-black text-base  active:scale-[0.97] transition-all text-center block"
-        >
-          {t('sub_webCta')}
-        </a>
-
-        <div
-          className={`flex items-center justify-center gap-3 py-2 border-t ${'border-rule'} mt-4 opacity-50`}
-        >
-          <span className="text-xs font-black text-zinc-400 flex items-center gap-1">
-            <AppleLogo className="w-2 h-2" /> iOS
-          </span>
-          <span className="text-zinc-700">|</span>
-          <span className="text-xs font-black text-zinc-400 flex items-center gap-1">
-            🤖 Android ({language === 'ko' ? '준비 중' : 'Soon'})
-          </span>
-        </div>
-      </div>
+        {t('sub_webCta')}
+      </a>
+      <p className="mt-4 flex items-center gap-3 text-[13px] font-semibold text-ink-3">
+        <span className="flex items-center gap-1">
+          <AppleLogo className="w-3 h-3" /> iOS
+        </span>
+        <span className="text-rule" aria-hidden="true">|</span>
+        <span>Android ({language === 'ko' ? '준비 중' : 'soon'})</span>
+      </p>
     </div>
   );
 };
@@ -522,28 +484,8 @@ export const SubscriptionScreen: React.FC<Props> = ({ onClose, isNight = true })
     <div>
       {/* Header */}
       <div className="text-center mb-6">
-        <h2
-          className={`text-2xl md:text-3xl font-black ${'text-ink'} mb-1  break-keep`}
-        >
-          {t('sub_title')}
-        </h2>
-        <p className="text-zinc-400 text-sm font-medium break-keep">{t('sub_subtitle')}</p>
-
-        <div className="mt-3 flex justify-center">
-          <span
-            className={`text-xs ${'bg-sunken border-rule'} text-zinc-500 px-3 py-1 rounded-full font-black flex items-center gap-1.5 border`}
-          >
-            {platform === 'ios' ? (
-              <>
-                <AppleLogo className="w-2.5 h-2.5" /> iOS
-              </>
-            ) : platform === 'android' ? (
-              '🤖 Android'
-            ) : (
-              '🌐 Web'
-            )}
-          </span>
-        </div>
+        <p className="text-[13px] font-bold text-line-ink">{t('sub_title')}</p>
+        <p className="mt-0.5 text-[15px] text-ink-2 break-keep">{t('sub_subtitle')}</p>
       </div>
 
       {/* Platform-specific content */}

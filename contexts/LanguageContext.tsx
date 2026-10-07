@@ -165,7 +165,7 @@ const translations = {
     btn_upload: 'Scan Worksheet',
     btn_guest_scan: 'Try a Free Scan',
     btn_walkthrough: 'Watch Walkthrough',
-    supported_formats: 'Images are processed temporarily and NEVER stored.',
+    supported_formats: 'Photos are handled as our privacy policy describes.',
     dash_welcome: 'Hi,',
     dash_subtitle: 'Snap a photo to see the answers and your teaching guide.',
     lbl_feedback: 'Feedback',
@@ -218,7 +218,7 @@ const translations = {
     trust_title: 'Safe for Your Family',
     trust_privacy: 'Privacy You Can Trust',
     trust_privacy_desc:
-      'Your family’s safety is our priority; we never store your child’s data, processing images in real-time before deleting them instantly.',
+      'Your child’s homework is used only as our privacy policy describes, and everything is deleted as soon as you close your account.',
     trust_safety: 'Bonding, Not Battling',
     trust_safety_desc:
       'We turn stressful correction time into a happy, high-five moment with interactive digital stamps and positive praise your child will love.',
@@ -529,7 +529,7 @@ const translations = {
     btn_upload: '학습지 스캔하기',
     btn_guest_scan: '무료 스캔 체험하기',
     btn_walkthrough: '사용 가이드 보기',
-    supported_formats: '이미지는 분석 후 즉시 삭제됩니다.',
+    supported_formats: '사진은 개인정보처리방침에 따라 안전하게 다뤄요.',
     dash_welcome: '반가워요,',
     dash_subtitle: '사진을 찍으면 바로 정답과 티칭 가이드를 보여드려요.',
     lbl_feedback: '의견 보내기',
@@ -582,7 +582,7 @@ const translations = {
     trust_title: '부모님들이 채키를 믿는 이유',
     trust_privacy: '안심할 수 있는 보안',
     trust_privacy_desc:
-      '우리 아이의 정보는 소중하니까요. 사진은 저장되지 않고 분석 즉시 파기되어 개인정보를 완벽하게 보호합니다.',
+      '아이 숙제는 개인정보처리방침에 적힌 대로만 쓰고, 탈퇴하면 바로 모두 지워요.',
     trust_safety: '혼내지 않는 즐거운 학습',
     trust_safety_desc:
       '숙제 시간이 전쟁터가 아닌, 아이와 웃으며 하이파이브하는 칭찬과 교감의 시간으로 바뀝니다.',

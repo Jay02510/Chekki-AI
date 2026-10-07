@@ -28,6 +28,7 @@ import {
 } from '@phosphor-icons/react';
 import { SchoolLoopDiagram } from '../components/SchoolLoopDiagram';
 import ScreenshotGallery from '../components/ScreenshotGallery';
+import EducatorResources from '../components/EducatorResources';
 import { PLAN_SEATS, PLAN_LABELS, PRICING_BILLING } from '../../api/_lib/pricingTiers';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useToast } from '../../contexts/ToastContext';
@@ -1079,6 +1080,8 @@ const SchoolsLandingPage: React.FC<Props> = ({ isNight, setIsNight }) => {
           })}
         </div>
       </section>
+
+      <EducatorResources isNight={isNight} isKo={isKo} />
 
       {/* --- GET IN TOUCH & CONSULTATION SECTION --- */}
       <section id="talk-to-us" className={`cta-reveal py-20 px-6 max-w-4xl mx-auto w-full text-center rounded-3xl my-12 border transition-colors ${

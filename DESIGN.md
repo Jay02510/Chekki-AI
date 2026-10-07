@@ -1,91 +1,86 @@
 ---
 name: Chekki AI
-description: Grading by Chekki, praise by Mom. Each week is one trip around the loop line, told in Seoul Metro station signage.
+description: Grading by Chekki, praise by Mom. A warm kitchen-table app for a tired parent reading homework results with a child beside her.
 colors:
+  ground: "#fbf6ee"
+  surface: "#ffffff"
+  sunken: "#f5ecdf"
+  sign: "#3a2c22"
+  on-sign: "#fff8f0"
+  on-sign-2: "#dccab8"
+  ink: "#2b211a"
+  ink-2: "#5b4b3f"
+  ink-3: "#76665a"
+  rule: "#ebdfcf"
   line: "#ef7c1c"
   line-ink: "#a84d06"
-  line-soft: "#fde9d7"
-  wrong: "#d1242b"
-  wrong-soft: "#fbe3e3"
-  right: "#0a7a3e"
-  right-soft: "#dcf1e4"
-  sign: "#1e2226"
-  on-sign: "#ffffff"
-  on-sign-2: "#b4bac1"
-  ground: "#f3f4f1"
-  surface: "#ffffff"
-  sunken: "#e9ebe7"
-  ink: "#16191c"
-  ink-2: "#474d55"
-  ink-3: "#5f666e"
-  rule: "#d6d9d4"
-  tile-joint: "rgba(22, 25, 28, 0.055)"
-  line-dark: "#f08a32"
+  line-soft: "#fdebd8"
+  wrong: "#d4462a"
+  wrong-soft: "#fce6df"
+  right: "#1f8a4c"
+  right-soft: "#e1f3e6"
+  tile: "rgba(239, 124, 28, 0.10)"
+  ground-dark: "#17120f"
+  surface-dark: "#221b16"
+  sunken-dark: "#110d0b"
+  sign-dark: "#2e241d"
+  on-sign-2-dark: "#cdb9a6"
+  ink-dark: "#f7efe6"
+  ink-2-dark: "#d3c4b5"
+  ink-3-dark: "#a8988a"
+  rule-dark: "#3a2f27"
+  line-dark: "#f28a35"
   line-ink-dark: "#f6a560"
-  line-soft-dark: "#3a2614"
-  wrong-dark: "#ff6369"
-  wrong-soft-dark: "#3a1a1c"
-  right-dark: "#3fd07f"
-  right-soft-dark: "#12301f"
-  sign-dark: "#262b31"
-  on-sign-2-dark: "#a9b0b8"
-  ground-dark: "#101215"
-  surface-dark: "#181b1f"
-  sunken-dark: "#0b0c0e"
-  ink-dark: "#f1f2ef"
-  ink-2-dark: "#bcc1c7"
-  ink-3-dark: "#959ba2"
-  rule-dark: "#2d3238"
-  tile-joint-dark: "rgba(255, 255, 255, 0.04)"
+  line-soft-dark: "#3d2716"
+  wrong-dark: "#ff7a66"
+  wrong-soft-dark: "#3d1f19"
+  right-dark: "#4cd48a"
+  right-soft-dark: "#15301f"
+  tile-dark: "rgba(242, 138, 53, 0.10)"
+  ink-on-line: "#2b211a"
+  scrim: "rgba(43, 33, 26, 0.55)"
 typography:
-  sign-display:
+  display:
     fontFamily: "'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', sans-serif"
-    fontSize: "44px"
-    fontWeight: 800
-    lineHeight: 1.15
-    letterSpacing: "-0.02em"
-  sign-display-mobile:
-    fontFamily: "'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', sans-serif"
-    fontSize: "26px"
-    fontWeight: 800
-    lineHeight: 1.15
-    letterSpacing: "-0.02em"
-  door:
-    fontFamily: "'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', sans-serif"
-    fontSize: "36px"
+    fontSize: "28px"
     fontWeight: 800
     lineHeight: 1.15
     letterSpacing: "-0.02em"
   headline:
     fontFamily: "'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', sans-serif"
-    fontSize: "26px"
+    fontSize: "22px"
     fontWeight: 800
-    lineHeight: 1.15
+    lineHeight: 1.2
     letterSpacing: "-0.02em"
   title:
     fontFamily: "'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', sans-serif"
     fontSize: "17px"
-    fontWeight: 700
+    fontWeight: 800
     lineHeight: 1.375
   body:
     fontFamily: "'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', sans-serif"
     fontSize: "15px"
     fontWeight: 500
     lineHeight: 1.625
+  input:
+    fontFamily: "'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', sans-serif"
+    fontSize: "16px"
+    fontWeight: 500
+    lineHeight: 1.5
   label:
+    fontFamily: "'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', sans-serif"
+    fontSize: "14px"
+    fontWeight: 600
+    lineHeight: 1.4
+  caption:
     fontFamily: "'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', sans-serif"
     fontSize: "13px"
     fontWeight: 600
-    lineHeight: 1.25
-  secondary-line:
-    fontFamily: "'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', sans-serif"
-    fontSize: "12px"
-    fontWeight: 500
     lineHeight: 1.3
-    letterSpacing: "0"
 rounded:
   sm: "4px"
-  md: "6px"
+  md: "14px"
+  lg: "20px"
   full: "9999px"
 spacing:
   xs: "4px"
@@ -94,21 +89,20 @@ spacing:
   lg: "20px"
   xl: "24px"
   2xl: "32px"
-  tile: "48px"
 components:
-  button-door:
-    backgroundColor: "{colors.line}"
-    textColor: "{colors.ink}"
-    typography: "{typography.door}"
-    rounded: "{rounded.md}"
-    padding: "32px"
-    height: "232px"
   button-primary:
     backgroundColor: "{colors.line}"
+    textColor: "{colors.ink-on-line}"
+    typography: "{typography.body}"
+    rounded: "{rounded.md}"
+    padding: "0 24px"
+    height: "48px"
+  button-outline:
+    backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
     typography: "{typography.body}"
     rounded: "{rounded.md}"
-    padding: "0 16px"
+    padding: "0 24px"
     height: "48px"
   button-sign:
     backgroundColor: "{colors.sign}"
@@ -117,212 +111,240 @@ components:
     rounded: "{rounded.md}"
     padding: "0 16px"
     height: "44px"
-  button-outline:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
+  button-destructive:
+    backgroundColor: "{colors.wrong}"
+    textColor: "#ffffff"
     typography: "{typography.body}"
     rounded: "{rounded.md}"
-    padding: "0 16px"
     height: "48px"
-  station-sign:
-    backgroundColor: "{colors.sign}"
-    textColor: "{colors.on-sign}"
-    typography: "{typography.sign-display}"
-    rounded: "{rounded.md}"
-    padding: "32px 32px 40px"
   card:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
     rounded: "{rounded.md}"
     padding: "16px 20px"
-  note-line:
+  note:
     backgroundColor: "{colors.line-soft}"
     textColor: "{colors.ink}"
     rounded: "{rounded.md}"
-    padding: "20px"
+    padding: "12px 16px"
   input-text:
     backgroundColor: "{colors.sunken}"
     textColor: "{colors.ink}"
-    typography: "{typography.body}"
+    typography: "{typography.input}"
     rounded: "{rounded.md}"
-    padding: "12px"
+    padding: "0 16px"
+    height: "48px"
   segmented-toggle:
     backgroundColor: "{colors.sunken}"
     textColor: "{colors.ink-2}"
     typography: "{typography.label}"
     rounded: "{rounded.md}"
     padding: "2px"
+  sheet:
+    backgroundColor: "{colors.surface}"
+    rounded: "{rounded.lg}"
+    padding: "20px 24px"
   roundel:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
     rounded: "{rounded.full}"
     size: "32px"
-  roundel-stop:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.full}"
-    size: "44px"
 ---
 
-> **Warm pass (2026-10-07), supersedes the colour and signage parts below.** Parent testing said the metro look felt official, not mom-and-child. The parent app now uses the "kitchen table" palette in `index.css`: cream ground `#fbf6ee`, cocoa ink and sign `#2b211a` / `#3a2c22`, a softer coral for wrong answers `#d4462a`, a warm lamp glow instead of the floor tiles, and `rounded-md` = 14px. Charcoal station signs are gone from the parent screens: the home is a big transparent Chekki, one scan button, and three honest "why not a chatbot" cards for guests. Results open praise first, then the misses one at a time ("같이 볼 문제 1 / 2"), with "전체 보기" for the full list. The orange line, numbered roundels, Pretendard and the Korean-over-English pairing stay.
+# Design System: Chekki AI (parent app)
 
-
-# Design System: Chekki AI
+Scope: the parent app (`app.html` → `App.tsx`, `components/`) the marketing landing page (`index.html` → `src/Landing.tsx`), and the parent pages that render through the landing bundle (`/subscribe`, `/privacy`, `/terms`, `/refund`, `/youth`, `/support`). `/faq` (`src/pages/FaqPage.tsx`) is covered too. The Schools pages (`/schools`, `src/pages/TeacherPage.tsx`, `src/components/`) still use the older dark look and are **not** covered here.
 
 ## Overview
 
-**Creative North Star: "The Loop Line"**
+**Creative North Star: "The Kitchen Table"**
 
-Every parent screen is a Seoul Metro station. The family is always at a stop, the previous stop and the next one are named, and the week is one trip around a single orange line. Charcoal enamel sign panels carry the "you are here" moment; a pale platform-tile ground sits under everything; numbered roundels mark each step, and on the result route each question is a stop on a vertical rail.
+The reader is Min-ji: a tired parent, often reading in her second language, with a 5 to 7 year old next to her looking at the same screen. Every screen should feel like homework spread out on a warm table under a lamp: cream paper, cocoa ink, one orange pencil line, and Chekki the mascot keeping things light.
 
-The reader is a tired parent with her child beside her, often reading in her second language. So the system is built like transit signage: big heavy Korean (or the user's language) first, the other language small underneath, one action the size of a platform door, and colour that carries meaning rather than decoration. Orange means "the line / go here". Red appears only on wrong answers, green only on right ones. Light and dark follow the device; both are first-class.
+Three jobs, in order:
 
-The world is flat. Tone blocks, 1px tile joints, ring outlines and a 6px line do all the structural work. It refuses the in-app marketing hero: no giant slogan headline, no floating mascot card, no glow, no glass.
+1. **One obvious next action.** Each screen has one big orange button. Everything else is quieter.
+2. **Korean first, little reading.** Short sentences in plain 해요체. Korean leads when the app is in Korean; English sits small underneath only where it helps.
+3. **Never scold in front of the child.** Wrong answers are "같이 볼 문제", not red crosses. A pronunciation miss is a gentle orange note, not an error.
 
-**Key Characteristics:**
-- Charcoal station sign with the orange line along its foot as the first thing on a screen.
-- One orange line (6px), drawn as rails, sign feet and roundel rings.
-- Bilingual pairs: primary line large and heavy, secondary line small and medium, hidden when identical.
-- Pretendard only, at weights 500 to 800.
-- Platform-tile ground (48px grid, 1px joints) behind full-screen states.
-- Flat tone blocks; soft corners (6px); circles only for roundels and the mascot badge.
-- Light and dark themes swap the same token names.
+This replaced the earlier "Seoul Metro" direction (charcoal station signs, platform tiles) on 2026-10-07 after parent testing said it felt official, not mom-and-child. What survived: the orange line, numbered roundels, Pretendard, and the Korean-over-English pairing.
+
+**Key characteristics**
+
+- Cream ground with a soft orange "lamp" glow at the top of full-screen states (`.tile-ground`).
+- White cards with a 1px inset Rule ring, 14px corners. Flat; no resting shadows.
+- One accent: Chekki orange. Text on orange is always cocoa ink, never white.
+- Red and green are signals only (wrong/right, error/success).
+- Modals are bottom sheets on phones and centred cards from `sm` up.
+- Light and dark follow the device, with a manual override in Settings. Both are first-class.
 
 ## Colors
 
-A grey platform palette with one transit orange and two strictly reserved signal colours; every value has a light and a dark (`-dark`) twin under the same role.
+All colours live as `--m-*` variables in `tokens.css` and swap together under `html.dark`. Use the Tailwind utilities (`bg-ground`, `text-ink-2`, `ring-rule`, ...), never raw hex, with one exception: ink on orange is written `text-[#2b211a]` because it must stay dark in both themes.
 
 ### Primary
-- **Line Orange** (`line` / `line-dark`): Chekki's line. The scan door, the primary action button, rails, the sign's 6px foot, the current-stop roundel fill, focus outline, caret and text selection. Text on orange is always ink (#16191c), never white.
-- **Line Ink** (`line-ink` / `line-ink-dark`): orange dark enough to read as text. Links, inline counts, "next" labels, the PRO tag text.
-- **Line Wash** (`line-soft` / `line-soft-dark`): quiet orange tone block for teacher-report notes, praise lines and the tutor-script panel.
 
-### Secondary (signal colours, reserved)
-- **Wrong Red** (`wrong`, `wrong-soft`): wrong-answer roundel rings and their gentle label, destructive menu items, error toasts, the record-in-progress state. Nothing else.
-- **Right Green** (`right`, `right-soft`): right-answer roundel rings, "맞았어요 / Right", success panels. Nothing else.
+- **Chekki Orange** (`line`): the primary button, focus outline, caret, selection, progress fills, the active roundel, selected chip rings.
+- **Orange Ink** (`line-ink`): orange that is dark enough for text. Links, small labels ("Premium", "같이 볼 문제"), counts, icons inside Orange Wash circles.
+- **Orange Wash** (`line-soft`): notes, praise, selected options, suggestion chips, icon circles, the user's own chat bubbles.
 
-### Neutral
-- **Enamel Charcoal** (`sign` / `sign-dark`): station signs, result header sign, toasts, secondary solid buttons, the done-stop roundel in light mode.
-- **Sign White** and **Sign Grey** (`on-sign`, `on-sign-2`): primary and secondary text on charcoal.
-- **Platform Ground** (`ground`): page background; carries the tile pattern on full-screen states.
-- **Panel White** (`surface`): cards, stops, outline buttons, menus.
-- **Recess** (`sunken`): text inputs, the language/mode segmented control, tip panels, skeletons.
-- **Ink 1 / 2 / 3** (`ink`, `ink-2`, `ink-3`): heading and body text, supporting text, captions and off-stop labels. Ink 3 stays at legible contrast on both grounds; it is not a decorative fade.
-- **Rule** (`rule`): 1px inset rings on cards and buttons, dividers, the unlit part of the rail.
-- **Tile Joint** (`tile-joint`): the 1px platform-tile lines only.
+### Signals (reserved)
 
-### Named Rules
-**The One Line Rule.** There is one accent hue: orange. No second brand colour, no gradients of it, no tints beyond Line Wash.
+- **Wrong** (`wrong`, `wrong-soft`): wrong-answer marks on the result screen, real errors (`role="alert"`), destructive actions (leave class, delete account). Nothing else.
+- **Right** (`right` / `correct`, `right-soft`): right-answer marks, success notices ("연결됐어요"). Nothing else.
 
-**The Signal Reservation Rule.** Red means a wrong answer or a real error; green means a right answer or success. Neither is ever used for decoration, category, or emphasis.
+`text-right` is also Tailwind's `text-align: right`, so green text is written **`text-correct`**. `--color-right` only exists in the app bundle (`index.css`); the landing bundle deliberately does not define it so staff pages keep `text-right` as alignment.
 
-**The Ink-on-Orange Rule.** Text and icons on Line Orange are charcoal ink (#16191c) in both themes, never white.
+### Neutrals
+
+- **Ground** (`ground`): page background and the Settings sheet body.
+- **Surface** (`surface`): cards, sheets, outline buttons, menus.
+- **Sunken** (`sunken`): inputs, segmented-control tracks, info boxes inside cards, Chekki's chat bubbles.
+- **Cocoa** (`sign`, `on-sign`, `on-sign-2`): the dark panel used by onboarding, toasts, the mobile app banner, the selected thumb of a segmented control, and secondary solid buttons.
+- **Ink 1/2/3** (`ink`, `ink-2`, `ink-3`): headings and body, supporting text, captions and placeholders. Ink 3 is still readable; never fade text further with opacity.
+- **Rule** (`rule`): 1px rings and dividers.
+- **Scrim**: modal backdrops are `bg-[#2b211a]/55`. No blur.
+
+### Named rules
+
+**The One Pencil Rule.** Orange is the only accent. No purple, pink, blue, emerald or gradients.
+
+**The Ink-on-Orange Rule.** Text and icons on `bg-line` are `text-[#2b211a]` in both themes.
+
+**The No-Scolding Rule.** Red never appears on anything the child did in a practice or review mode. Use Orange Wash and a kind sentence instead.
 
 ## Typography
 
-**Display Font:** Pretendard Variable (with Pretendard, -apple-system, Apple SD Gothic Neo, Malgun Gothic, sans-serif)
-**Body Font:** Pretendard Variable (same stack)
+One family: **Pretendard Variable**, self-hosted, Korean and Latin together. `word-break: keep-all` everywhere (`break-keep`) so Korean wraps at word boundaries. Legacy aliases (`font-display`, `font-korean`, `font-hand`, `font-serif`) all resolve to Pretendard; don't add new ones.
 
-**Character:** One Korean-first grotesque at every size, the way station signage uses one family. Hierarchy comes from weight (800 for sign names, 700 for titles and buttons, 500 to 600 for text) and from the bilingual pairing, never from a second face. Legacy family aliases (display, hand, korean, serif) all resolve to Pretendard. Text uses `word-break: keep-all` so Korean breaks at word boundaries; numbers that line up use tabular figures.
+| Role | Size / weight | Use |
+| --- | --- | --- |
+| Display | 28px (34px `sm+`) / 800, -0.02em | Page titles (Help, Flashcards done) |
+| Headline | 20 to 22px / 800, -0.02em | Sheet and modal titles |
+| Title | 17px / 800 | Card titles, dialog questions |
+| Body | 15px / 500, 1.625 | Paragraphs, button labels |
+| Input | **16px** / 500 | Every text input and textarea (stops iOS zoom) |
+| Label | 14px / 600 | Field labels, secondary buttons, links |
+| Caption | 13px / 600 to 700 | Section headers above cards, badges |
 
-### Hierarchy
-- **Sign Display** (800, 44px desktop / 30px at 400px+ / 26px phone, 1.15, -0.02em): the current stop name on the station sign. One per screen.
-- **Door** (800, 36px desktop / 28px phone, 1.15, -0.02em): the label on the platform-door scan button.
-- **Headline** (800, 26px / 22px phone, 1.15, -0.02em): result header sign title, grading sign title (34px / 30px).
-- **Title** (700, 15 to 17px, ~1.375): card titles, question text (16px semibold), tutor script (17px semibold), loading tip.
-- **Body** (500, 15px, 1.625): paragraphs, teacher reports, inputs. Translations and supporting text at 14px in Ink 2.
-- **Label** (600 to 700, 13px): stop labels, status labels ("아이와 같이 보기"), menu items, adjacent-stop names on the sign.
-- **Secondary Line** (500, 11 to 12px under labels, 15 to 18px under sign names, 1.3): the other-language line, always smaller and lighter than its primary.
+Rules:
 
-### Named Rules
-**The Station Pair Rule.** Bilingual text is a pair: the user's language is the primary line (large, 700 to 800), the other language sits directly under it (small, 500, Ink 3 or Sign Grey). If the two are identical the secondary is dropped. Never set them side by side at equal size.
-
-**The One Family Rule.** Pretendard only. No display face, no handwriting face, no monospace for flavour.
+- Nothing parent-facing below 12px. The old 9 to 11px uppercase tracking labels are gone; don't bring them back.
+- No `uppercase` and no wide letter-spacing on Korean or English UI text.
+- Numbers that change or line up use `.num` (tabular figures).
 
 ## Layout
 
-Single column on phones, centred at up to 1024px (scan home, `max-w-5xl`) with an app bar up to 1280px. The scan home stacks: station sign, platform-door button (left, 1.5fr) beside one-word photo tips and a privacy line (right, 1fr) on desktop, then the loop strip spanning both columns; on phones the order is sign, door, privacy, loop strip, 3-up tips. The result route splits 50/50 at `lg` (worksheet image sticky on the left, route rail scrolling on the right) and stacks on smaller screens.
+- Phone first. Single column, 16px side gutter (`px-4`), content max `max-w-2xl` for reading pages.
+- Section rhythm: a caption-size section title (`text-[13px] font-bold text-ink-3 mb-2.5`) above a card; 28px between sections.
+- Tap targets are at least 44px (`min-h-11`); primary and outline buttons are 48px (`min-h-12`); the flashcard and practice buttons are 56px (`min-h-14`) because a child may press them.
+- Respect safe areas on sheets and full-screen views (`env(safe-area-inset-*)`).
 
-Spacing runs on a 4px base: 16px gaps between major blocks, 12px within stacks, 20 to 32px card padding (tighter on phones), 48px platform tiles. Tap targets are at least 44px (`min-h-11`), primary buttons 48px, the scan door 150px tall on phones and 232px on desktop.
+## Elevation
 
-**The Door-Sized Action Rule.** Each screen has one primary action, and it is big: the scan door fills its column. Secondary actions are outline or charcoal buttons at 44 to 48px.
-
-## Elevation & Depth
-
-Flat by default. Depth comes from tone (charcoal sign over grey ground, white panel over ground, recessed inputs) and from 1px inset rings in Rule. Nothing at rest casts a shadow. The only shadow in the system belongs to layers that genuinely float above content: the account menu, toasts and modals.
-
-### Shadow Vocabulary
-- **Floating layer** (`box-shadow: 0 16px 40px -12px rgba(0,0,0,0.35)`; toasts use `0 16px 40px -16px rgba(0,0,0,0.5)`): dropdown menus and fixed toasts only.
-
-### Named Rules
-**The Enamel Rule.** Surfaces are flat tone blocks. No glass, no backdrop blur, no glow, no gradient sheen. If a resting element needs separation, use a Rule ring or a tone step, not a shadow.
+Flat at rest. Separation comes from tone (white on cream, sunken inside white) and 1px inset rings. Only layers that float get a shadow: `shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)]` for sheets and modals, `0 16px 40px -16px rgba(0,0,0,0.5)` for toasts. No glass, no backdrop blur, no glows, no "double bezel" frames.
 
 ## Shapes
 
-Softly squared panels (6px) for signs, cards, buttons, inputs and toasts; 4px for small chips, tags and segmented-control thumbs. Circles are reserved for roundels, the mascot badge (orange ring 3 to 6px) and the avatar. Lines are fully rounded bars: the 6px rail and the 6px sign foot. Rings are inset so outlines never shift layout. The platform tile is a flat square 48px grid of 1px joints, never dots or noise.
+- `rounded-md` = 14px: cards, buttons, inputs, notes.
+- `rounded-lg` = 20px: sheets, modals, full flashcards.
+- `rounded` = 4px: segmented thumbs and tiny tags.
+- `rounded-full`: roundels, avatar, icon circles, pills.
 
 ## Components
 
-### Station Sign (signature)
-The "you are here" panel. Charcoal block, 6px radius, 6px orange line along the bottom edge. Three columns on desktop: previous stop (left arrow, 13px semibold Sign Grey, secondary line under it), current stop centred with an optional mascot roundel badge, next stop (right arrow). On phones the current stop sits on top and prev/next share a row beneath. The current name uses Sign Display; its secondary line uses Sign Grey at 15 to 18px. Used on scan home, grading, and (as a simpler title sign) the result header.
+### Sheet / modal
 
-### Roundel
-A station ring: circle, border width max(3px, size/9), centred tabular number at 42% of size, weight 800. States: **current** solid orange with ink number; **done** solid charcoal (ink in dark mode); **next** white with orange ring; **off** white with Rule ring and Ink 3 number; **wrong** white with red ring; **right** white with green ring. 32px in the loop strip, 44px on the route rail.
-
-### Loop Strip (signature motion)
-The week's stops on a horizontal rail. Grey 6px rail across, orange fill up to the current stop, one roundel per stop with a label pair beneath (current in 800 Ink, done 600 Ink 2, off 500 Ink 3). A 28px orange marker with a 4px ground-coloured ring "arrives" at the current stop from the previous one on mount: 700ms, `cubic-bezier(0.16, 1, 0.3, 1)` (the arrive ease). This is the world's one motion moment.
-
-### Route Rail
-The result screen: a vertical 6px orange rail at the left, each question a stop with a 44px roundel and a white card. Wrong stops are ringed red and labelled "아이와 같이 보기 / Let's look together" in red; right stops are ringed green with a check and "맞았어요 / Right"; ungraded stops use Line Ink. The open stop's card takes a 2px orange inset ring.
-
-### Grading (in transit)
-Full-screen tile ground. A station sign shows the mascot badge (6px orange ring) and the stop name; below, a white panel draws a rail between a done roundel (Scan) and a next roundel (Explain) with an orange pill travelling between them (1.8s loop). No percentage bar. A rotating tip line sits under a Rule divider.
+- Phone: bottom sheet (`items-end`, `rounded-t-lg`, full width). `sm+`: centred card (`sm:items-center sm:rounded-lg`, `sm:max-w-md` to `sm:max-w-xl`).
+- Header row: headline left, 44px close button right (`X` from Phosphor, `text-ink-3`, `hover:bg-sunken`). Body scrolls; a sticky footer holds the one primary action.
+- Every modal uses `useDialogA11y` (focus trap, Escape, focus return) and `useModalExit` (`.modal-enter` / `.modal-exit`). If closing would lose typed text, route Escape through the same "are you sure" path as the close button.
+- Shared with staff pages: `ConfirmDialog` and `FeedbackModal` take a `warm` prop. Parent call sites pass `warm`; staff call sites don't, so their old look is untouched.
 
 ### Buttons
-- **Shape:** softly squared (6px).
-- **Platform door:** Line Orange block filling its column, 24 to 32px padding, a 56px ink circle holding the camera icon in orange, Door-size label pair in ink. Press scales to 0.99. Locked state turns white with a 2px Rule ring and a charcoal lock circle.
-- **Primary:** Line Orange, ink text, 15px bold, 48px tall.
-- **Sign (solid secondary):** charcoal, Sign White text, 14 to 15px bold, 40 to 44px tall. Used for sign-in, submit, unlock.
-- **Outline:** white panel with a 1px inset Rule ring, ink text, ring darkens to Ink 3 on hover.
-- **Focus:** every focusable element gets a 3px Line Orange outline at 2px offset.
 
-### Segmented Toggle
-Language (한 / EN) and mode (Tutor / Speed) switches: a recessed `sunken` track with 2px padding; the selected thumb is charcoal (or orange for mode) with bold 13px text, 36px tall.
+- **Primary**: `bg-line text-[#2b211a] min-h-12 rounded-md text-[15px] font-bold btn-press`. One per screen.
+- **Outline**: `bg-surface ring-1 ring-inset ring-rule text-ink`, ring darkens to `ink-3` on hover.
+- **Cocoa**: `bg-sign text-on-sign` for a strong secondary (sign up inside a notice, App Store button).
+- **Destructive**: `bg-wrong text-white`. Only inside a confirm step. The entry point is a red underlined text link, not a big red button.
+- **Quiet**: text button, `text-ink-2` or `text-ink-3`, still 44px tall.
+- Disabled is `opacity-40` to `opacity-50`. Loading replaces the label with a small ink spinner.
 
-### Cards / Containers
-- **Corner Style:** 6px.
-- **Background:** white panel; Line Wash for notes and praise; Recess for tips; Right Wash for success.
-- **Shadow Strategy:** none (see Elevation).
-- **Border:** 1px inset Rule ring.
-- **Internal Padding:** 16 to 20px on phones, up to 32px on desktop. Lists inside cards divide with 1px Rule lines.
+### Choice chips and options
 
-### Inputs / Fields
-- **Style:** Recess background, 1px inset Rule ring, 6px radius, 15px ink text, Ink 3 placeholder.
-- **Focus:** ring thickens to 2px Line Orange.
-- **Disabled:** 60% opacity on the paired submit button.
+Full-width 48px rows: unselected `bg-surface ring-1 ring-rule text-ink-2`; selected `bg-line-soft ring-2 ring-line text-ink` with a filled orange radio dot. Use `aria-pressed`.
 
-### Navigation
-A 56px app bar on the ground: mascot badge (36px, 3px orange ring) and wordmark left; home icon, language toggle and a charcoal sign-in button or charcoal initial avatar right. The account menu is a white panel with a Rule ring, the floating-layer shadow and a slide-down entry; its top action is an orange row, its sign-out row is red text.
+### Segmented toggle
 
-### Toasts / Notices
-Charcoal (or Wrong Red for errors) 6px panels fixed under the app bar, max 576px wide, white text, floating-layer shadow, slide-down entry.
+`bg-sunken p-0.5 rounded-md` track; selected thumb `bg-sign text-on-sign` (`dark:bg-ink dark:text-ground`), 40px tall, 14px bold. Language toggles read "한국어 / English".
+
+### Inputs
+
+`bg-sunken ring-1 ring-inset ring-rule rounded-md min-h-12 px-4 text-[16px]`, placeholder `text-ink-3`, focus `ring-2 ring-line`. Always a visible `<label>` above, 14px semibold `ink-2`.
+
+### Cards, notes, foldable cards
+
+- Card: `bg-surface ring-1 ring-inset ring-rule rounded-md p-4 sm:p-5`.
+- Note: `bg-line-soft rounded-md p-3 text-ink` for gentle notices (pending approval, trial ending, billing caveats).
+- Success note: `bg-right-soft`. Error note: `bg-wrong-soft text-wrong`.
+- `Fold` (`components/metro.tsx`): a native `<details>` card with an orange-wash icon circle, title, sub-line and caret. Use it for anything most parents won't need (privacy and device check in Settings, dashboard sections).
+
+### Roundel
+
+Numbered circle from `metro.tsx`: `current` is solid orange with ink number; `next` is white with an orange ring; `done` is solid cocoa; `wrong`/`right` rings for answers. Used for the Help steps and the loop strip.
+
+### Chekki the mascot
+
+Use the transparent images in `public/images/` (`chekki-wave`, `chekki-thumbs`, `chekki-analyzing`, `chekki-holding-laptop`) at 96 to 128px for empty, success and waiting states. Chekki replaces emoji icons and trophy icons. In chat, Chekki's avatar is a 36px orange-ringed circle.
+
+### Chat (Ask Chekki)
+
+Parent bubbles right-aligned in Orange Wash; Chekki bubbles left in Sunken with the avatar. Input is a single rounded field with an orange send button inside it. Suggestions wrap as orange-wash pills under the input; no hidden horizontal scroll.
+
+### Child-facing practice (flashcards, speaking)
+
+Full-screen on the cream ground. Big type (26 to 46px), one card, a thin orange progress line, two big buttons ("다시 볼래요" outline, "알았어요!" orange). Completion shows Chekki thumbs-up and "N개 중 M개 알았어요". A small warm-coloured confetti burst is allowed here only, and is skipped under reduced motion.
+
+### Toasts and banners
+
+Toasts: cocoa panel (or `wrong` for errors), white text, slide down under the app bar. The mobile-web app banner is a cocoa strip with an orange "받기" button and a 44px dismiss.
+
+## Motion
+
+- Entrances use the arrive ease `cubic-bezier(0.16, 1, 0.3, 1)`; sheets use `.modal-enter` / `.modal-exit`.
+- Press feedback is `.btn-press` (scale 0.97).
+- Allowed moments: the loop-strip marker arriving, the flashcard flip, the practice-complete confetti.
+- Everything respects `prefers-reduced-motion` (global override in `index.css`).
+
+## Landing page
+
+`src/Landing.tsx`, same tokens and rules as the app. Order: hero (tagline, one orange "지금 무료로 채점해 보기" that opens `/app` as a guest, plus a card saying Chekki is designed for phones with an app link), three steps, why-not-a-chatbot, academy (free via invite, copy a message for the director, link to `/schools`), pricing (₩0 / ₩9,900 / ₩99,000), three FAQs, closing CTA, footer with business info. The app bar always shows the language and theme toggles, on every width. The theme follows the device until the visitor picks one; `useWarmTheme()` in `src/lib/theme.ts` saves the choice under `chekki_theme_override`, the same key the app reads. `/faq` uses the same hook. CTA clicks log `landing_start_scan` / `landing_get_app` via `src/lib/track.ts`.
+
+## Copy
+
+- Korean in 해요체, short. "다시 설명 받기", not "새로운 추천 받기". "처음으로", not "결과 삭제 (처음으로)".
+- Never claim what we can't back up: no "1초 채점", no "photos are never stored" (the privacy policy says images are kept). Grading speed claims stay vague ("바로").
+- Errors say what to do next: "보내지 못했어요. 잠시 후 다시 시도해 주세요."
 
 ## Do's and Don'ts
 
-### Do:
-- **Do** open each parent screen with a station sign that names where the family is, where they came from and what comes next.
-- **Do** set every user-facing label as a Station Pair: primary language large and heavy, the other language small beneath, dropped when identical.
-- **Do** keep one door-sized primary action per screen, in Line Orange with ink text.
-- **Do** use roundels and the 6px orange rail for any sequence of steps or questions.
-- **Do** keep red for wrong answers and errors and green for right answers and success, and phrase wrong answers gently ("아이와 같이 보기 / Let's look together").
-- **Do** define every colour through the `--m-*` tokens so light and dark swap together; the theme follows `prefers-color-scheme` unless the user overrides it.
-- **Do** keep tap targets at 44px or larger and the 3px orange focus outline intact.
+### Do
 
-### Don't:
-- **Don't** build an in-app marketing hero: no giant slogan headline, no floating mascot card, no glow.
-- **Don't** use glass, backdrop blur, gradients or glow shadows; surfaces are flat enamel and tile.
-- **Don't** add a second accent colour or use red/green for anything but answer correctness and real status.
-- **Don't** mark wrong answers with ✕ or the word "wrong".
-- **Don't** add a fake percentage progress bar or confetti; the train arrival is the only motion moment, and grading is shown as a train in transit.
-- **Don't** introduce another typeface; Pretendard carries every role.
-- **Don't** set white text on Line Orange.
+- Start from tokens; check both themes.
+- Keep one orange primary action per screen and make it 48px or taller.
+- Put rarely needed things in a `Fold` or at the bottom.
+- Use Chekki images for empty, waiting and success states.
+- Give every icon-only button an `aria-label` in the current language.
+
+### Don't
+
+- Don't use `zinc`, `slate`, `indigo`, `purple`, `emerald`, `pink`, `brand-*` or `white/5`-style classes in parent screens. Quick check: `grep -nE '(zinc|indigo|purple|emerald|brand-|white/[0-9])' components/*.tsx`.
+- Don't use `backdrop-blur`, glow shadows, gradient text, or nested "bezel" frames.
+- Don't use `text-right` for colour; use `text-correct`.
+- Don't put white text on orange.
+- Don't add 9 to 11px uppercase labels, emoji as icons, or English-only strings.
+- Don't show red on the child's practice attempts.
+
+## Known gaps
+
+- Schools pages and dashboards are intentionally out of scope.
+- The landing bundle's `font-sans` is Onest (for the staff pages). Parent pages on that bundle opt into Pretendard with `font-warm`; use it on any new parent page there.

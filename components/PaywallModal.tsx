@@ -6,6 +6,7 @@ import { LegalModal } from './LegalModal';
 import { LegalType } from '../types';
 import { useDialogA11y } from '../hooks/useDialogA11y';
 import { useModalExit } from '../hooks/useModalExit';
+import { X } from '@phosphor-icons/react';
 
 interface Props {
   isNight?: boolean;
@@ -44,46 +45,31 @@ export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
   if (!showPaywall) return null;
 
   return (
-    <div className="fixed inset-0 z-[10010] flex items-center justify-center p-3 md:p-4">
+    <div className="fixed inset-0 z-[10010] flex items-end justify-center sm:items-center sm:p-4">
       <div
-        className={`absolute inset-0 bg-black/90 backdrop-blur-xl ${isClosing ? 'modal-backdrop-exit' : 'animate-fade-in'}`}
+        className={`absolute inset-0 bg-[#2b211a]/55 ${isClosing ? 'modal-backdrop-exit' : 'animate-fade-in'}`}
         onClick={close}
+        aria-hidden="true"
       />
 
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Premium subscription"
+        aria-label="Premium"
         tabIndex={-1}
-        className={`relative rounded-md shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] ${isClosing ? 'modal-exit' : 'modal-enter'} transition-opacity w-full max-w-lg md:max-w-2xl mx-2 sm:mx-4 ${standaloneLegal ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+        className={`relative flex w-full flex-col overflow-hidden rounded-t-lg bg-surface ring-1 ring-inset ring-rule shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)] sm:max-w-2xl sm:rounded-lg ${isClosing ? 'modal-exit' : 'modal-enter'} ${standaloneLegal ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
       >
-        <div
-          className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${'bg-surface'}  flex flex-col overflow-hidden`}
+        <button
+          onClick={close}
+          aria-label="Close"
+          className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-md text-ink-3 hover:bg-sunken hover:text-ink"
         >
-          {/* Gradient glow */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-40 bg-gradient-to-b from-orange-500/10 to-transparent pointer-events-none" />
+          <X size={20} weight="bold" />
+        </button>
 
-          {/* Fade-out overlay at the top to prevent text from cutting off when scrolled */}
-          <div
-            className={`absolute top-0 left-0 right-0 h-10 bg-gradient-to-b ${'from-[var(--m-surface)] via-[var(--m-surface)]'} to-transparent pointer-events-none z-20 rounded-t-3xl`}
-          />
-
-          {/* Close */}
-          <button
-            onClick={close}
-            aria-label="Close"
-            className="absolute top-4 right-5 text-zinc-400 hover:text-white transition-colors text-xl z-30 p-1"
-          >
-            ✕
-          </button>
-
-          <div
-            ref={scrollContainerRef}
-            className="p-6 md:p-8 pt-10 md:pt-12 overflow-y-auto max-h-[85vh] custom-scrollbar"
-          >
-            <SubscriptionScreen onClose={() => setShowPaywall(false)} isNight={isNight} />
-          </div>
+        <div ref={scrollContainerRef} className="custom-scrollbar max-h-[90vh] overflow-y-auto p-5 pt-8 sm:p-8">
+          <SubscriptionScreen onClose={() => setShowPaywall(false)} isNight={isNight} />
         </div>
       </div>
 

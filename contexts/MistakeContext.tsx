@@ -16,8 +16,6 @@ interface MistakeContextType {
   toggleMistake: (item: WorksheetItem) => void;
   isMistake: (questionText: string, correctAnswer: string) => boolean;
   removeMistake: (uniqueId: string) => void;
-  showMistakeModal: boolean;
-  setShowMistakeModal: (show: boolean) => void;
   isLoading: boolean;
   autoBookmark: (items: WorksheetItem[]) => void;
 }
@@ -28,7 +26,6 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const { user } = useAuth();
   const { showToast } = useToast();
   const [mistakes, setMistakes] = useState<MistakeItem[]>([]);
-  const [showMistakeModal, setShowMistakeModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   // True when the initial cloud read failed — blocks saveState's cloud write
   // path so a transient network blip can't overwrite real cloud history with
@@ -206,8 +203,6 @@ export const MistakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
         toggleMistake,
         isMistake,
         removeMistake,
-        showMistakeModal,
-        setShowMistakeModal,
         isLoading,
         autoBookmark,
       }}

@@ -9,7 +9,7 @@ export const Confetti: React.FC = () => {
           className="absolute w-2 h-2 rounded-full animate-[confetti_3s_ease-out_forwards]"
           style={
             {
-              backgroundColor: ['#F97316', '#EC4899', '#8B5CF6', '#FCD34D'][i % 4],
+              backgroundColor: ['#ef7c1c', '#fdebd8', '#1f8a4c', '#f6a560'][i % 4],
               left: '50%',
               top: '50%',
               '--tx': `${(Math.random() - 0.5) * 600}px`,

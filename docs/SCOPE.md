@@ -21,7 +21,7 @@ Everything in [`PRD.md` §4](./PRD.md#4-the-core-loop):
 Plus the three staff dashboards (Director/KT/FT) that serve #2–5, and the parent-app features that serve #1 directly:
 
 - **Flashcards** — live, used feature, direct extension of the scan/review loop.
-- **Mistake review & practice sheet** (`OdapNoteModal` — "오답," Korean for "wrong answer") — pulls flagged mistakes, lets the parent mark them mastered, generates a printable practice worksheet. This is the payoff of loop stage #3 on the parent side. Not to be confused with a generic "notes" feature — it's core, not creep.
+- **Mistake review** (the "다시 볼 문제" section of `Dashboard.tsx`) — saved misses with their answers, plus flashcards and speaking practice built from them. This is the payoff of loop stage #3 on the parent side. (The older `OdapNoteModal` and `CloneWorksheetModal`, with the printable/AI-generated practice sheet, had become unreachable and were deleted on 2026-10-07; the server-side `generate` task in `api/analyze.ts` is now unused by the client.)
 
 ---
 

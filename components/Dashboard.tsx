@@ -8,8 +8,6 @@ import {
   ArrowsClockwise,
   MicrophoneStage,
   CheckCircle,
-  XCircle,
-  Trophy,
   Cards,
   NotePencil,
   CaretDown,
@@ -428,28 +426,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
     <div className="fixed inset-0 z-[200] bg-ground text-ink overflow-y-auto animate-fade-in font-sans">
       
       {showHandoff && (
-        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-6 bg-white/95 dark:bg-black/95 backdrop-blur-3xl animate-in fade-in zoom-in duration-200">
-          <div className="max-w-md w-full text-center space-y-8">
-            <div className="w-32 h-32 mx-auto bg-line/20 rounded-full flex items-center justify-center mb-8 animate-pulse">
-              <span className="text-6xl">📱</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black text-ink font-display tracking-tight leading-tight">
+        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-6 bg-ground tile-ground animate-fade-in">
+          <div className="max-w-md w-full text-center space-y-6">
+            <img src="/images/chekki-wave.webp" alt="" className="mx-auto h-32 w-32 object-contain" />
+            <h2 className="whitespace-pre-line text-[30px] md:text-[40px] font-extrabold text-ink tracking-[-0.02em] leading-tight break-keep">
               {language === 'ko' ? '폰을 테이블에\n올려주세요!' : 'Tabletop Co-Pilot\nMode Active'}
             </h2>
-            <p className="text-ink-3 font-korean text-lg mb-12">
+            <p className="text-ink-2 text-[17px] break-keep">
               {language === 'ko'
                 ? '화면 터치 없이 오디오로 복습이 진행됩니다.'
                 : 'Hands-free interactive voice review is starting.'}
             </p>
             <button
               onClick={confirmStartPractice}
-              className="w-full py-5 bg-line text-[#2b211a] font-black rounded-full text-xl  active:scale-[0.97] transition-[background-color,transform]"
+              className="btn-press w-full min-h-14 bg-line text-[#2b211a] font-extrabold rounded-md text-[18px]"
             >
               {language === 'ko' ? '준비 완료!' : "I'm Ready!"}
             </button>
             <button
               onClick={() => setShowHandoff(false)}
-              className="mt-4 text-ink-3 hover:text-zinc-900 dark:hover:text-white font-korean text-sm"
+              className="min-h-11 px-4 text-ink-3 hover:text-ink font-semibold text-[15px]"
             >
               {language === 'ko' ? '취소' : 'Cancel'}
             </button>
@@ -524,7 +520,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                         <span className="min-w-0 text-[15px] font-semibold text-ink break-words">{mistake.question_text}</span>
                         <CaretDown size={16} weight="bold" className="shrink-0 text-ink-3 transition-transform group-open/m:rotate-180" />
                       </summary>
-                      <p className="px-4 pb-4 text-[17px] font-extrabold text-right break-words">
+                      <p className="px-4 pb-4 text-[17px] font-extrabold text-correct break-words">
                         {cleanAnswerText(mistake.correct_answer || '')}
                       </p>
                     </details>
@@ -592,27 +588,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
       {/* ── Interactive Practice Room Modal ─────────────────────────────────────────── */}
       {isPracticing && (
-        <div className="fixed inset-0 z-[300] bg-black/40 dark:bg-black/90 backdrop-blur-2xl flex items-center justify-center p-4">
-          <div className="relative w-full max-w-2xl bg-surface ring-1 ring-rule rounded-md p-6 md:p-10 shadow-2xl">
+        <div className="fixed inset-0 z-[300] bg-ground tile-ground flex items-center justify-center p-4 animate-fade-in">
+          <div className="relative w-full max-w-2xl bg-surface ring-1 ring-inset ring-rule rounded-lg p-6 md:p-10">
             {/* Close */}
             <button
               onClick={handleResetPractice}
-              aria-label="Close"
-              className="absolute top-5 right-5 w-11 h-11 rounded-full bg-sunken flex items-center justify-center hover:bg-rule transition-colors"
+              aria-label={language === 'ko' ? '닫기' : 'Close'}
+              className="absolute top-4 right-4 w-11 h-11 rounded-md text-ink-3 flex items-center justify-center hover:bg-sunken hover:text-ink"
             >
               <X size={18} weight="bold" />
             </button>
 
             {practiceDone ? (
               <div className="flex flex-col items-center gap-6 py-8 text-center">
-                <Trophy size={64} className="text-right" weight="fill" />
-                <h2 className="text-3xl font-black text-ink">
+                <img src="/images/chekki-thumbs.webp" alt="" className="h-28 w-28 object-contain" />
+                <h2 className="text-[28px] font-extrabold tracking-[-0.02em] text-ink">
                   {language === 'ko' ? '연습 완료!' : 'Practice Complete!'}
                 </h2>
-                <p className="text-4xl font-black text-ink mb-2">
+                <p className="num text-[34px] font-extrabold text-line-ink">
                   {score}/{mistakes.length}
                 </p>
-                <p className="text-ink-3 mb-8 font-korean">
+                <p className="text-ink-2 text-[17px] break-keep">
                   {language === 'ko'
                     ? score === mistakes.length
                       ? '발음이 완벽해요! 🎉'
@@ -623,7 +619,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 </p>
                 <button
                   onClick={handleStartPractice}
-                  className="mt-4 px-8 py-3 bg-right text-white font-bold rounded-full hover:bg-emerald-600 transition-[background-color,transform] duration-200 active:scale-[0.97] font-korean"
+                  className="btn-press mt-2 px-8 min-h-12 bg-surface ring-1 ring-inset ring-rule text-ink font-bold rounded-md hover:ring-ink-3 text-[15px]"
                 >
                   {language === 'ko' ? '다시 연습하기' : 'Practice Again'}
                 </button>
@@ -634,30 +630,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                 return (
                   <div className="mt-12 flex flex-col gap-6 items-center text-center">
                     <div className="w-full flex items-center justify-between mb-4">
-                      <span className="font-bold">
+                      <span className="num shrink-0 pr-3 font-bold text-ink-2">
                         {practiceIndex + 1} / {mistakes.length}
                       </span>
-                      <div className="w-full h-2 bg-rule rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-rule rounded-full overflow-hidden">
                         <div
                           className="h-full bg-line transition-[width] duration-200"
                           style={{ width: `${((practiceIndex + 1) / mistakes.length) * 100}%` }}
                         />
                       </div>
-                      <span className="text-xs font-bold text-right">{score} ✓</span>
+                      <span className="num shrink-0 pl-3 text-[14px] font-bold text-line-ink">{score} ✓</span>
                     </div>
 
-                    <p className="text-[10px] font-bold text-ink-3 mb-2">
+                    <p className="text-[15px] font-bold text-ink-2">
                       {language === 'ko'
                         ? '다음 문장을 소리 내어 읽어보세요'
                         : 'Read the sentence out loud'}
                     </p>
 
-                    <div className="bg-sunken rounded-md p-6 border border-rule w-full">
-                      <p className="text-sm text-ink-3 line-through mb-2">
+                    <div className="bg-sunken rounded-md p-6 w-full">
+                      <p className="text-sm text-ink-3 mb-2">
                         {current.question_text}
                       </p>
                       <p
-                        className="text-2xl md:text-3xl font-bold text-right mb-4 cursor-pointer active:scale-[0.97] transition-transform"
+                        className="text-[26px] md:text-[32px] font-extrabold text-ink mb-4 cursor-pointer active:scale-[0.97] transition-transform break-keep"
                         onClick={() => {
                           const correctText = cleanAnswerText(current.correct_answer || '');
                           setSpokenText(correctText);
@@ -672,9 +668,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                         {cleanAnswerText(current.correct_answer || '')}
                       </p>
 
-                      <div className="h-20 flex items-center justify-center bg-surface rounded-md border border-rule relative overflow-hidden">
+                      <div className="h-20 flex items-center justify-center bg-surface rounded-md ring-1 ring-inset ring-rule relative overflow-hidden">
                         {isListening && (
-                          <div className="absolute inset-0 bg-emerald-500/10 animate-pulse" />
+                          <div className="absolute inset-0 bg-line-soft animate-pulse" />
                         )}
                         <p
                           className={`text-lg font-medium relative z-10 px-4 ${spokenText ? 'text-ink' : 'text-ink-3'}`}
@@ -691,31 +687,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                       <div className="flex flex-col items-center gap-4">
                         <button
                           onClick={handleMicPress}
-                          className={`group relative w-24 h-24 rounded-full flex items-center justify-center transition-[box-shadow,transform] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] outline-none ${
-                            isListening
-                              ? 'active:scale-[0.97] shadow-[0_0_40px_rgba(239,68,68,0.4)]'
-                              : 'hover:scale-[1.02] active:scale-[0.97] shadow-[0_0_40px_rgba(16,185,129,0.2)] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)]'
-                          }`}
+                          aria-label={isListening ? (language === 'ko' ? '듣기 멈추기' : 'Stop listening') : language === 'ko' ? '말하기 시작' : 'Start speaking'}
+                          className="btn-press group relative w-24 h-24 rounded-full flex items-center justify-center outline-none"
                         >
+                          <div className="absolute inset-0 rounded-full bg-line-soft" />
                           <div
-                            className={`absolute inset-0 rounded-full transition-colors duration-700 ${isListening ? 'bg-red-500/20' : 'bg-emerald-500/20'}`}
-                          />
-                          <div
-                            className={`relative z-10 w-[calc(100%-1rem)] h-[calc(100%-1rem)] rounded-full flex items-center justify-center transition-colors duration-700 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)] ${isListening ? 'bg-red-500' : 'bg-emerald-500'}`}
+                            className={`relative z-10 w-[calc(100%-1rem)] h-[calc(100%-1rem)] rounded-full flex items-center justify-center transition-colors duration-300 ${isListening ? 'bg-sign' : 'bg-line'}`}
                           >
                             {isListening && (
-                              <div className="absolute inset-0 rounded-full border-2 border-red-300 animate-ping opacity-50" />
+                              <div className="absolute inset-0 rounded-full border-2 border-line animate-ping opacity-60" />
                             )}
                             <MicrophoneStage
                               size={36}
                               weight="fill"
-                              className="text-white relative z-10 transition-transform duration-700 group-hover:scale-110"
+                              className={`relative z-10 ${isListening ? 'text-line' : 'text-[#2b211a]'}`}
                             />
                           </div>
                         </button>
                         {isListening && (
                           <span
-                            className="text-xs text-wrong font-bold tracking-widest uppercase animate-fade-in cursor-pointer"
+                            className="text-[14px] text-ink-2 font-bold animate-fade-in cursor-pointer"
                             onClick={handleMicPress}
                           >
                             {language === 'ko' ? '정지 / 취소' : 'Stop / Cancel'}
@@ -726,7 +717,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
                     {practiceStatus === 'success' && (
                       <div className="flex flex-col items-center gap-6 animate-fade-in w-full">
-                        <div className="flex items-center gap-3 text-right bg-emerald-500/10 px-6 py-3 rounded-full border border-emerald-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                        <div className="flex items-center gap-3 text-correct bg-right-soft px-6 py-3 rounded-full">
                           <CheckCircle size={24} weight="fill" />
                           <span className="text-lg font-bold font-korean">
                             {language === 'ko' ? '완벽해요!' : 'Perfect!'}
@@ -734,9 +725,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                         </div>
                         <button
                           onClick={handleNextPractice}
-                          className="group relative overflow-hidden pl-8 pr-2 py-2 w-full sm:w-auto bg-right text-white font-bold rounded-full text-lg flex items-center justify-between gap-8 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] shadow-2xl shadow-emerald-500/20 outline-none"
+                          className="btn-press w-full sm:w-auto min-h-12 px-6 bg-line text-[#2b211a] font-bold rounded-md flex items-center justify-center gap-2"
                         >
-                          <span className="font-bold text-sm">
+                          <span className="font-bold text-[15px]">
                             {practiceIndex + 1 >= mistakes.length
                               ? language === 'ko'
                                 ? '결과 보기'
@@ -745,17 +736,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                                 ? '다음 문장'
                                 : 'Next Sentence'}
                           </span>
-                          <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.02] group-hover:translate-x-1 group-hover:-translate-y-[1px]">
-                            <CaretRight size={20} weight="bold" />
-                          </div>
+                          <CaretRight size={18} weight="bold" />
                         </button>
                       </div>
                     )}
 
                     {practiceStatus === 'failed' && (
                       <div className="flex flex-col items-center gap-6 animate-fade-in w-full">
-                        <div className="flex items-center gap-3 text-wrong bg-red-500/10 px-6 py-3 rounded-full border border-red-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
-                          <XCircle size={24} weight="fill" />
+                        <div className="flex items-center gap-3 text-line-ink bg-line-soft px-6 py-3 rounded-full">
                           <span className="text-lg font-bold font-korean">
                             {language === 'ko'
                               ? '조금 아쉬워요. 다시 해볼까요?'
@@ -767,14 +755,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                             setPracticeStatus('idle');
                             setSpokenText('');
                           }}
-                          className="group relative overflow-hidden pl-8 pr-2 py-2 w-full sm:w-auto bg-black/5 text-zinc-900 font-bold rounded-full border border-zinc-300 hover:bg-black/10 dark:bg-white/10 dark:text-white dark:border-white/20 dark:hover:bg-white/20 text-lg flex items-center justify-between gap-8 transition-[background-color,transform] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] outline-none"
+                          className="btn-press w-full sm:w-auto min-h-12 px-6 bg-surface text-ink font-bold rounded-md ring-1 ring-inset ring-rule hover:ring-ink-3 text-[15px] flex items-center justify-center gap-2"
                         >
-                          <span className="relative z-10 font-korean">
+                          <span>
                             {language === 'ko' ? '다시 말하기' : 'Try Again'}
                           </span>
-                          <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.02] group-hover:-rotate-90">
-                            <ArrowsClockwise size={20} weight="bold" />
-                          </div>
+                          <ArrowsClockwise size={18} weight="bold" />
                         </button>
                       </div>
                     )}

@@ -15,7 +15,6 @@ import { SuccessDialog } from './components/SuccessDialog';
 import { Confetti } from './components/Confetti';
 
 import { PaywallModal } from './components/PaywallModal';
-import { OdapNoteModal } from './components/OdapNoteModal';
 import { LoginModal } from './components/LoginModal';
 import { LegalModal } from './components/LegalModal';
 import { ProgressiveOnboardingModal } from './components/ProgressiveOnboardingModal';
@@ -573,10 +572,10 @@ function AppContent() {
       setConfirmDialog({
         title:
           language === 'ko'
-            ? '현재 결과가 삭제됩니다. 계속하시겠습니까?'
-            : 'Current results will be removed. Do you want to continue?',
-        confirmText: language === 'ko' ? '결과 삭제 (처음으로)' : 'Discard Results & Exit',
-        cancelText: language === 'ko' ? '취소' : 'Cancel',
+            ? '이 결과를 닫고 처음 화면으로 갈까요?'
+            : 'Close these results and start over?',
+        confirmText: language === 'ko' ? '처음으로' : 'Start over',
+        cancelText: language === 'ko' ? '결과 계속 보기' : 'Keep looking',
         onConfirm: () => {
           hookExecuteReset();
           setConfirmDialog(null);
@@ -630,13 +629,13 @@ function AppContent() {
   // covers only one of four roles). Tell them explicitly instead.
   if (platform !== 'web' && isAuthenticated && !staffAsParent && (user?.role === 'teacher' || user?.role === 'director')) {
     return (
-      <div className={`min-h-[100dvh] flex items-center justify-center p-6 text-center ${isNight ? 'bg-brand-dark text-zinc-100' : 'bg-zinc-50 text-zinc-900'}`}>
+      <div className={`min-h-[100dvh] flex items-center justify-center p-6 text-center bg-ground text-ink`}>
         <div className="w-full max-w-sm space-y-4">
           <ChekkiMascot className="w-16 h-16 mx-auto opacity-80" />
-          <h2 className="text-lg font-black">
+          <h2 className="text-[20px] font-extrabold break-keep">
             {language === 'ko' ? '교사/원장 대시보드는 웹에서만 이용 가능합니다' : 'Teacher & Director tools are web-only'}
           </h2>
-          <p className="text-sm text-zinc-400 leading-relaxed">
+          <p className="text-[15px] text-ink-2 leading-relaxed break-keep">
             {language === 'ko'
               ? '이 앱은 학부모용입니다. 교사/원장 대시보드는 모바일 브라우저에서 chekki.ai/teacher 로 접속해 주세요.'
               : 'This app is for parents. Please open chekki.ai/teacher in your mobile browser to reach your dashboard.'}
@@ -645,7 +644,7 @@ function AppContent() {
             href="https://chekki.ai/teacher"
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full rounded-xl bg-brand py-3 font-bold text-white"
+            className="flex min-h-12 w-full items-center justify-center rounded-md bg-line font-bold text-[#2b211a]"
           >
             {language === 'ko' ? '브라우저에서 열기' : 'Open in browser'}
           </a>
@@ -654,13 +653,13 @@ function AppContent() {
               try { localStorage.setItem('chekki_staff_as_parent', '1'); } catch { /* storage blocked: session-only */ }
               setStaffAsParent(true);
             }}
-            className="block w-full rounded-xl border border-zinc-300 py-3 font-bold"
+            className="min-h-12 w-full rounded-md bg-surface ring-1 ring-inset ring-rule font-bold text-ink"
           >
             {language === 'ko' ? '학부모 기능 사용하기' : 'Continue as parent'}
           </button>
           <button
             onClick={logout}
-            className="block w-full rounded-xl py-3 font-bold text-zinc-500"
+            className="min-h-11 w-full rounded-md font-semibold text-ink-3"
           >
             {language === 'ko' ? '로그아웃' : 'Sign out'}
           </button>
@@ -672,7 +671,7 @@ function AppContent() {
   return (
     <ErrorBoundary fallback={AppCrashFallback}>
       <div
-        className="min-h-[100dvh] bg-ground tile-ground text-ink font-sans overflow-x-hidden flex flex-col"
+        className="min-h-[100dvh] bg-ground tile-ground text-ink font-warm overflow-x-hidden flex flex-col"
       >
         {standaloneLegal && (
           <div className="fixed inset-0 z-[200]">
@@ -708,7 +707,6 @@ function AppContent() {
         {/* Web-only mobile download banner */}
         {platform === 'web' && <MobileAppBanner onVisibilityChange={setIsMobileBannerVisible} />}
         <PaywallModal isNight={isNight} />
-        <OdapNoteModal isNight={isNight} />
         <LoginModal isNight={isNight} />
 
         {showSuccessToast && (
@@ -751,6 +749,7 @@ function AppContent() {
             cancelText={confirmDialog.cancelText}
             isSaving={confirmDialog.isSaving}
             isNight={isNight}
+            warm
             onConfirm={confirmDialog.onConfirm}
             onCancel={() => setConfirmDialog(null)}
           />
@@ -952,7 +951,7 @@ function AppContent() {
         {/* Help View Overlay */}
         {showHelp && (
           <div
-            className={`fixed inset-0 z-[100] animate-fade-in ${isNight ? 'bg-zinc-950' : 'bg-white'} overflow-y-auto touch-pan-y`}
+            className="fixed inset-0 z-[100] animate-fade-in bg-ground overflow-y-auto touch-pan-y"
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
             <HelpView isNight={isNight} onClose={() => setShowHelp(false)} />
@@ -967,20 +966,19 @@ function AppContent() {
               100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.5) rotate(360deg); }
             }
             .prose-answer strong {
-              color: #f97316; /* orange-500 */
-              font-weight: 900;
-              text-shadow: 0 0 20px rgba(249, 115, 22, 0.1);
+              color: var(--m-line-ink);
+              font-weight: 800;
             }
             .prose-answer em {
-              color: #f97316; /* brand-orange (One Accent Rule) */
+              color: var(--m-line-ink);
               font-style: italic;
               font-weight: 700;
             }
             .prose-answer mark {
-              background: rgba(249, 115, 22, 0.15);
-              color: #f97316; /* brand-orange */
+              background: var(--m-line-soft);
+              color: var(--m-ink);
               padding: 0 4px;
-              border-radius: 0.75rem; /* rounded-xl */
+              border-radius: 4px;
               font-weight: 700;
             }
             .prose-answer p {

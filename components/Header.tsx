@@ -51,7 +51,7 @@ export const Header: React.FC<Props> = ({
 }) => {
   const { user, isAuthenticated, openLoginModal, logout, setShowPaywall } = useAuth();
   const { language, setLanguage, t } = useLanguage();
-  const { setShowMistakeModal, mistakes } = useMistakes();
+  const { mistakes } = useMistakes();
 
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -232,8 +232,7 @@ export const Header: React.FC<Props> = ({
                           className={`${menuItem} justify-between`}
                           onClick={() => {
                             setShowUserMenu(false);
-                            if (onOpenDashboard) onOpenDashboard();
-                            else setShowMistakeModal(true);
+                            onOpenDashboard?.();
                           }}
                         >
                           <span className="flex items-center gap-3">

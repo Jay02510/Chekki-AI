@@ -181,56 +181,6 @@ export const analyzeWorksheet = async (
   }
 };
 
-export const generateSimilarWorksheet = async (
-  originalItems: WorksheetItem[],
-  language: string = 'ko',
-  signal?: AbortSignal,
-  idempotencyKey?: string
-): Promise<WorksheetItem[]> => {
-  if (MOCK_MODE) {
-    await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY));
-    return originalItems.map((item) => ({
-      ...item,
-      question_text: `[New Version] ${item.question_text}`,
-      korean_guide: `[새 버전] ${item.korean_guide}`,
-      student_response: undefined,
-      is_correct: undefined,
-    }));
-  }
-  try {
-    const idToken = await getValidIdToken();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      Authorization: idToken ? `Bearer ${idToken}` : '',
-    };
-    if (idempotencyKey) {
-      headers['X-Idempotency-Key'] = idempotencyKey;
-    }
-
-    const response = await fetch(`${API_BASE_URL}/api/analyze`, {
-      method: 'POST',
-      headers,
-      signal,
-      body: JSON.stringify({
-        task: 'generate',
-        originalItems: originalItems.slice(0, 5),
-        language,
-      }),
-    });
-
-    if (!response.ok) throw new Error('GEN_FAILED');
-    const newItems = await response.json();
-
-    return newItems.map((item: any, idx: number) => ({
-      ...item,
-      id: idx + 1,
-    }));
-  } catch (e: any) {
-    if (e.name === 'AbortError') throw e;
-    return originalItems;
-  }
-};
-
 export const refineWorksheetItem = async (
   item: WorksheetItem,
   reason: string,

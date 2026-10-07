@@ -1,9 +1,7 @@
 {
   "detector": {
     "ignoreRules": [],
-    "ignoreFiles": [
-      "components/OdapNoteModal.tsx"
-    ],
+    "ignoreFiles": [],
     "ignoreValues": [
       {
         "rule": "bounce-easing",

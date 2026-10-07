@@ -12,6 +12,8 @@ import { InAppReview } from '@capacitor-community/in-app-review';
 import { copyToClipboard } from '../utils/clipboard';
 import { useModalExit } from '../hooks/useModalExit';
 import { useDialogA11y } from '../hooks/useDialogA11y';
+import { ChatCircleText, Check, Moon, ShieldCheck, Star, Sun, X } from '@phosphor-icons/react';
+import { Fold } from './metro';
 
 interface Props {
   onClose: () => void;
@@ -171,16 +173,47 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
     }
   };
 
+  const expiryMs = subscriptionRecord?.subscription_expiry_date
+    ? new Date(subscriptionRecord.subscription_expiry_date).getTime() - Date.now()
+    : null;
+  // Simple trial detection: an active plan expiring within ~7 days.
+  const isTrial = expiryMs !== null && expiryMs < 8 * 24 * 60 * 60 * 1000;
+  const daysLeft = expiryMs !== null ? Math.ceil(expiryMs / (1000 * 60 * 60 * 24)) : 0;
+  const fmtDate = (d: string) =>
+    new Date(d).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const directorInviteMsg =
+    language === 'ko'
+      ? '안녕하세요 원장님! Chekki AI로 아이 숙제를 스캔해서 채점 결과를 바로 받아보고 있어요. Chekki School Pro를 도입하시면 선생님들 채점 시간이 크게 줄고, 저희 같은 학부모들은 전원 무료로 이용할 수 있대요. 한번 살펴봐 주시겠어요? https://www.chekkiai.com/schools'
+      : "Hello Director! We've been using Chekki AI to scan and grade my child's homework — it's been great. Chekki School Pro brings this to your whole academy: teachers save hours on grading, and every parent gets it free. Worth a look: https://www.chekkiai.com/schools";
+
+  const sectionTitle = 'text-[13px] font-bold text-ink-3 mb-2.5';
+  const card = 'rounded-md bg-surface ring-1 ring-inset ring-rule p-4 sm:p-5';
+  const input =
+    'w-full rounded-md bg-sunken px-4 min-h-12 text-[16px] text-ink ring-1 ring-inset ring-rule placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-line';
+  const primaryBtn = 'btn-press flex min-h-12 w-full items-center justify-center rounded-md bg-line text-[15px] font-bold text-[#2b211a] disabled:opacity-50';
+  const outlineBtn =
+    'btn-press flex min-h-12 w-full items-center justify-center rounded-md bg-surface text-[15px] font-bold text-ink ring-1 ring-inset ring-rule hover:ring-ink-3';
+  const segment = (on: boolean) =>
+    `flex min-h-10 items-center gap-1.5 rounded px-4 text-[14px] font-bold ${on ? 'bg-sign text-on-sign dark:bg-ink dark:text-ground' : 'text-ink-2 hover:text-ink'}`;
+  const legalLinks: { key: 'privacy' | 'terms' | 'refund' | 'youth' | 'support'; label: string }[] = [
+    { key: 'support', label: language === 'ko' ? '고객 지원' : 'Help & Support' },
+    { key: 'privacy', label: t('nav_privacy') },
+    { key: 'terms', label: t('nav_terms') },
+    { key: 'refund', label: t('nav_refund') },
+    { key: 'youth', label: t('nav_youth') },
+  ];
+
   return (
     <>
       {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
-      {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
+      {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} warm />}
 
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-4">
         <div
-          className={`absolute inset-0 bg-black/90 backdrop-blur-xl ${isClosing ? 'modal-backdrop-exit' : 'animate-fade-in'}`}
+          className={`absolute inset-0 bg-[#2b211a]/55 ${isClosing ? 'modal-backdrop-exit' : 'animate-fade-in'}`}
           onClick={close}
-        ></div>
+          aria-hidden="true"
+        />
 
         <div
           ref={dialogRef}
@@ -188,806 +221,454 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
           aria-modal="true"
           aria-labelledby="settings-modal-title"
           tabIndex={-1}
-          className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] w-full max-w-lg md:max-w-xl lg:max-w-2xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[90vh] mx-2 sm:mx-4`}
+          className={`relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-lg bg-ground ring-1 ring-inset ring-rule shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)] sm:max-w-xl sm:rounded-lg ${isClosing ? 'modal-exit' : 'modal-enter'}`}
         >
-          <div
-            className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-zinc-950/90' : 'bg-white/90'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}
-          >
-            <div
-              className={`${isNight ? 'bg-zinc-950 border-white/5' : 'bg-zinc-50 border-zinc-200'} px-5 py-5 sm:px-8 sm:py-6 border-b flex justify-between items-center shrink-0`}
+          <div className="flex shrink-0 items-center justify-between border-b border-rule bg-surface px-5 py-3 sm:px-6">
+            <h2 id="settings-modal-title" className="text-[20px] font-extrabold tracking-[-0.02em] text-ink">
+              {t('settings_title')}
+            </h2>
+            <button
+              onClick={close}
+              aria-label={language === 'ko' ? '닫기' : 'Close'}
+              className="-mr-2 flex h-11 w-11 items-center justify-center rounded-md text-ink-3 hover:bg-sunken hover:text-ink"
             >
-              <h2
-                id="settings-modal-title"
-                className={`text-balance text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display uppercase tracking-tight`}
-              >
-                {t('settings_title')}
-              </h2>
-              <button
-                onClick={close}
-                aria-label="Close"
-                className="text-zinc-400 hover:text-orange-500 transition-colors text-xl"
-              >
-                ✕
-              </button>
-            </div>
+              <X size={20} weight="bold" />
+            </button>
+          </div>
 
-            <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 overflow-y-auto custom-scrollbar flex-1 pb-24">
-              {/* --- ADMIN BADGE (Conditional) --- */}
-              {isAdmin && (
-                <div className="bg-purple-500/10 rounded-3xl p-6 border border-purple-500/30 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-balance text-sm font-black text-purple-400 uppercase tracking-tight leading-tight mb-1">
-                      Admin Access
-                    </h3>
-                    <p className="text-xs sm:text-sm text-zinc-400 font-bold">
-                      System management enabled
-                    </p>
-                  </div>
-                  <svg
-                    className="w-5 h-5 text-purple-400"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z"
-                    />
-                  </svg>
-                </div>
-              )}
+          <div className="custom-scrollbar flex-1 space-y-7 overflow-y-auto px-4 py-5 sm:px-6">
+            {isAdmin && (
+              <p className="rounded-md bg-sunken px-4 py-3 text-[14px] font-semibold text-ink-2">
+                Admin access enabled
+              </p>
+            )}
 
-              {/* --- SECURITY AUDIT SECTION --- */}
-              <div
-                className={`${isNight ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-emerald-50 border-emerald-200'} rounded-3xl p-4 sm:p-6 border`}
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <svg
-                    className={`w-5 h-5 ${isNight ? 'text-emerald-500' : 'text-emerald-600'}`}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"
-                    />
-                  </svg>
-                  <h3
-                    className={`text-sm font-black ${isNight ? 'text-emerald-500' : 'text-emerald-600'} uppercase tracking-wide leading-tight`}
-                  >
-                    {t('sec_audit_title')}
-                  </h3>
-                </div>
-                <p className="text-xs sm:text-sm text-zinc-400 font-medium mb-4 leading-relaxed break-keep">
-                  {t('sec_audit_desc')}
-                </p>
-                <div className="space-y-2">
-                  {[1, 2, 3, 4].map((idx) => (
-                    <div
-                      key={idx}
-                      className={`flex items-center gap-2 text-xs sm:text-sm ${isNight ? 'text-zinc-300' : 'text-zinc-600'} font-bold`}
-                    >
-                      <span className="text-emerald-500">✓</span>
-                      {t(`sec_point_${idx}`)}
-                    </div>
-                  ))}
-                </div>
+            {/* --- PROFILE --- */}
+            <section>
+              <h3 className={sectionTitle}>{t('settings_profile')}</h3>
+              <div className={card}>
+                <label htmlFor="settings-name" className="mb-2 block text-[14px] font-semibold text-ink-2">
+                  {t('settings_name_label')}
+                </label>
+                <input id="settings-name" type="text" value={name} onChange={(e) => setName(e.target.value)} className={input} />
               </div>
+            </section>
 
-              {/* --- ADVANCED DIAGNOSTICS --- */}
-              <div
-                className={`${isNight ? 'bg-zinc-800/50 border-white/5' : 'bg-zinc-100/50 border-zinc-200'} rounded-3xl p-4 sm:p-6 border relative overflow-hidden group`}
-              >
-                <div className="absolute top-0 right-0 p-4">
-                  <div
-                    className={`w-2 h-2 rounded-full ${diagResults.auth === 'verified' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : isNight ? 'bg-zinc-700' : 'bg-zinc-300'} animate-pulse`}
-                  ></div>
-                </div>
-
-                <h3 className="text-balance text-xs sm:text-sm font-black text-orange-500 uppercase tracking-tight mb-4">
-                  {t('settings_device_diag')}
-                </h3>
-
-                <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-6">
-                  {[
-                    {
-                      label: language === 'ko' ? '카메라' : 'Camera',
-                      val: diagResults.camera === 'granted' ? 'OK' : 'Check',
-                      color:
-                        diagResults.camera === 'granted' ? 'text-emerald-500' : 'text-orange-500',
-                    },
-                    {
-                      label: language === 'ko' ? '마이크' : 'Mic',
-                      val: diagResults.mic === 'granted' ? 'OK' : 'Check',
-                      color: diagResults.mic === 'granted' ? 'text-emerald-500' : 'text-orange-500',
-                    },
-                    {
-                      label: language === 'ko' ? '음성 지원' : 'Voice API',
-                      val: diagResults.speech,
-                      color: 'text-indigo-500',
-                    },
-                    {
-                      label: language === 'ko' ? '인증 상태' : 'Auth',
-                      val: diagResults.auth,
-                      color: isNight ? 'text-zinc-400' : 'text-zinc-500',
-                    },
-                  ].map((d, i) => (
-                    <div
-                      key={i}
-                      className={`${isNight ? 'bg-black/40 border-white/5' : 'bg-white border-zinc-200 shadow-sm'} p-2 sm:p-3 rounded-2xl border`}
-                    >
-                      <p className="text-[10px] sm:text-xs font-black text-zinc-400 uppercase mb-1">
-                        {d.label}
-                      </p>
-                      <p className={`text-xs font-black truncate ${d.color}`}>{d.val}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* --- SUBSCRIPTION STATUS --- */}
-              <div
-                className={`${isNight ? 'bg-zinc-800/30 border-white/5' : 'bg-zinc-100/50 border-zinc-200 shadow-sm'} rounded-3xl p-4 sm:p-6 border`}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-balance text-xs sm:text-sm font-black text-zinc-400 uppercase tracking-tight">
-                    {language === 'ko' ? '구독 정보' : 'SUBSCRIPTION'}
-                  </h3>
-                  {/* Status Badge */}
-                  {(!subscriptionRecord || subscriptionRecord.subscription_status === 'none') && (
-                    <span
-                      className={`text-[10px] sm:text-xs ${isNight ? 'bg-zinc-800 border-white/5' : 'bg-white border-zinc-200 shadow-sm'} text-zinc-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border`}
-                    >
-                      {t('sub_no_active')}
-                    </span>
-                  )}
-                  {subscriptionRecord?.subscription_status === 'active' && (
-                    <span
-                      className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-black uppercase tracking-wide border ${
-                        subscriptionRecord.subscription_expiry_date &&
-                        new Date(subscriptionRecord.subscription_expiry_date).getTime() -
-                          new Date().getTime() <
-                          8 * 24 * 60 * 60 * 1000 // Simple logic for trial detection: if expiry is within ~7 days of now
-                          ? 'bg-orange-500/10 text-orange-500 border-orange-500/20'
-                          : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                      }`}
-                    >
-                      {subscriptionRecord.subscription_expiry_date &&
-                      new Date(subscriptionRecord.subscription_expiry_date).getTime() -
-                        new Date().getTime() <
-                        8 * 24 * 60 * 60 * 1000
-                        ? t('sub_trial_badge')
-                        : t('sub_active')}
-                    </span>
-                  )}
-                  {subscriptionRecord?.subscription_status === 'expired' && (
-                    <span className="text-[10px] sm:text-xs bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-red-500/20">
-                      {t('sub_expired')}
-                    </span>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  {subscriptionRecord?.subscription_status === 'active' ? (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shadow-inner">
-                          <svg
-                            className="w-6 h-6 text-orange-500"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 0 1-2.448-2.448 14.9 14.9 0 0 1 .06-.312m-2.24 2.39a4.493 4.493 0 0 0-1.757 4.306 4.493 4.493 0 0 0 4.306-1.758M16.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"
-                            />
-                          </svg>
-                        </div>
-                        <div>
-                          {subscriptionRecord.subscription_expiry_date &&
-                          new Date(subscriptionRecord.subscription_expiry_date).getTime() -
-                            new Date().getTime() <
-                            8 * 24 * 60 * 60 * 1000 ? (
-                            <>
-                              <p
-                                className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}
-                              >
-                                {(() => {
-                                  const days = Math.ceil(
-                                    (new Date(
-                                      subscriptionRecord.subscription_expiry_date
-                                    ).getTime() -
-                                      new Date().getTime()) /
-                                      (1000 * 60 * 60 * 24)
-                                  );
-                                  return t('sub_trial_status').replace('{days}', days.toString());
-                                })()}
-                              </p>
-                              {Math.ceil(
-                                (new Date(subscriptionRecord.subscription_expiry_date).getTime() -
-                                  new Date().getTime()) /
-                                  (1000 * 60 * 60 * 24)
-                              ) <= 2 && (
-                                <p className="text-xs sm:text-sm text-orange-500 font-bold animate-pulse">
-                                  {t('sub_trial_ending')}
-                                </p>
-                              )}
-                            </>
-                          ) : (
-                            <p
-                              className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}
-                            >
-                              {user?.plan === 'pro'
-                                ? language === 'ko'
-                                  ? '프리미엄 플랜'
-                                  : 'Premium Plan'
-                                : language === 'ko'
-                                  ? '기본 플랜'
-                                  : 'Basic Plan'}
-                            </p>
-                          )}
-                          <p className="text-[10px] text-zinc-400 font-bold">
-                            {subscriptionRecord.subscription_platform === 'apple'
-                              ? t('sub_platformApple')
-                              : subscriptionRecord.subscription_platform === 'google'
-                                ? t('sub_platformGoogle')
-                                : subscriptionRecord.subscription_platform === 'school_code'
-                                  ? (language === 'ko' ? '학원 제공' : 'Provided by your academy')
-                                  : t('sub_platformWeb')}
-                          </p>
-                        </div>
-                      </div>
-
-                      {subscriptionRecord.subscription_expiry_date && (
-                        <p className="text-sm text-zinc-400 font-medium">
-                          {new Date(subscriptionRecord.subscription_expiry_date).toLocaleDateString(
-                            language === 'ko' ? 'ko-KR' : 'en-US',
-                            { year: 'numeric', month: 'long', day: 'numeric' }
-                          )}
-                          {t('sub_renews_on')}
-                        </p>
-                      )}
-
-                      {Capacitor.getPlatform() === 'ios' ? (
-                        <a
-                          href="itms-apps://apps.apple.com/account/subscriptions"
-                          className={`block w-full text-center ${isNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-zinc-200 text-zinc-900 hover:bg-zinc-50 shadow-sm'} py-4 rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97] border`}
-                        >
-                          {t('sub_manage')}
-                        </a>
-                      ) : Capacitor.getPlatform() === 'android' ? (
-                        <a
-                          href="https://play.google.com/store/account/subscriptions?package=com.chekkiai.app"
-                          className={`block w-full text-center ${isNight ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-zinc-200 text-zinc-900 hover:bg-zinc-50 shadow-sm'} py-4 rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97] border`}
-                        >
-                          {t('sub_manage')}
-                        </a>
-                      ) : (
-                        <p
-                          className={`text-[11px] sm:text-xs text-zinc-500 italic ${isNight ? 'bg-black/20 border-white/5' : 'bg-zinc-100 border-zinc-200'} p-3 rounded-xl border`}
-                        >
-                          {t('sub_web_manage')}
-                        </p>
-                      )}
-                    </div>
-                  ) : subscriptionRecord?.subscription_status === 'expired' ? (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-orange-500/5 border border-orange-500/10 flex items-center justify-center shadow-inner">
-                          <svg
-                            className="w-6 h-6 text-orange-400"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
-                            />
-                          </svg>
-                        </div>
-                        <div>
-                          <p
-                            className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}
-                          >
-                            {t('sub_expired')}
-                          </p>
-                          {subscriptionRecord.subscription_expiry_date && (
-                            <p className="text-xs sm:text-sm text-zinc-400 font-bold">
-                              {new Date(
-                                subscriptionRecord.subscription_expiry_date
-                              ).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                              })}{' '}
-                              {t('sub_expired_on')}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => {
-                          close();
-                          setShowPaywall(true);
-                        }}
-                        className="w-full bg-orange-500 hover:bg-orange-600 text-black py-4 rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest shadow-lg shadow-orange-500/20 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97]"
-                      >
-                        {t('sub_renew_now')}
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <p className="text-xs sm:text-sm text-zinc-400 font-medium leading-relaxed break-keep">
-                        {language === 'ko'
-                          ? '구독하여 모든 프로 기능을 무제한으로 이용하세요.'
-                          : 'Subscribe to unlock all premium features and unlimited AI magic.'}
-                      </p>
-                      {Capacitor.getPlatform() === 'web' ? (
-                        <div className="space-y-4">
-                          <p className="text-xs sm:text-sm text-zinc-400 font-bold text-center italic break-keep">
-                            {language === 'ko'
-                              ? '모바일 앱을 통해 구독하세요'
-                              : 'Subscribe via our mobile app'}
-                          </p>
-                          <div className="flex justify-center gap-3">
-                            <a
-                              href="https://apps.apple.com/app/id6741479840"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 opacity-80 hover:opacity-100 hover:bg-white/10 transition-colors text-[10px] sm:text-xs font-black text-white uppercase tracking-widest"
-                            >
-                              App Store
-                            </a>
-                            <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 opacity-50 text-[10px] sm:text-xs font-black text-zinc-400 uppercase tracking-widest">
-                              Google Play
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            close();
-                            setShowPaywall(true);
-                          }}
-                          className="w-full bg-orange-500 hover:bg-orange-600 text-black py-4 rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest shadow-lg shadow-orange-500/20 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97]"
-                        >
-                          {t('sub_subscribe_now')}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* --- PROFILE --- */}
-              <div>
-                <h3 className="text-balance text-xs font-black text-zinc-400 uppercase tracking-tight mb-4">
-                  {t('settings_profile')}
-                </h3>
-                <div className="space-y-4">
-                  <label
-                    className={`block text-xs sm:text-sm font-black ${isNight ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-widest`}
-                  >
-                    {t('settings_name_label')}
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'} border rounded-2xl px-5 py-4 focus:border-orange-500 outline-none transition-colors`}
-                  />
-                </div>
-              </div>
-
-              {/* --- SCHOOL & CLASSROOM SETTINGS (Case A: B2C Parents, allow late B2B redemption) --- */}
-              {!user?.schoolId ? (
-                <div className="space-y-6 pt-4 border-t border-zinc-900/10">
-                  <h3 className="text-balance text-xs font-black text-zinc-400 uppercase tracking-tight">
-                    {language === 'ko' ? '🏫 학급 가입 및 Premium 인증' : '🏫 School Sponsorship'}
-                  </h3>
-
-                  {/* Default: most parents don't have a code yet — nudge them
+            {/* --- ACADEMY / CLASS --- */}
+            {!user?.schoolId ? (
+              /* Case A: B2C parent, allow late B2B redemption */
+              <section>
+                <h3 className={sectionTitle}>{language === 'ko' ? '학원 연결' : 'Your academy'}</h3>
+                <div className={`${card} space-y-4`}>
+                  {/* Default: most parents don't have a code yet, so nudge them
                       to invite their director instead of a dead-end form. */}
-                  <div className="p-5 bg-orange-500/5 border border-orange-500/15 rounded-3xl space-y-4 text-left">
-                    <p className="text-xs text-zinc-400 font-medium leading-relaxed break-keep">
-                      {language === 'ko'
-                        ? '다니고 계신 어학원 원장님이 체키 스쿨 프로를 도입하시면, 원장님 초대로 Premium 혜택을 100% 무료로 이용하실 수 있어요.'
-                        : "If your child's academy director adopts Chekki School Pro, you get Premium access 100% free via their personal invite."}
+                  <p className="text-[15px] leading-relaxed text-ink-2 break-keep">
+                    {language === 'ko'
+                      ? '다니는 학원이 체키 스쿨을 쓰면, 원장님 초대로 Premium을 무료로 쓸 수 있어요.'
+                      : "If your child's academy uses Chekki School, you get Premium free through their invite."}
+                  </p>
+                  <div className="rounded-md bg-sunken p-3.5">
+                    <p className="mb-1 text-[13px] font-bold text-line-ink">
+                      {language === 'ko' ? '원장님께 보낼 메시지' : 'Message for the director'}
                     </p>
-
-                    <div className="bg-zinc-950/40 border border-white/10 rounded-2xl p-3.5 space-y-1.5">
-                      <p className="text-[10px] font-mono font-bold uppercase text-orange-400 tracking-wider">
-                        {language === 'ko' ? '📋 추천 메시지 미리보기' : '📋 PREVIEW MESSAGE'}
-                      </p>
-                      <p className="text-xs text-zinc-300 leading-relaxed">
-                        {language === 'ko'
-                          ? '안녕하세요 원장님! Chekki AI로 아이 숙제를 스캔해서 채점 결과를 바로 받아보고 있어요. Chekki School Pro를 도입하시면 선생님들 채점 시간이 크게 줄고, 저희 같은 학부모들은 전원 무료로 이용할 수 있대요. 한번 살펴봐 주시겠어요? https://www.chekkiai.com/schools'
-                          : "Hello Director! We've been using Chekki AI to scan and grade my child's homework — it's been great. Chekki School Pro brings this to your whole academy: teachers save hours on grading, and every parent gets it free. Worth a look: https://www.chekkiai.com/schools"}
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        const inviteMsg = language === 'ko'
-                          ? '안녕하세요 원장님! Chekki AI로 아이 숙제를 스캔해서 채점 결과를 바로 받아보고 있어요. Chekki School Pro를 도입하시면 선생님들 채점 시간이 크게 줄고, 저희 같은 학부모들은 전원 무료로 이용할 수 있대요. 한번 살펴봐 주시겠어요? https://www.chekkiai.com/schools'
-                          : "Hello Director! We've been using Chekki AI to scan and grade my child's homework — it's been great. Chekki School Pro brings this to your whole academy: teachers save hours on grading, and every parent gets it free. Worth a look: https://www.chekkiai.com/schools";
-                        const copied = await copyToClipboard(inviteMsg);
-                        if (copied) {
-                          setInviteCopied(true);
-                          setTimeout(() => setInviteCopied(false), 2500);
-                        } else {
-                          showToast({
-                            type: 'error',
-                            message: language === 'ko' ? '복사에 실패했습니다. 다시 시도해 주세요.' : 'Copy failed — please try again.',
-                          });
-                        }
-                      }}
-                      className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-black font-black text-xs rounded-2xl shadow-md transition-colors cursor-pointer"
-                    >
-                      {inviteCopied
-                        ? (language === 'ko' ? '✓ 복사 완료!' : '✓ Copied!')
-                        : (language === 'ko' ? '메시지 복사하기' : 'Copy Invite Message')}
-                    </button>
+                    <p className="text-[14px] leading-relaxed text-ink-2">{directorInviteMsg}</p>
                   </div>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const copied = await copyToClipboard(directorInviteMsg);
+                      if (copied) {
+                        setInviteCopied(true);
+                        setTimeout(() => setInviteCopied(false), 2500);
+                      } else {
+                        showToast({
+                          type: 'error',
+                          message: language === 'ko' ? '복사에 실패했습니다. 다시 시도해 주세요.' : 'Copy failed — please try again.',
+                        });
+                      }
+                    }}
+                    className={primaryBtn}
+                  >
+                    {inviteCopied
+                      ? language === 'ko' ? '복사했어요' : 'Copied'
+                      : language === 'ko' ? '메시지 복사하기' : 'Copy message'}
+                  </button>
 
                   {/* Fallback for the minority who already have a personal code. */}
                   {!showCodeEntry ? (
                     <button
                       type="button"
                       onClick={() => setShowCodeEntry(true)}
-                      className="text-zinc-400 hover:text-orange-500 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                      className="min-h-11 w-full text-[14px] font-semibold text-line-ink underline"
                     >
-                      {language === 'ko' ? '이미 초대 코드가 있으신가요?' : 'Already have an invite code?'}
+                      {language === 'ko' ? '초대 코드가 있어요' : 'I have an invite code'}
                     </button>
                   ) : (
-                    <form
-                      onSubmit={handleRedeemClassCode}
-                      className="p-5 bg-zinc-900/40 border border-zinc-900 rounded-3xl space-y-4 text-left"
-                    >
-                      <p className="text-xs text-zinc-400 font-medium leading-relaxed break-keep">
-                        {language === 'ko'
-                          ? '다니고 계신 어학원(Poly, GATE, ECC 등) 담당 선생님께 초대받으셨나요? 초대 코드를 입력해 Premium 혜택과 맞춤형 숙제 관리를 시작하세요.'
-                          : "Were you invited by your child's teacher (Poly, GATE, ECC, etc.)? Enter your invite code to activate premium grading and sync homework."}
-                      </p>
-
+                    <form onSubmit={handleRedeemClassCode} className="space-y-3 border-t border-rule pt-4">
                       {user?.plan === 'pro' && (
-                        <div className="p-3 bg-orange-500/5 border border-orange-500/15 text-orange-400 text-[10px] sm:text-xs font-semibold rounded-xl leading-normal font-korean">
-                          ⚠️{' '}
+                        <p className="rounded-md bg-line-soft p-3 text-[14px] leading-normal text-ink break-keep">
                           {language === 'ko'
-                            ? '주의: 현재 유료 정기 결제 플랜을 사용 중이십니다. 초대 코드를 등록해도 자동 정기 결제는 연동되지 않으므로, 이중 청구를 방지하기 위해 App Store 또는 Google Play에서 구독을 수동으로 취소해 주세요.'
-                            : 'Note: You have an active Premium plan. Joining via an invite code transitions your account sponsorship. Please cancel your App Store or Play Store subscription manually to avoid duplicate billing.'}
-                        </div>
-                      )}
-
-                      <div className="space-y-1.5">
-                        <label
-                          className={`block text-xs font-black ${isNight ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-widest`}
-                        >
-                          {language === 'ko'
-                            ? '초대 코드 입력'
-                            : 'Enter Invite Code'}
-                        </label>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={classJoinCode}
-                            onChange={(e) => setClassJoinCode(e.target.value)}
-                            placeholder="E.g. MERC82"
-                            maxLength={6}
-                            className={`flex-1 min-w-0 ${isNight ? 'bg-zinc-950 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'} border rounded-2xl px-5 py-3 focus:border-orange-500 outline-none text-sm uppercase font-mono tracking-widest`}
-                          />
-                          <button
-                            type="submit"
-                            disabled={isUpgradingCode}
-                            className="px-6 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-xs rounded-2xl shadow-md transition-[background-color,opacity] flex items-center justify-center gap-1.5 shrink-0"
-                          >
-                            {isUpgradingCode ? (
-                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            ) : (
-                              <span>{language === 'ko' ? '등록' : 'Redeem'}</span>
-                            )}
-                          </button>
-                        </div>
-                      </div>
-
-                      {redeemError && (
-                        <p className="text-red-400 text-xs font-semibold pl-1">⚠️ {redeemError}</p>
-                      )}
-                      {redeemSuccess && (
-                        <p className="text-emerald-400 text-xs font-semibold pl-1">
-                          ✓ {redeemSuccess}
+                            ? '지금 유료 구독 중이에요. 초대 코드를 등록해도 자동 결제는 멈추지 않으니, 이중 결제를 막으려면 App Store 또는 Google Play에서 구독을 직접 취소해 주세요.'
+                            : 'You have an active Premium plan. Joining via an invite code transitions your account sponsorship. Please cancel your App Store or Play Store subscription manually to avoid duplicate billing.'}
                         </p>
                       )}
+                      <label htmlFor="settings-code" className="block text-[14px] font-semibold text-ink-2">
+                        {language === 'ko' ? '초대 코드' : 'Invite code'}
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          id="settings-code"
+                          type="text"
+                          value={classJoinCode}
+                          onChange={(e) => setClassJoinCode(e.target.value)}
+                          placeholder="MERC82"
+                          maxLength={6}
+                          autoCapitalize="characters"
+                          className={`${input} min-w-0 flex-1 uppercase tracking-widest`}
+                        />
+                        <button
+                          type="submit"
+                          disabled={isUpgradingCode}
+                          className="btn-press flex min-h-12 shrink-0 items-center justify-center rounded-md bg-line px-5 text-[15px] font-bold text-[#2b211a] disabled:opacity-50"
+                        >
+                          {isUpgradingCode ? (
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#2b211a]/30 border-t-[#2b211a]" />
+                          ) : language === 'ko' ? '등록' : 'Redeem'}
+                        </button>
+                      </div>
+                      {redeemError && <p role="alert" className="text-[14px] font-semibold text-wrong">{redeemError}</p>}
+                      {redeemSuccess && <p role="status" className="text-[14px] font-semibold text-correct">{redeemSuccess}</p>}
                     </form>
                   )}
                 </div>
-              ) : (
-                /* --- SCHOOL & CLASSROOM SETTINGS (Case B: Already B2B, configure child/class) --- */
-                <div className="space-y-6 pt-4 border-t border-zinc-900/10">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-balance text-xs font-black text-zinc-400 uppercase tracking-tight">
-                      {language === 'ko' ? '🏫 학교 / 학급 정보' : '🏫 School & Classroom Info'}
-                    </h3>
-                    <button
-                      onClick={() => setShowLeaveClassConfirm(true)}
-                      className="text-[10px] font-black text-red-500 hover:text-red-400 transition-colors uppercase tracking-wider"
-                    >
-                      {language === 'ko' ? '학급 연동 해제' : 'Leave Class'}
-                    </button>
-                  </div>
+              </section>
+            ) : (
+              /* Case B: already linked to an academy */
+              <section>
+                <h3 className={sectionTitle}>{language === 'ko' ? '학원 / 반' : 'Academy & class'}</h3>
+                <div className={`${card} space-y-4`}>
+                  <dl className="grid grid-cols-2 gap-4">
+                    <div className="min-w-0">
+                      <dt className="text-[13px] font-semibold text-ink-3">{language === 'ko' ? '학원' : 'Academy'}</dt>
+                      <dd className="truncate text-[16px] font-bold text-ink">{user.schoolName || user.schoolId}</dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="text-[13px] font-semibold text-ink-3">{language === 'ko' ? '반' : 'Class'}</dt>
+                      <dd className="truncate text-[16px] font-bold text-ink">
+                        {isLoadingClassDetails ? (
+                          <span className="inline-block h-4 w-16 animate-pulse rounded bg-sunken" />
+                        ) : activeClassDetails ? (
+                          `${activeClassDetails.name} (${activeClassDetails.level})`
+                        ) : (
+                          'N/A'
+                        )}
+                      </dd>
+                    </div>
+                  </dl>
 
-                  <div className="p-5 bg-orange-500/5 border border-orange-500/10 rounded-3xl space-y-4 text-left">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block mb-0.5">
-                          {language === 'ko' ? '소속 교육기관' : 'Partner School'}
-                        </span>
-                        <p
-                          className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'} truncate`}
-                        >
-                          {user.schoolName || user.schoolId}
+                  {user.classId && user.classStatus === 'pending' && (
+                    <p className="rounded-md bg-line-soft p-3 text-[14px] leading-normal text-ink break-keep">
+                      {language === 'ko'
+                        ? '선생님 승인을 기다리고 있어요. 승인되면 반 교재에 맞춰 채점해요.'
+                        : 'Waiting for the teacher to approve. Once approved, grading follows the class materials.'}
+                    </p>
+                  )}
+                  {user.classId && user.classStatus === 'active' && (
+                    <p className="rounded-md bg-right-soft p-3 text-[14px] leading-normal text-ink break-keep">
+                      {language === 'ko'
+                        ? '연결됐어요. 이번 주 반 교재에 맞춰 채점하고 있어요.'
+                        : "You're linked. Grading follows this week's class materials."}
+                    </p>
+                  )}
+
+                  <div className="border-t border-rule pt-4">
+                    <label htmlFor="settings-child" className="mb-2 block text-[14px] font-semibold text-ink-2">
+                      {language === 'ko' ? '아이 이름' : "Child's name"}
+                    </label>
+                    <input
+                      id="settings-child"
+                      type="text"
+                      value={studentName}
+                      onChange={(e) => setStudentName(e.target.value)}
+                      placeholder={language === 'ko' ? '예: 김유나' : 'e.g. Yuna Kim'}
+                      className={input}
+                    />
+                  </div>
+                  <button
+                    onClick={() => setShowLeaveClassConfirm(true)}
+                    className="min-h-11 text-[14px] font-semibold text-wrong underline"
+                  >
+                    {language === 'ko' ? '학원 연결 끊기' : 'Leave class'}
+                  </button>
+                </div>
+              </section>
+            )}
+
+            {/* --- SUBSCRIPTION --- */}
+            <section>
+              <h3 className={sectionTitle}>{language === 'ko' ? '구독' : 'Plan'}</h3>
+              <div className={`${card} space-y-4`}>
+                {subscriptionRecord?.subscription_status === 'active' ? (
+                  <>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-[17px] font-extrabold text-ink">
+                          {isTrial
+                            ? t('sub_trial_status').replace('{days}', daysLeft.toString())
+                            : user?.plan === 'pro'
+                              ? language === 'ko' ? '프리미엄 플랜' : 'Premium Plan'
+                              : language === 'ko' ? '기본 플랜' : 'Basic Plan'}
+                        </p>
+                        <p className="text-[14px] text-ink-3">
+                          {subscriptionRecord.subscription_platform === 'apple'
+                            ? t('sub_platformApple')
+                            : subscriptionRecord.subscription_platform === 'google'
+                              ? t('sub_platformGoogle')
+                              : subscriptionRecord.subscription_platform === 'school_code'
+                                ? language === 'ko' ? '학원 제공' : 'Provided by your academy'
+                                : t('sub_platformWeb')}
                         </p>
                       </div>
-
-                      <div>
-                        <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block mb-0.5">
-                          {language === 'ko' ? '소속 학급반' : 'Classroom'}
-                        </span>
-                        {isLoadingClassDetails ? (
-                          <div className="w-16 h-4 bg-zinc-900 animate-pulse rounded" />
-                        ) : (
-                          <p
-                            className={`text-sm font-black ${isNight ? 'text-white' : 'text-zinc-900'} truncate`}
+                      <span className="shrink-0 rounded-full bg-line-soft px-2.5 py-0.5 text-[13px] font-bold text-line-ink">
+                        {isTrial ? t('sub_trial_badge') : t('sub_active')}
+                      </span>
+                    </div>
+                    {isTrial && daysLeft <= 2 && (
+                      <p className="text-[14px] font-semibold text-line-ink">{t('sub_trial_ending')}</p>
+                    )}
+                    {subscriptionRecord.subscription_expiry_date && (
+                      <p className="text-[14px] text-ink-2">
+                        {fmtDate(subscriptionRecord.subscription_expiry_date)}
+                        {t('sub_renews_on')}
+                      </p>
+                    )}
+                    {Capacitor.getPlatform() === 'ios' ? (
+                      <a href="itms-apps://apps.apple.com/account/subscriptions" className={outlineBtn}>
+                        {t('sub_manage')}
+                      </a>
+                    ) : Capacitor.getPlatform() === 'android' ? (
+                      <a href="https://play.google.com/store/account/subscriptions?package=com.chekkiai.app" className={outlineBtn}>
+                        {t('sub_manage')}
+                      </a>
+                    ) : (
+                      <p className="rounded-md bg-sunken p-3 text-[14px] text-ink-2">{t('sub_web_manage')}</p>
+                    )}
+                  </>
+                ) : subscriptionRecord?.subscription_status === 'expired' ? (
+                  <>
+                    <div>
+                      <p className="text-[17px] font-extrabold text-ink">{t('sub_expired')}</p>
+                      {subscriptionRecord.subscription_expiry_date && (
+                        <p className="text-[14px] text-ink-3">
+                          {fmtDate(subscriptionRecord.subscription_expiry_date)} {t('sub_expired_on')}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => {
+                        close();
+                        setShowPaywall(true);
+                      }}
+                      className={primaryBtn}
+                    >
+                      {t('sub_renew_now')}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-[15px] leading-relaxed text-ink-2 break-keep">
+                        {language === 'ko'
+                          ? '구독하면 채점을 횟수 제한 없이 쓸 수 있어요.'
+                          : 'Subscribe for unlimited grading and every premium feature.'}
+                      </p>
+                      <span className="shrink-0 rounded-full bg-sunken px-2.5 py-0.5 text-[13px] font-bold text-ink-3">
+                        {t('sub_no_active')}
+                      </span>
+                    </div>
+                    {Capacitor.getPlatform() === 'web' ? (
+                      <>
+                        <p className="text-[14px] text-ink-3">
+                          {language === 'ko' ? '구독은 모바일 앱에서 할 수 있어요.' : 'Subscriptions are in the mobile app.'}
+                        </p>
+                        <div className="flex gap-2">
+                          <a
+                            href="https://apps.apple.com/app/id6741479840"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={outlineBtn}
                           >
-                            {activeClassDetails
-                              ? `${activeClassDetails.name} (${activeClassDetails.level})`
-                              : 'N/A'}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Class Status Banner */}
-                    {user.classId && user.classStatus === 'pending' && (
-                      <div className="p-3 bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] sm:text-xs font-semibold rounded-xl leading-normal font-korean">
-                        ⏳{' '}
-                        {language === 'ko'
-                          ? '교사의 학급 승인을 기다리고 있습니다. 승인이 완료되면 학급 진도에 맞춰 채점이 자동 활성화됩니다.'
-                          : 'Awaiting teacher approval. Once approved, homework grading will automatically align with the class curriculum.'}
-                      </div>
-                    )}
-                    {user.classId && user.classStatus === 'active' && (
-                      <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] sm:text-xs font-semibold rounded-xl leading-normal font-korean">
-                        ✅{' '}
-                        {language === 'ko'
-                          ? '가입 승인 완료: 현재 이 반의 주간 커리큘럼 기반으로 채점이 진행되고 있습니다.'
-                          : 'Classroom enrollment active: Graders are currently aligned with the weekly curriculum.'}
-                      </div>
-                    )}
-
-                    <div className="space-y-1.5 pt-2 border-t border-zinc-900/10">
-                      <label
-                        className={`block text-xs font-black ${isNight ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-widest`}
+                            App Store
+                          </a>
+                          <span className="flex min-h-12 w-full items-center justify-center rounded-md bg-sunken text-[14px] font-semibold text-ink-3">
+                            Google Play ({language === 'ko' ? '준비 중' : 'soon'})
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          close();
+                          setShowPaywall(true);
+                        }}
+                        className={primaryBtn}
                       >
-                        {language === 'ko' ? '자녀 이름' : "Child's Name"}
-                      </label>
-                      <input
-                        type="text"
-                        value={studentName}
-                        onChange={(e) => setStudentName(e.target.value)}
-                        placeholder={language === 'ko' ? '예: 김유나' : 'E.g. Yuna Kim'}
-                        className={`w-full ${isNight ? 'bg-zinc-950 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'} border rounded-2xl px-5 py-4 focus:border-orange-500 outline-none text-sm transition-colors`}
-                      />
-                    </div>
+                        {t('sub_subscribe_now')}
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            </section>
+
+            {/* --- PREFERENCES --- */}
+            <section>
+              <h3 className={sectionTitle}>{language === 'ko' ? '화면' : 'Display'}</h3>
+              <div className={`${card} space-y-4`}>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[15px] font-semibold text-ink">{t('settings_lang_label')}</span>
+                  <div className="flex rounded-md bg-sunken p-0.5" role="group" aria-label={t('settings_lang_label')}>
+                    <button onClick={() => setLanguage('ko')} aria-pressed={language === 'ko'} className={segment(language === 'ko')}>
+                      한국어
+                    </button>
+                    <button onClick={() => setLanguage('en')} aria-pressed={language === 'en'} className={segment(language === 'en')}>
+                      English
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[15px] font-semibold text-ink">{t('settings_theme_label')}</span>
+                  <div className="flex rounded-md bg-sunken p-0.5" role="group" aria-label={t('settings_theme_label')}>
+                    <button onClick={() => setIsNight(false)} aria-pressed={!isNight} className={segment(!isNight)}>
+                      <Sun size={16} weight="bold" />
+                      {language === 'ko' ? '밝게' : 'Light'}
+                    </button>
+                    <button onClick={() => setIsNight(true)} aria-pressed={isNight} className={segment(isNight)}>
+                      <Moon size={16} weight="bold" />
+                      {language === 'ko' ? '어둡게' : 'Dark'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* --- HELP --- */}
+            <section>
+              <h3 className={sectionTitle}>{language === 'ko' ? '도움' : 'Help'}</h3>
+              <div className="overflow-hidden rounded-md bg-surface ring-1 ring-inset ring-rule">
+                <button
+                  onClick={() => setShowFeedback(true)}
+                  className="flex min-h-12 w-full items-center gap-3 px-4 text-left text-[15px] font-semibold text-ink hover:bg-sunken"
+                >
+                  <ChatCircleText size={18} weight="bold" className="text-ink-3" />
+                  {t('fb_title')}
+                </button>
+                <button
+                  onClick={() => {
+                    if (Capacitor.isNativePlatform()) {
+                      InAppReview.requestReview().catch(console.error);
+                    } else {
+                      window.open('https://play.google.com/store/apps/details?id=com.chekkiai.app', '_blank');
+                    }
+                  }}
+                  className="flex min-h-12 w-full items-center gap-3 border-t border-rule px-4 text-left text-[15px] font-semibold text-ink hover:bg-sunken"
+                >
+                  <Star size={18} weight="bold" className="text-ink-3" />
+                  {language === 'ko' ? '앱 평가하기' : 'Rate this app'}
+                </button>
+              </div>
+              <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1">
+                {legalLinks.map((l) => (
+                  <button
+                    key={l.key}
+                    onClick={() => setShowLegal(l.key)}
+                    className="min-h-10 text-[13px] font-semibold text-ink-3 underline hover:text-ink"
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {/* --- PRIVACY & DEVICE CHECK (folded: rarely needed) --- */}
+            <Fold
+              title={language === 'ko' ? '개인정보 보호와 기기 확인' : 'Privacy & device check'}
+              icon={<ShieldCheck size={20} weight="bold" />}
+            >
+              <p className="text-[14px] leading-relaxed text-ink-2 break-keep">{t('sec_audit_desc')}</p>
+              <ul className="mt-3 space-y-1.5">
+                {[1, 2, 3, 4].map((idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-[14px] font-semibold text-ink">
+                    <Check size={16} weight="bold" className="mt-0.5 shrink-0 text-line-ink" />
+                    {t(`sec_point_${idx}`)}
+                  </li>
+                ))}
+              </ul>
+              <p className="mb-2 mt-5 text-[13px] font-bold text-ink-3">{t('settings_device_diag')}</p>
+              <dl className="grid grid-cols-2 gap-2">
+                {[
+                  { label: language === 'ko' ? '카메라' : 'Camera', val: diagResults.camera === 'granted' ? 'OK' : 'Check' },
+                  { label: language === 'ko' ? '마이크' : 'Mic', val: diagResults.mic === 'granted' ? 'OK' : 'Check' },
+                  { label: language === 'ko' ? '음성 지원' : 'Voice API', val: diagResults.speech },
+                  { label: language === 'ko' ? '인증 상태' : 'Auth', val: diagResults.auth },
+                ].map((d) => (
+                  <div key={d.label} className="rounded-md bg-sunken p-3">
+                    <dt className="text-[13px] font-semibold text-ink-3">{d.label}</dt>
+                    <dd className="truncate text-[15px] font-bold text-ink">{d.val}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Fold>
+
+            {/* --- DELETE ACCOUNT --- */}
+            <section>
+              {!showDeleteConfirm ? (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="min-h-11 w-full text-center text-[14px] font-semibold text-wrong underline"
+                >
+                  {t('settings_delete_account')}
+                </button>
+              ) : (
+                <div className="space-y-3 rounded-md bg-wrong-soft p-4">
+                  <p className="text-[15px] font-bold leading-normal text-ink break-keep">{t('settings_delete_confirm')}</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={async () => {
+                        try {
+                          await deleteAccount();
+                        } catch (e: any) {
+                          showToast({ type: 'error', message: e.message || 'Error deleting account' });
+                          setShowDeleteConfirm(false);
+                        }
+                      }}
+                      className="btn-press min-h-11 flex-1 rounded-md bg-wrong text-[14px] font-bold text-white"
+                    >
+                      {t('settings_delete_yes')}
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="btn-press min-h-11 flex-1 rounded-md bg-surface text-[14px] font-bold text-ink ring-1 ring-inset ring-rule"
+                    >
+                      {t('settings_delete_no')}
+                    </button>
                   </div>
                 </div>
               )}
+            </section>
+          </div>
 
-              {/* --- PREFERENCES --- */}
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>
-                    {t('settings_lang_label')}
-                  </div>
-                  <div
-                    className={`flex ${isNight ? 'bg-zinc-950 border-zinc-800' : 'bg-zinc-100 border-zinc-200'} rounded-xl p-1 border`}
-                  >
-                    <button
-                      onClick={() => setLanguage('en')}
-                      className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-black uppercase ${language === 'en' ? (isNight ? 'bg-zinc-800 text-white shadow-lg' : 'bg-white text-zinc-900 shadow-sm') : 'text-zinc-500'}`}
-                    >
-                      EN
-                    </button>
-                    <button
-                      onClick={() => setLanguage('ko')}
-                      className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-black uppercase ${language === 'ko' ? (isNight ? 'bg-zinc-800 text-white shadow-lg' : 'bg-white text-zinc-900 shadow-sm') : 'text-zinc-500'}`}
-                    >
-                      KO
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>
-                    {t('settings_theme_label')}
-                  </div>
-                  <div
-                    className={`flex ${isNight ? 'bg-zinc-950 border-zinc-800' : 'bg-zinc-100 border-zinc-200'} rounded-xl p-1 border`}
-                  >
-                    <button
-                      onClick={() => setIsNight(false)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-black uppercase transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 ${!isNight ? (isNight ? 'bg-zinc-800 text-white shadow-lg' : 'bg-white text-zinc-900 shadow-sm') : 'text-zinc-500'}`}
-                    >
-                      <svg
-                        className="w-3.5 h-3.5"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
-                        />
-                      </svg>
-                      <span className="hidden xs:inline">
-                        {language === 'ko' ? '라이트' : 'Light'}
-                      </span>
-                    </button>
-                    <button
-                      onClick={() => setIsNight(true)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-black uppercase transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 ${isNight ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500'}`}
-                    >
-                      <svg
-                        className="w-3.5 h-3.5"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
-                        />
-                      </svg>
-                      <span className="hidden xs:inline">
-                        {language === 'ko' ? '다크' : 'Dark'}
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* --- RATE APP --- */}
-              <button
-                onClick={() => {
-                  if (Capacitor.isNativePlatform()) {
-                    InAppReview.requestReview().catch(console.error);
-                  } else {
-                    window.open(
-                      'https://play.google.com/store/apps/details?id=com.chekkiai.app',
-                      '_blank'
-                    );
-                  }
-                }}
-                className={`w-full flex items-center justify-center gap-3 ${isNight ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/20' : 'bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100'} font-black py-4 rounded-2xl transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97] mt-6 uppercase tracking-widest text-xs sm:text-sm`}
-              >
-                <svg className="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                {language === 'ko' ? '앱 평가하기' : 'Rate This App'}
-              </button>
-
-              {/* --- LEGAL LINKS --- */}
-              <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 px-4 py-2 border-t border-white/5 pt-6">
-                <button
-                  onClick={() => setShowLegal('privacy')}
-                  className="text-xs sm:text-sm text-zinc-400 hover:text-white font-bold transition-colors uppercase tracking-wide underline decoration-zinc-800"
-                >
-                  {t('nav_privacy')}
-                </button>
-                <button
-                  onClick={() => setShowLegal('terms')}
-                  className="text-xs sm:text-sm text-zinc-400 hover:text-white font-bold transition-colors uppercase tracking-wide underline decoration-zinc-800"
-                >
-                  {t('nav_terms')}
-                </button>
-                <button
-                  onClick={() => setShowLegal('refund')}
-                  className="text-xs sm:text-sm text-zinc-400 hover:text-white font-bold transition-colors uppercase tracking-wide underline decoration-zinc-800"
-                >
-                  {t('nav_refund')}
-                </button>
-                <button
-                  onClick={() => setShowLegal('youth')}
-                  className="text-xs sm:text-sm text-zinc-400 hover:text-white font-bold transition-colors uppercase tracking-wide underline decoration-zinc-800"
-                >
-                  {t('nav_youth')}
-                </button>
-                <button
-                  onClick={() => setShowLegal('support')}
-                  className="text-xs sm:text-sm text-zinc-400 hover:text-white font-bold transition-colors uppercase tracking-wide underline decoration-zinc-800"
-                >
-                  {language === 'ko' ? '고객 지원' : 'Help & Support'}
-                </button>
-              </div>
-
-              {/* --- DANGER ZONE --- */}
-              <div>
-                {!showDeleteConfirm ? (
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="w-full text-center px-5 py-4 rounded-2xl border border-red-500/20 text-red-500 text-xs sm:text-sm font-black uppercase tracking-wide hover:bg-red-500/10 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100"
-                  >
-                    {t('settings_delete_account')}
-                  </button>
-                ) : (
-                  <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-5 flex items-center justify-between">
-                    <p className="text-xs sm:text-sm text-orange-400 font-black uppercase tracking-wide leading-normal break-keep">
-                      {t('settings_delete_confirm')}
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={async () => {
-                          try {
-                            await deleteAccount();
-                          } catch (e: any) {
-                            showToast({ type: 'error', message: e.message || 'Error deleting account' });
-                            setShowDeleteConfirm(false);
-                          }
-                        }}
-                        className="px-4 py-2 bg-red-600 text-white text-xs sm:text-sm font-black rounded-lg"
-                      >
-                        {t('settings_delete_yes')}
-                      </button>
-                      <button
-                        onClick={() => setShowDeleteConfirm(false)}
-                        className="px-4 py-2 bg-zinc-800 text-zinc-300 text-xs sm:text-sm font-black rounded-lg"
-                      >
-                        {t('settings_delete_no')}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* --- FIXED FOOTER --- */}
-            <div
-              className={`${isNight ? 'bg-zinc-900/95 border-white/5' : 'bg-zinc-50/95 border-zinc-200'} backdrop-blur-md px-8 py-5 flex items-center justify-between border-t shrink-0`}
+          {/* --- FIXED FOOTER --- */}
+          <div className="flex shrink-0 items-center justify-between gap-3 border-t border-rule bg-surface px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)] sm:px-6">
+            <span role="status" className={`min-w-0 text-[14px] font-semibold ${saveErrorMsg ? 'text-wrong' : 'text-correct'}`}>
+              {saveErrorMsg || successMsg}
+            </span>
+            <button
+              onClick={handleSave}
+              className="btn-press min-h-12 shrink-0 rounded-md bg-line px-8 text-[15px] font-bold text-[#2b211a]"
             >
-              <span
-                className={`text-xs sm:text-sm font-black uppercase tracking-wide ${
-                  saveErrorMsg ? 'text-red-500' : 'text-emerald-500'
-                }`}
-              >
-                {saveErrorMsg || successMsg}
-              </span>
-              <button
-                onClick={handleSave}
-                className={`${isNight ? 'bg-white text-black hover:bg-zinc-100' : 'bg-zinc-900 text-white hover:bg-black'} px-10 py-4 rounded-2xl font-black text-sm btn-press transition-transform duration-200 ease-[var(--ease-out-strong)]`}
-              >
-                {t('settings_save')}
-              </button>
-            </div>
+              {t('settings_save')}
+            </button>
           </div>
         </div>
       </div>
@@ -1001,6 +682,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
           cancelText={language === 'ko' ? '취소' : 'Cancel'}
           variant="destructive"
           isNight={isNight}
+          warm
           onConfirm={() => {
             setShowLeaveClassConfirm(false);
             leaveClassroom().catch((e) => {

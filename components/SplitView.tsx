@@ -4,7 +4,6 @@ import { WorksheetItem } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useMistakes } from '../contexts/MistakeContext';
 import { useAuth } from '../contexts/AuthContext';
-import { CloneWorksheetModal } from './CloneWorksheetModal';
 import { PremiumUpsellModal } from './PremiumUpsellModal';
 import { FeedbackModal } from './FeedbackModal';
 import { RefineModal } from './RefineModal';
@@ -77,7 +76,6 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
   const [activeItemId, setActiveItemId] = useState<number | null>(null);
   const [localItems, setLocalItems] = useState<WorksheetItem[]>(items);
-  const [showCloneModal, setShowCloneModal] = useState(false);
   const [reportContext, setReportContext] = useState<WorksheetItem | null>(null);
   const [refiningItemId, setRefiningItemId] = useState<number | null>(null);
   const [isRefining, setIsRefining] = useState(false);
@@ -676,18 +674,12 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
   return (
     <>
-      {showCloneModal && (
-        <CloneWorksheetModal
-          originalItems={localItems}
-          onClose={() => setShowCloneModal(false)}
-          isNight={isNight}
-        />
-      )}
       {reportContext && (
         <FeedbackModal
           context={reportContext}
           onClose={() => setReportContext(null)}
           isNight={isNight}
+          warm
         />
       )}
       <PremiumUpsellModal
@@ -924,7 +916,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                     onClick={() => setShowAll(true)}
                     className="mt-4 flex w-full items-center justify-between gap-3 rounded-md bg-right-soft px-5 py-4 text-left"
                   >
-                    <span className="flex items-center gap-2 text-[15px] font-bold text-right">
+                    <span className="flex items-center gap-2 text-[15px] font-bold text-correct">
                       <Check size={18} weight="bold" />
                       {language === 'ko' ? `맞은 문제 ${correctCount}개` : `${correctCount} correct`}
                     </span>

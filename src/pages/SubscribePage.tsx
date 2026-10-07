@@ -17,9 +17,9 @@ const QRCodeWithFallback: React.FC<{ url: string }> = ({ url }) => {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="w-28 h-28 rounded-2xl border border-white/10 bg-zinc-900 flex items-center justify-center text-center text-[10px] font-bold text-orange-400 p-2 hover:bg-zinc-800 transition-colors"
+        className="w-28 h-28 rounded-md bg-sunken ring-1 ring-inset ring-rule flex items-center justify-center text-center text-[13px] font-bold text-line-ink p-2"
       >
-        📱 Tap to open App Store
+        App Store
       </a>
     );
   }
@@ -28,7 +28,7 @@ const QRCodeWithFallback: React.FC<{ url: string }> = ({ url }) => {
     <img
       src={qrDataUrl}
       alt="App Store QR Code"
-      className="w-28 h-28 rounded-2xl border border-white/10 bg-white p-1"
+      className="w-28 h-28 rounded-md ring-1 ring-rule bg-white p-1"
       onError={() => setFailed(true)}
     />
   );
@@ -61,118 +61,83 @@ const SubscribePage: React.FC = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-brand-dark text-white flex flex-col items-center justify-center px-6 py-16 relative overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+  const segment = (on: boolean) =>
+    `min-h-10 rounded px-4 text-[14px] font-bold ${on ? 'bg-sign text-on-sign dark:bg-ink dark:text-ground' : 'text-ink-2 hover:text-ink'}`;
 
-      {/* Navigation Top Bar / Back Button */}
-      <div className="absolute top-6 left-6 z-20">
+  return (
+    <div className="font-warm min-h-screen bg-ground tile-ground text-ink flex flex-col items-center px-4 pb-12 pt-[calc(env(safe-area-inset-top)+12px)]">
+      <div className="flex w-full max-w-lg items-center justify-between">
         <button
           type="button"
           onClick={handleBack}
-          className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-xs font-bold text-zinc-300 hover:text-white transition-all cursor-pointer"
+          className="-ml-2 flex min-h-11 items-center gap-2 rounded-md px-2 text-[15px] font-semibold text-ink-2 hover:text-ink"
         >
-          <ArrowLeft size={16} weight="bold" />
-          <span>{isKo ? '뒤로 가기' : 'Back'}</span>
+          <ArrowLeft size={18} weight="bold" />
+          {isKo ? '뒤로' : 'Back'}
         </button>
-      </div>
-
-      {/* Logo */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl md:text-5xl font-black tracking-tight">
-          Chekki<span className="text-orange-500">AI</span>
-        </h1>
-        <p className="text-zinc-400 text-xs font-black uppercase tracking-[0.3em] mt-1.5">
-          Homework Helper
-        </p>
-      </div>
-
-      {/* Main card */}
-      <div className="bg-zinc-900 border border-white/10 rounded-3xl max-w-lg w-full p-8 md:p-10 text-center shadow-[0_0_80px_rgba(249,115,22,0.1)] relative hover:border-orange-500/20 transition-all duration-200 group">
-        <div className="w-16 h-16 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-3xl mx-auto mb-6 text-orange-500">
-          📱
+        <div className="flex rounded-md bg-sunken p-0.5" role="group" aria-label={isKo ? '언어' : 'Language'}>
+          <button onClick={() => setLanguage('ko')} aria-pressed={isKo} className={segment(isKo)}>
+            한국어
+          </button>
+          <button onClick={() => setLanguage('en')} aria-pressed={!isKo} className={segment(!isKo)}>
+            English
+          </button>
         </div>
+      </div>
 
-        {/* Headline */}
-        <h2 className="text-2xl md:text-3xl font-black text-white mb-3 leading-tight">
+      <div className="mt-8 w-full max-w-lg rounded-lg bg-surface p-6 text-center ring-1 ring-inset ring-rule sm:p-8">
+        <img src="/images/chekki-wave.webp" alt="" className="mx-auto h-24 w-24 object-contain" />
+        <p className="mt-3 text-[17px] font-extrabold tracking-[-0.02em] text-ink">
+          Chekki<span className="text-line">AI</span> Premium
+        </p>
+        <h1 className="mt-2 whitespace-pre-line text-[24px] font-extrabold leading-tight tracking-[-0.02em] text-ink sm:text-[28px] break-keep">
+          {isKo ? '구독은 모바일 앱에서\n할 수 있어요' : 'Subscribe in\nthe mobile app'}
+        </h1>
+        <p className="mt-2 text-[15px] leading-relaxed text-ink-2 break-keep">
           {isKo
-            ? 'ChekkiAI 프리미엄은\n모바일 앱에서 이용 가능합니다'
-            : 'ChekkiAI Premium is available\non our mobile app'}
-        </h2>
-
-        <p className="text-zinc-400 text-sm leading-relaxed mb-8">
-          {isKo
-            ? 'App Store 및 Google Play Store에서 체키 앱을 다운로드하여 구독을 진행해 보세요.'
-            : 'Download the official app on App Store or Google Play Store to start your subscription today.'}
+            ? '체키 앱을 받아서 7일 무료 체험을 시작하세요. 웹에서 쓰던 계정 그대로 로그인하면 돼요.'
+            : 'Get the Chekki app and start the 7-day free trial. Sign in with the same account you use here.'}
         </p>
 
-        {/* Store badges */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-          {/* App Store */}
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <a
             href={APP_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-3 bg-white text-black px-6 py-3.5 rounded-2xl font-black hover:bg-zinc-100 transition-all active:scale-[0.97] shadow-lg flex-1"
+            className="btn-press flex min-h-14 flex-1 items-center justify-center gap-3 rounded-md bg-sign px-5 text-on-sign dark:bg-ink dark:text-ground"
           >
-            <AppleLogo size={28} weight="fill" className="text-black shrink-0" />
-            <div className="text-left">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">
-                {isKo ? '다운로드' : 'Download on the'}
-              </p>
-              <p className="text-sm font-black leading-none mt-0.5">App Store</p>
-            </div>
+            <AppleLogo size={26} weight="fill" className="shrink-0" />
+            <span className="text-left">
+              <span className="block text-[12px] font-semibold opacity-80">{isKo ? '다운로드' : 'Download on the'}</span>
+              <span className="block text-[16px] font-extrabold leading-none">App Store</span>
+            </span>
           </a>
-
-          {/* Google Play */}
           <a
             href={PLAY_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-3 bg-white/10 hover:bg-white/15 border border-white/20 text-white px-6 py-3.5 rounded-2xl font-black transition-all active:scale-[0.97] shadow-lg flex-1"
+            className="btn-press flex min-h-14 flex-1 items-center justify-center gap-3 rounded-md bg-surface px-5 text-ink ring-1 ring-inset ring-rule hover:ring-ink-3"
           >
-            <GooglePlayLogo size={26} weight="fill" className="text-emerald-400 shrink-0" />
-            <div className="text-left">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">
-                {isKo ? '다운로드' : 'Get it on'}
-              </p>
-              <p className="text-sm font-black leading-none mt-0.5">Google Play</p>
-            </div>
+            <GooglePlayLogo size={24} weight="fill" className="shrink-0" />
+            <span className="text-left">
+              <span className="block text-[12px] font-semibold text-ink-3">{isKo ? '다운로드' : 'Get it on'}</span>
+              <span className="block text-[16px] font-extrabold leading-none">Google Play</span>
+            </span>
           </a>
         </div>
 
         {/* QR code for desktop */}
-        <div className="hidden md:flex flex-col items-center gap-3 pt-6 border-t border-white/5">
-          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-            {isKo ? 'iPhone / Android QR 코드로 스캔' : 'Scan to download on mobile'}
+        <div className="mt-6 hidden flex-col items-center gap-2 border-t border-rule pt-6 md:flex">
+          <p className="text-[14px] font-semibold text-ink-2">
+            {isKo ? '휴대폰 카메라로 찍으면 App Store가 열려요' : 'Scan with your phone camera to open the App Store'}
           </p>
           <QRCodeWithFallback url={APP_STORE_URL} />
-          <p className="text-[9px] text-zinc-400">iOS &amp; Android App Store</p>
-        </div>
-
-        {/* Language toggle */}
-        <div className="mt-6 flex justify-center">
-          <div className="flex bg-zinc-950 rounded-xl p-1 border border-zinc-800">
-            <button
-              onClick={() => setLanguage('en')}
-              className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase ${language === 'en' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-400'}`}
-            >
-              EN
-            </button>
-            <button
-              onClick={() => setLanguage('ko')}
-              className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase ${language === 'ko' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-400'}`}
-            >
-              KO
-            </button>
-          </div>
         </div>
       </div>
 
       {/* Footer & Business Info */}
-      <footer className="mt-12 text-center text-xs text-zinc-400 space-y-4 max-w-lg w-full border-t border-white/10 pt-8">
-        <div className="space-y-1 text-[11px] text-zinc-400">
+      <footer className="mt-10 w-full max-w-lg space-y-3 text-center text-[12px] text-ink-3">
+        <div className="space-y-1">
           <p>
             <span><strong>{isKo ? '상호:' : 'Company:'}</strong> 채키 AI (Chekki AI)</span> | {' '}
             <span><strong>{isKo ? '대표자:' : 'Representative:'}</strong> Benjamin Jason</span>
@@ -183,21 +148,21 @@ const SubscribePage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex justify-center gap-4 text-[11px] font-bold text-zinc-400">
-          <a href="/privacy" onClick={(e) => { e.preventDefault(); window.location.href = '/privacy'; }} className="hover:text-orange-400">
+        <div className="flex justify-center gap-4 font-semibold">
+          <a href="/privacy" onClick={(e) => { e.preventDefault(); window.location.href = '/privacy'; }} className="underline hover:text-ink">
             {isKo ? '개인정보처리방침' : 'Privacy Policy'}
           </a>
           <span>|</span>
-          <a href="/terms" onClick={(e) => { e.preventDefault(); window.location.href = '/terms'; }} className="hover:text-orange-400">
+          <a href="/terms" onClick={(e) => { e.preventDefault(); window.location.href = '/terms'; }} className="underline hover:text-ink">
             {isKo ? '이용약관' : 'Terms of Service'}
           </a>
           <span>|</span>
-          <a href="/refund" onClick={(e) => { e.preventDefault(); window.location.href = '/refund'; }} className="hover:text-orange-400">
+          <a href="/refund" onClick={(e) => { e.preventDefault(); window.location.href = '/refund'; }} className="underline hover:text-ink">
             {isKo ? '환불정책' : 'Refund Policy'}
           </a>
         </div>
 
-        <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest pt-2">
+        <p className="pt-1">
           © {new Date().getFullYear()} Chekki AI — {isKo ? '모바일 전용 구독' : 'Mobile App Subscriptions Only'}
         </p>
       </footer>

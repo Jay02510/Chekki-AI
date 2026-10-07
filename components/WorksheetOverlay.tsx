@@ -220,7 +220,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
       >
         {/* Simplified background to prevent 'double image' glitch from failed blurs on mobile */}
         <div
-          className={`absolute inset-0 overflow-hidden pointer-events-none opacity-20 ${isNight ? 'bg-zinc-800' : 'bg-zinc-200'}`}
+          className={`absolute inset-0 overflow-hidden pointer-events-none bg-sunken`}
         ></div>
 
         {/* The precise bounding container for the image and bubbles */}
@@ -360,7 +360,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
             <button
               aria-label={language === 'ko' ? '정답 설정' : 'Overlay Settings'}
               onClick={() => setShowSettings(!showSettings)}
-              className={`w-11 h-11 rounded-md bg-surface/95 text-ink ring-1 ring-rule ${showSettings ? 'ring-2 ring-line text-line-ink opacity-100' : 'opacity-70 md:opacity-40 md:hover:opacity-100'} hover:scale-110 active:scale-90 hover:border-orange-500/50 hover:text-orange-500 transition-[border-color,color,opacity,transform] duration-200 flex items-center justify-center text-xl shadow-2xl group shrink-0`}
+              className={`w-11 h-11 rounded-md bg-surface/95 text-ink ring-1 ring-rule ${showSettings ? 'ring-2 ring-line text-line-ink opacity-100' : 'opacity-70 md:opacity-40 md:hover:opacity-100'} hover:scale-110 active:scale-90 hover:text-line-ink transition-[border-color,color,opacity,transform] duration-200 flex items-center justify-center text-xl shadow-2xl group shrink-0`}
               title={language === 'ko' ? '정답 설정' : 'Overlay Settings'}
             >
               <svg
@@ -397,15 +397,15 @@ export const WorksheetOverlay: React.FC<Props> = ({
                         step="0.05"
                         value={bubbleScale}
                         onChange={(e) => setBubbleScale(parseFloat(e.target.value))}
-                        className={`w-32 accent-[var(--m-line)] cursor-pointer h-1.5 ${isNight ? 'bg-white/10' : 'bg-zinc-200'} rounded-full appearance-none`}
+                        className={`w-32 accent-[var(--m-line)] cursor-pointer h-1.5 bg-rule rounded-full appearance-none`}
                       />
                       <span className="text-lg font-black">A</span>
                     </div>
                   </div>
-                  <div className="w-full h-px bg-white/10"></div>
+                  <div className="w-full h-px bg-rule"></div>
                   <button
                     onClick={resetPositions}
-                    className={`w-full py-3 rounded-md bg-sunken text-ink ring-1 ring-inset ring-rule hover:bg-rule transition-[background-color,transform] flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest active:scale-[0.97] border`}
+                    className={`w-full py-3 rounded-md bg-sunken text-ink ring-1 ring-inset ring-rule hover:bg-rule transition-[background-color,transform] flex items-center justify-center gap-3 text-[14px] font-bold active:scale-[0.97]`}
                   >
                                         {language === 'ko' ? '위치 초기화' : 'Reset Positions'}
                   </button>
@@ -417,7 +417,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
           <div className="flex items-center gap-3 pointer-events-auto shrink-0">
             <button
               onClick={() => setIsFullscreen(true)}
-              className={`w-11 h-11 rounded-md bg-surface/95 text-ink ring-1 ring-rule flex items-center justify-center hover:ring-line hover:text-white opacity-70 md:opacity-40 md:hover:opacity-100 hover:scale-110 active:scale-90 transition-[background-color,border-color,color,opacity,transform] duration-200 shadow-2xl group shrink-0`}
+              className={`w-11 h-11 rounded-md bg-surface/95 text-ink ring-1 ring-rule flex items-center justify-center hover:ring-line hover:text-line-ink opacity-70 md:opacity-40 md:hover:opacity-100 hover:scale-110 active:scale-90 transition-[background-color,border-color,color,opacity,transform] duration-200 shadow-2xl group shrink-0`}
               title="Full Screen Focus"
             >
               <svg
@@ -481,7 +481,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
         typeof document !== 'undefined' &&
         createPortal(
           <div
-            className={`fixed inset-0 z-[9999] flex flex-col ${isNight ? 'bg-zinc-950' : 'bg-white'} animate-[fadeIn_200ms_ease-out] overflow-hidden select-none`}
+            className={`fixed inset-0 z-[9999] flex flex-col bg-ground animate-[fadeIn_200ms_ease-out] overflow-hidden select-none`}
           >
             {/* Top Control Bar with safe area awareness */}
             <div className="absolute top-0 left-0 right-0 z-[10002] px-6 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] flex justify-between items-start pointer-events-none gap-4">
@@ -518,15 +518,15 @@ export const WorksheetOverlay: React.FC<Props> = ({
                             step="0.05"
                             value={bubbleScale}
                             onChange={(e) => setBubbleScale(parseFloat(e.target.value))}
-                            className={`w-36 accent-[var(--m-line)] cursor-pointer h-2 ${isNight ? 'bg-white/10' : 'bg-zinc-200'} rounded-full appearance-none`}
+                            className={`w-36 accent-[var(--m-line)] cursor-pointer h-2 bg-rule rounded-full appearance-none`}
                           />
                           <span className="text-xl font-black">A</span>
                         </div>
                       </div>
-                      <div className="w-full h-px bg-white/10"></div>
+                      <div className="w-full h-px bg-rule"></div>
                       <button
                         onClick={resetPositions}
-                        className="w-full py-4 rounded-md bg-sunken text-ink hover:bg-rule transition-[background-color,transform] flex items-center justify-center gap-3 text-[14px] font-bold active:scale-[0.97] border border-white/10"
+                        className="w-full py-4 rounded-md bg-sunken text-ink hover:bg-rule transition-[background-color,transform] flex items-center justify-center gap-3 text-[14px] font-bold active:scale-[0.97] ring-1 ring-inset ring-rule"
                       >
                                                 {language === 'ko' ? '위치 초기화' : 'Reset Positions'}
                       </button>
@@ -541,7 +541,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                       onClick={handleToggleAnswers}
                       className={`pointer-events-auto px-6 py-3 rounded-md font-bold text-[14px] shadow-[0_8px_20px_-8px_rgba(0,0,0,0.5)] transition-[background-color,border-color,color,transform] active:scale-[0.97] border-2 ${
                         showAnswers
-                          ? 'bg-white text-black border-white shadow-sm'
+                          ? 'bg-surface text-ink border-rule'
                           : 'bg-line text-[#2b211a] border-transparent'
                       }`}
                     >
@@ -550,8 +550,8 @@ export const WorksheetOverlay: React.FC<Props> = ({
                           ? '정답 숨기기'
                           : 'Hide Answers'
                         : language === 'ko'
-                          ? '👀 정답 보기'
-                          : '👀 Show Answers'}
+                          ? '정답 보기'
+                          : 'Show answers'}
                     </button>
                   </div>
                 )}
@@ -603,7 +603,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
 
               <button
                 onClick={() => setIsFullscreen(false)}
-                className="w-11 h-11 rounded-md bg-sign text-on-sign flex items-center justify-center opacity-80 hover:opacity-100 transition-[background-color,opacity,transform] active:scale-90 border-2 border-white/30 pointer-events-auto shadow-2xl group shrink-0"
+                className="w-11 h-11 rounded-md bg-sign text-on-sign flex items-center justify-center opacity-80 hover:opacity-100 transition-[background-color,opacity,transform] active:scale-90 pointer-events-auto shadow-2xl group shrink-0"
               >
                 <svg
                   className="w-10 h-10 group-hover:rotate-90 transition-transform duration-200"

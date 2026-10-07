@@ -1,3 +1,4 @@
+import { X } from '@phosphor-icons/react';
 import React, { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -69,44 +70,37 @@ export const MobileAppBanner: React.FC<Props> = ({ onVisibilityChange }) => {
         : 'Get it on Google Play';
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[200] bg-zinc-900 border-b border-white/10 px-4 py-3 flex items-center gap-3 shadow-xl animate-fade-in">
-      {/* App icon */}
-      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center shrink-0 shadow-lg">
-        <ChekkiMascot className="w-8 h-8" mood="happy" />
-      </div>
+    <div className="fixed top-0 left-0 right-0 z-[200] flex items-center gap-3 bg-sign px-4 py-2.5 text-on-sign animate-slide-down">
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-md bg-line">
+        <ChekkiMascot className="h-8 w-8" mood="happy" />
+      </span>
 
-      {/* Text */}
-      <div className="flex-1 min-w-0">
-        <p className="text-white font-black text-xs truncate">
-          {language === 'ko'
-            ? 'ChekkiAI를 앱으로 이용하세요'
-            : 'Get the full experience on ChekkiAI app'}
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[14px] font-bold">
+          {language === 'ko' ? '앱으로 쓰면 더 편해요' : 'Easier in the ChekkiAI app'}
         </p>
-        <p className="text-zinc-400 text-[10px] truncate">
-          {language === 'ko'
-            ? '앱에서만 구독이 가능합니다'
-            : 'Subscription is only available in the app'}
+        <p className="truncate text-[12px] text-on-sign-2">
+          {language === 'ko' ? '구독은 앱에서만 할 수 있어요' : 'Subscriptions are app-only'}
         </p>
       </div>
 
-      {/* Store link */}
       <a
         href={storeUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="shrink-0 bg-orange-500 hover:bg-orange-600 text-black text-[10px] font-black px-3 py-2 rounded-xl transition-colors whitespace-nowrap"
+        aria-label={storeLabel}
+        className="flex min-h-10 shrink-0 items-center gap-1.5 rounded-md bg-line px-3 text-[13px] font-bold text-[#2b211a]"
       >
-        {mobilePlatform === 'ios' ? <AppleLogo className="w-4 h-4" /> : '🤖'}{' '}
-        {language === 'ko' ? '다운로드' : 'Download'}
+        {mobilePlatform === 'ios' && <AppleLogo className="h-3.5 w-3.5" />}
+        {language === 'ko' ? '받기' : 'Get'}
       </a>
 
-      {/* Dismiss */}
       <button
         onClick={dismiss}
-        aria-label="Dismiss banner"
-        className="shrink-0 text-zinc-600 hover:text-white text-lg transition-colors p-1"
+        aria-label={language === 'ko' ? '배너 닫기' : 'Dismiss banner'}
+        className="-mr-2 flex h-11 w-11 shrink-0 items-center justify-center text-on-sign-2 hover:text-on-sign"
       >
-        ✕
+        <X size={18} weight="bold" />
       </button>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { LegalType } from '../types';
 import { useModalExit } from '../hooks/useModalExit';
+import { X } from '@phosphor-icons/react';
 
 interface Props {
   type: LegalType;
@@ -54,26 +55,26 @@ export const LegalModal: React.FC<Props> = ({
       className={`fixed inset-0 z-[110] flex items-center justify-center ${isStandalone ? '' : 'p-4'}`}
     >
       <div
-        className={`absolute inset-0 bg-black/80 backdrop-blur-sm ${isClosing ? 'modal-backdrop-exit' : ''}`}
+        className={`absolute inset-0 bg-[#2b211a]/55 ${isClosing ? 'modal-backdrop-exit' : ''}`}
         onClick={isStandalone ? undefined : close}
       ></div>
 
       <div
-        className={`relative ${isNight ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200 shadow-2xl'} ${isStandalone ? 'w-full h-full rounded-none' : 'rounded-2xl w-full max-w-2xl h-[85vh]'} flex flex-col shadow-2xl border ${isClosing ? 'modal-exit' : 'animate-fade-in-up'}`}
+        className={`relative bg-ground border-rule ${isStandalone ? 'w-full h-full rounded-none' : 'rounded-lg w-full max-w-2xl h-[85vh]'} flex flex-col shadow-2xl border ${isClosing ? 'modal-exit' : 'animate-fade-in-up'}`}
       >
         <div
-          className={`${isNight ? 'bg-zinc-950 border-zinc-800' : 'bg-zinc-50 border-zinc-200'} px-6 py-4 border-b flex justify-between items-center shrink-0`}
+          className={`bg-surface border-rule px-6 py-4 border-b flex justify-between items-center shrink-0`}
         >
           <div className="flex items-center gap-3">
             <span className="text-xl">{icon}</span>
             <div>
               <h2
-                className={`text-sm md:text-base font-bold ${isNight ? 'text-white' : 'text-zinc-900'} font-display`}
+                className={`text-sm md:text-base font-bold text-ink `}
               >
                 {title}
               </h2>
               <p
-                className={`text-[10px] ${isNight ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-widest`}
+                className={`text-[10px] text-ink-3 `}
               >
                 {date}
               </p>
@@ -83,32 +84,32 @@ export const LegalModal: React.FC<Props> = ({
             <button
               onClick={close}
               aria-label="Close"
-              className={`${isNight ? 'text-zinc-500 hover:text-white bg-zinc-900 border-zinc-800' : 'text-zinc-400 hover:text-zinc-900 bg-zinc-100 border-zinc-200'} w-8 h-8 rounded-full flex items-center justify-center border`}
+              className="text-ink-3 hover:text-ink hover:bg-sunken w-11 h-11 -mr-2 rounded-md flex items-center justify-center"
             >
-              ✕
+              <X size={20} weight="bold" />
             </button>
           )}
         </div>
 
         <div
-          className={`flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8 ${isNight ? 'bg-zinc-900' : 'bg-white'}`}
+          className={`flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8 bg-ground`}
         >
           {type === 'terms' && (
             <div className="space-y-8">
               <section className="space-y-4">
                 <div
-                  className={`${isNight ? 'bg-zinc-800/60 border-zinc-700/60' : 'bg-zinc-50 border-zinc-200 shadow-sm'} p-5 md:p-6 rounded-xl border`}
+                  className={`bg-surface border-rule p-5 md:p-6 rounded-md border`}
                 >
                   <h3
-                    className={`${isNight ? 'text-white border-zinc-700/60' : 'text-zinc-900 border-zinc-200'} font-black text-base mb-4 border-b pb-2`}
+                    className={`text-ink border-rule font-black text-base mb-4 border-b pb-2`}
                   >
                     [KR] 이용약관
                   </h3>
                   <div
-                    className={`${isNight ? 'text-zinc-200' : 'text-zinc-800'} text-xs md:text-sm leading-relaxed space-y-4 font-normal`}
+                    className={`text-ink text-xs md:text-sm leading-relaxed space-y-4 font-normal`}
                   >
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>
+                      <strong className="text-ink">
                         본 서비스는 전자상거래 등에서의 소비자보호에 관한 법률을 준수합니다.
                       </strong>
                     </p>
@@ -118,14 +119,14 @@ export const LegalModal: React.FC<Props> = ({
                       합니다.
                     </p>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>제1조 (서비스 목적 및 내용)</strong>
+                      <strong className="text-ink">제1조 (서비스 목적 및 내용)</strong>
                       <br />
                       Chekki (채키)는 부모가 가정에서 자녀의 영어 학습을 보다 원활하게 지도할 수
                       있도록 돕는 학습 보조 도구입니다. 제공되는 서비스는 AI를 활용한 학습지 분석 및
                       대시보드 관리 기능을 포함합니다.
                     </p>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>제2조 (유료 서비스 및 이용 기간)</strong>
+                      <strong className="text-ink">제2조 (유료 서비스 및 이용 기간)</strong>
                       <br />
                       1. 유료 서비스(Standard Pro)는 월 구독 형태로 제공되며, 1회 결제 시 이용
                       기간은 결제일로부터 30일입니다.
@@ -134,7 +135,7 @@ export const LegalModal: React.FC<Props> = ({
                       진행됩니다.
                     </p>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>제3조 (청약철회 및 서비스 해지)</strong>
+                      <strong className="text-ink">제3조 (청약철회 및 서비스 해지)</strong>
                       <br />
                       1. 이용자는 결제 후 7일 이내에 서비스를 이용하지 않은 경우 청약철회(환불)를
                       요청할 수 있습니다.
@@ -145,18 +146,18 @@ export const LegalModal: React.FC<Props> = ({
                   </div>
                 </div>
                 <div
-                  className={`${isNight ? 'bg-zinc-800/60 border-zinc-700/60' : 'bg-zinc-50 border-zinc-200 shadow-sm'} p-5 md:p-6 rounded-xl border`}
+                  className={`bg-surface border-rule p-5 md:p-6 rounded-md border`}
                 >
                   <h3
-                    className={`${isNight ? 'text-white border-zinc-700/60' : 'text-zinc-900 border-zinc-200'} font-black text-base mb-4 border-b pb-2`}
+                    className={`text-ink border-rule font-black text-base mb-4 border-b pb-2`}
                   >
                     [EN] Terms of Service
                   </h3>
                   <div
-                    className={`${isNight ? 'text-zinc-200' : 'text-zinc-800'} text-xs md:text-sm leading-relaxed space-y-4 font-normal`}
+                    className={`text-ink text-xs md:text-sm leading-relaxed space-y-4 font-normal`}
                   >
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>
+                      <strong className="text-ink">
                         This service complies with the Korean Act on Consumer Protection in
                         Electronic Commerce.
                       </strong>
@@ -166,13 +167,13 @@ export const LegalModal: React.FC<Props> = ({
                       learning assistance tool. By using the Service, you agree to these terms.
                     </p>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>1. Service Purpose & Content</strong>
+                      <strong className="text-ink">1. Service Purpose & Content</strong>
                       <br />
                       Chekki is a tool designed to help parents guide their children&apos;s English
                       learning at home, including AI-powered worksheet analysis and review notes.
                     </p>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>2. Subscriptions & Service Period</strong>
+                      <strong className="text-ink">2. Subscriptions & Service Period</strong>
                       <br />
                       1. Paid services (Standard Pro) are provided as monthly subscriptions. Each
                       billing cycle covers a period of 30 days.
@@ -181,7 +182,7 @@ export const LegalModal: React.FC<Props> = ({
                       user.
                     </p>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>3. Cancellation & Refunds</strong>
+                      <strong className="text-ink">3. Cancellation & Refunds</strong>
                       <br />
                       1. Users may request a full refund within 7 days of purchase if the service
                       has not been used.
@@ -198,13 +199,13 @@ export const LegalModal: React.FC<Props> = ({
           {type === 'privacy' && (
             <div className="space-y-8">
               <section className="space-y-4">
-                <div className={`${isNight ? 'bg-zinc-800/60 border-zinc-700/60' : 'bg-zinc-50 border-zinc-200 shadow-sm'} p-5 md:p-6 rounded-xl border`}>
-                  <h3 className={`${isNight ? 'text-white border-zinc-700/60' : 'text-zinc-900 border-zinc-200'} font-black text-base mb-4 border-b pb-2`}>
+                <div className={`bg-surface border-rule p-5 md:p-6 rounded-md border`}>
+                  <h3 className={`text-ink border-rule font-black text-base mb-4 border-b pb-2`}>
                     [KR] 개인정보처리방침
                   </h3>
-                  <div className={`${isNight ? 'text-zinc-200' : 'text-zinc-800'} text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
+                  <div className={`text-ink text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>1. 개인정보의 수집 항목 및 목적</strong>
+                      <strong className="text-ink">1. 개인정보의 수집 항목 및 목적</strong>
                       <br />
                       Chekki (채키)는 회원가입 및 서비스 제공을 위해 최소한의 개인정보를 수집합니다.
                       <br />
@@ -213,19 +214,19 @@ export const LegalModal: React.FC<Props> = ({
                     </p>
 
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>2. 데이터 저장 및 활용</strong>
+                      <strong className="text-ink">2. 데이터 저장 및 활용</strong>
                       <br />
                       업로드된 원본 학습지 이미지와 추출된 텍스트 및 오답 데이터는 개인 맞춤형 복습
                       워크시트 생성 및 학습 진행도 추적을 위해 안전하게 서버에 저장됩니다.
                       <br />
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>
+                      <strong className="text-ink">
                         오디오 연습실 기능 사용 시 수집되는 음성 데이터는 기기 내부(Apple/Google
                         네이티브 음성 인식)에서만 처리되며 당사 서버로 전송되거나 저장되지 않습니다.
                       </strong>
                     </p>
 
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>3. 제3자 제공 및 위탁</strong>
+                      <strong className="text-ink">3. 제3자 제공 및 위탁</strong>
                       <br />
                       서비스 운영을 위해 아래와 같은 외부 서비스를 이용하며, 해당 업체는 철저히
                       관리됩니다.
@@ -235,13 +236,13 @@ export const LegalModal: React.FC<Props> = ({
                     </p>
 
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>4. 개인정보의 보유 및 파기</strong>
+                      <strong className="text-ink">4. 개인정보의 보유 및 파기</strong>
                       <br />
                       이용자가 계정 탈퇴를 요청할 경우 수집된 개인정보는 즉시 파기됩니다.
                     </p>
 
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>5. 학원(기관) 이용 시 처리 특칙</strong>
+                      <strong className="text-ink">5. 학원(기관) 이용 시 처리 특칙</strong>
                       <br />
                       학원 원장/교사가 Chekki를 통해 학생 정보(이름, 반 배정, 학습지 이미지, 채점
                       결과, 학부모 연락처)를 입력하는 경우, 해당 학원이 그 학생 개인정보에 대한
@@ -254,16 +255,16 @@ export const LegalModal: React.FC<Props> = ({
                       있습니다. 삭제 요청은 확인 절차를 거쳐 통상 영업일 기준 30일 이내 처리됩니다.
                     </p>
 
-                    <p className={`pt-2 ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>개인정보 관리책임자: Benjamin Jason (support@chekkiai.com / 사업자등록번호: 814-14-03096)</p>
+                    <p className={`pt-2 text-ink-2`}>개인정보 관리책임자: Benjamin Jason (support@chekkiai.com / 사업자등록번호: 814-14-03096)</p>
                   </div>
                 </div>
-                <div className={`${isNight ? 'bg-zinc-800/60 border-zinc-700/60' : 'bg-zinc-50 border-zinc-200 shadow-sm'} p-5 md:p-6 rounded-xl border`}>
-                  <h3 className={`${isNight ? 'text-white border-zinc-700/60' : 'text-zinc-900 border-zinc-200'} font-black text-base mb-4 border-b pb-2`}>
+                <div className={`bg-surface border-rule p-5 md:p-6 rounded-md border`}>
+                  <h3 className={`text-ink border-rule font-black text-base mb-4 border-b pb-2`}>
                     [EN] Privacy Policy
                   </h3>
-                  <div className={`${isNight ? 'text-zinc-200' : 'text-zinc-800'} text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
+                  <div className={`text-ink text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>1. Collected Data & Purpose</strong>
+                      <strong className="text-ink">1. Collected Data & Purpose</strong>
                       <br />
                       Chekki collects minimal data required for account management and service
                       delivery.
@@ -274,13 +275,13 @@ export const LegalModal: React.FC<Props> = ({
                     </p>
 
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>2. Data Storage & Usage</strong>
+                      <strong className="text-ink">2. Data Storage & Usage</strong>
                       <br />
                       Uploaded original worksheet images, along with extracted text and mistake
                       data, are stored securely on our servers to generate customized PDF practice
                       worksheets and track learning progress.
                       <br />
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>
+                      <strong className="text-ink">
                         Voice data processed during the Audio Practice Room feature is evaluated
                         locally on your device (via Apple/Google native speech recognition) and is
                         NOT transmitted to or stored on our servers.
@@ -288,7 +289,7 @@ export const LegalModal: React.FC<Props> = ({
                     </p>
 
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>3. Third-Party Services</strong>
+                      <strong className="text-ink">3. Third-Party Services</strong>
                       <br />
                       We use trusted providers to maintain service reliability:
                       <br />
@@ -297,7 +298,7 @@ export const LegalModal: React.FC<Props> = ({
                     </p>
 
                     <p id="deletion">
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>4. Data Retention & Deletion</strong>
+                      <strong className="text-ink">4. Data Retention & Deletion</strong>
                       <br />
                       User data is retained until account deletion. You may delete your account and
                       all associated data at any time through the app settings, or by emailing{' '}
@@ -305,7 +306,7 @@ export const LegalModal: React.FC<Props> = ({
                     </p>
 
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>5. School/Institutional Use</strong>
+                      <strong className="text-ink">5. School/Institutional Use</strong>
                       <br />
                       When a school director or teacher enters student data into Chekki (student
                       name, class assignment, worksheet images, grading results, parent contact
@@ -320,7 +321,7 @@ export const LegalModal: React.FC<Props> = ({
                       within 30 business days.
                     </p>
 
-                    <p className={`pt-2 ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>Data Protection Officer: Benjamin Jason (support@chekkiai.com / Biz Reg No: 814-14-03096)</p>
+                    <p className={`pt-2 text-ink-2`}>Data Protection Officer: Benjamin Jason (support@chekkiai.com / Biz Reg No: 814-14-03096)</p>
                   </div>
                 </div>
               </section>
@@ -329,13 +330,13 @@ export const LegalModal: React.FC<Props> = ({
           {type === 'refund' && (
             <div className="space-y-8">
               <section className="space-y-4">
-                <div className={`${isNight ? 'bg-zinc-800/60 border-zinc-700/60' : 'bg-zinc-50 border-zinc-200 shadow-sm'} p-5 md:p-6 rounded-xl border`}>
-                  <h3 className={`${isNight ? 'text-white border-zinc-700/60' : 'text-zinc-900 border-zinc-200'} font-black text-base mb-4 border-b pb-2`}>
+                <div className={`bg-surface border-rule p-5 md:p-6 rounded-md border`}>
+                  <h3 className={`text-ink border-rule font-black text-base mb-4 border-b pb-2`}>
                     [KR] 환불 및 교환 정책
                   </h3>
-                  <div className={`${isNight ? 'text-zinc-200' : 'text-zinc-800'} text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
+                  <div className={`text-ink text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>1. 환불 규정 (청약철회)</strong>
+                      <strong className="text-ink">1. 환불 규정 (청약철회)</strong>
                       <br />
                       - 결제 후 7일 이내에 서비스를 전혀 이용하지 않은 경우 전액 환불이 가능합니다.
                       <br />- 서비스 이용 내역(학습지 분석 등)이 있는 경우, 디지털 콘텐츠 특성상
@@ -343,27 +344,27 @@ export const LegalModal: React.FC<Props> = ({
                     </p>
 
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>2. 교환 및 재제공 정책</strong>
+                      <strong className="text-ink">2. 교환 및 재제공 정책</strong>
                       <br />- 시스템 오류나 기술적 결함으로 인해 유료 서비스를 정상적으로 이용하지
                       못한 경우, 동일한 가치의 서비스를 재제공하거나 이용 기간을 연장해 드립니다.
                     </p>
 
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>3. 구독 해지</strong>
+                      <strong className="text-ink">3. 구독 해지</strong>
                       <br />- 정기 결제 해지는 언제든지 가능하며, 해지 후에도 이미 결제된 남은 이용
                       기간(30일 중 잔여일) 동안은 서비스를 계속 이용하실 수 있습니다.
                     </p>
 
-                    <p className={`pt-2 ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>환불 문의: chekkihelp@gmail.com</p>
+                    <p className={`pt-2 text-ink-2`}>환불 문의: chekkihelp@gmail.com</p>
                   </div>
                 </div>
-                <div className={`${isNight ? 'bg-zinc-800/60 border-zinc-700/60' : 'bg-zinc-50 border-zinc-200 shadow-sm'} p-5 md:p-6 rounded-xl border`}>
-                  <h3 className={`${isNight ? 'text-white border-zinc-700/60' : 'text-zinc-900 border-zinc-200'} font-black text-base mb-4 border-b pb-2`}>
+                <div className={`bg-surface border-rule p-5 md:p-6 rounded-md border`}>
+                  <h3 className={`text-ink border-rule font-black text-base mb-4 border-b pb-2`}>
                     [EN] Refund & Exchange Policy
                   </h3>
-                  <div className={`${isNight ? 'text-zinc-200' : 'text-zinc-800'} text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
+                  <div className={`text-ink text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>1. Refund Policy</strong>
+                      <strong className="text-ink">1. Refund Policy</strong>
                       <br />
                       - A full refund is available within 7 days of purchase if no services have
                       been accessed.
@@ -372,18 +373,18 @@ export const LegalModal: React.FC<Props> = ({
                     </p>
 
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>2. Exchange & Service Guarantee</strong>
+                      <strong className="text-ink">2. Exchange & Service Guarantee</strong>
                       <br />- If technical defects prevent normal service use, we will compensate by
                       extending the service period or granting equivalent access levels.
                     </p>
 
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>3. Cancellation</strong>
+                      <strong className="text-ink">3. Cancellation</strong>
                       <br />- You can cancel recurring billing at any time. You will retain access
                       to pro features for the remainder of your current 30-day billing cycle.
                     </p>
 
-                    <p className={`pt-2 ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>Inquiries: chekkihelp@gmail.com</p>
+                    <p className={`pt-2 text-ink-2`}>Inquiries: chekkihelp@gmail.com</p>
                   </div>
                 </div>
               </section>
@@ -393,64 +394,64 @@ export const LegalModal: React.FC<Props> = ({
           {type === 'youth' && (
             <div className="space-y-8">
               <section className="space-y-4">
-                <div className={`${isNight ? 'bg-zinc-800/60 border-zinc-700/60' : 'bg-zinc-50 border-zinc-200 shadow-sm'} p-5 md:p-6 rounded-xl border`}>
-                  <h3 className={`${isNight ? 'text-white border-zinc-700/60' : 'text-zinc-900 border-zinc-200'} font-black text-base mb-4 border-b pb-2`}>
+                <div className={`bg-surface border-rule p-5 md:p-6 rounded-md border`}>
+                  <h3 className={`text-ink border-rule font-black text-base mb-4 border-b pb-2`}>
                     [KR] 청소년 보호 정책
                   </h3>
-                  <div className={`${isNight ? 'text-zinc-200' : 'text-zinc-800'} text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
+                  <div className={`text-ink text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
                     <p>
                       Chekki (채키)는 청소년이 안전하고 유익하게 서비스를 이용할 수 있도록 청소년
                       보호 정책을 시행하고 있습니다.
                     </p>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>1. 기본 원칙</strong>
+                      <strong className="text-ink">1. 기본 원칙</strong>
                       <br />
                       서비스는 아동 및 청소년의 정서적 발달에 유해한 콘텐츠를 생성하거나 가공하지
                       않으며, 건전한 교육 환경을 제공하기 위해 노력합니다.
                     </p>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>2. 유해 정보 차단</strong>
+                      <strong className="text-ink">2. 유해 정보 차단</strong>
                       <br />
                       AI 기술과 내부 모니터링을 통해 부적절한 언어, 폭력적 내용, 성인용 콘텐츠가
                       학습 보조 자료에 포함되지 않도록 원천적으로 차단합니다.
                     </p>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>3. 피해 상담 및 고충 처리</strong>
+                      <strong className="text-ink">3. 피해 상담 및 고충 처리</strong>
                       <br />
                       청소년 보호와 관련하여 건의사항이나 피해가 발생한 경우, 아래 이메일로
                       연락주시면 즉시 조치하도록 하겠습니다.
                     </p>
-                    <p className={`pt-2 ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>청소년 보호 책임자: Chekki 지원팀 (chekkihelp@gmail.com)</p>
+                    <p className={`pt-2 text-ink-2`}>청소년 보호 책임자: Chekki 지원팀 (chekkihelp@gmail.com)</p>
                   </div>
                 </div>
-                <div className={`${isNight ? 'bg-zinc-800/60 border-zinc-700/60' : 'bg-zinc-50 border-zinc-200 shadow-sm'} p-5 md:p-6 rounded-xl border`}>
-                  <h3 className={`${isNight ? 'text-white border-zinc-700/60' : 'text-zinc-900 border-zinc-200'} font-black text-base mb-4 border-b pb-2`}>
+                <div className={`bg-surface border-rule p-5 md:p-6 rounded-md border`}>
+                  <h3 className={`text-ink border-rule font-black text-base mb-4 border-b pb-2`}>
                     [EN] Youth Protection Policy
                   </h3>
-                  <div className={`${isNight ? 'text-zinc-200' : 'text-zinc-800'} text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
+                  <div className={`text-ink text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
                     <p>
                       Chekki is committed to providing a safe and beneficial environment for
                       children and youth.
                     </p>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>1. Core Principles</strong>
+                      <strong className="text-ink">1. Core Principles</strong>
                       <br />
                       We ensure that AI-generated educational materials are appropriate for youth
                       and free from harmful emotional or psychological content.
                     </p>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>2. Blocking Harmful Content</strong>
+                      <strong className="text-ink">2. Blocking Harmful Content</strong>
                       <br />
                       We utilize AI safety filters and monitoring to proactively block inappropriate
                       language, violence, or adult content from being processed or displayed.
                     </p>
                     <p>
-                      <strong className={isNight ? 'text-white' : 'text-zinc-900'}>3. Reporting & Grievances</strong>
+                      <strong className="text-ink">3. Reporting & Grievances</strong>
                       <br />
                       For any concerns regarding youth safety or to report inappropriate content,
                       please contact our Youth Protection Officer.
                     </p>
-                    <p className={`pt-2 ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}>Youth Protection Officer: Chekki Support Team (chekkihelp@gmail.com)</p>
+                    <p className={`pt-2 text-ink-2`}>Youth Protection Officer: Chekki Support Team (chekkihelp@gmail.com)</p>
                   </div>
                 </div>
               </section>
@@ -460,25 +461,25 @@ export const LegalModal: React.FC<Props> = ({
           {type === 'support' && (
             <div className="space-y-8">
               <section className="space-y-4">
-                <div className={`${isNight ? 'bg-zinc-800/60 border-zinc-700/60' : 'bg-zinc-50 border-zinc-200 shadow-sm'} p-5 md:p-6 rounded-xl border`}>
-                  <h3 className={`${isNight ? 'text-white border-zinc-700/60' : 'text-zinc-900 border-zinc-200'} font-black text-base mb-4 border-b pb-2`}>
+                <div className={`bg-surface border-rule p-5 md:p-6 rounded-md border`}>
+                  <h3 className={`text-ink border-rule font-black text-base mb-4 border-b pb-2`}>
                     [KR] 고객 지원 및 문의
                   </h3>
-                  <div className={`${isNight ? 'text-zinc-200' : 'text-zinc-800'} text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
+                  <div className={`text-ink text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
                     <p>
                       Chekki AI를 이용해 주셔서 감사합니다. 서비스 이용 중 궁금한 점이나 기술적인
                       도움이 필요하시면 언제든지 문의해 주세요.
                     </p>
 
-                    <div className={`space-y-2 p-4 rounded-lg border ${isNight ? 'bg-zinc-900/80 border-zinc-700/60 text-zinc-200' : 'bg-zinc-100 border-zinc-200 text-zinc-800'}`}>
+                    <div className={`space-y-2 p-4 rounded-lg border bg-sunken border-rule text-ink`}>
                       <p>
-                        <strong className={isNight ? 'text-white' : 'text-zinc-900'}>📧 이메일 문의:</strong> chekkihelp@gmail.com
+                        <strong className="text-ink">📧 이메일 문의:</strong> chekkihelp@gmail.com
                       </p>
                       <p>
-                        <strong className={isNight ? 'text-white' : 'text-zinc-900'}>📞 전화 문의:</strong> 010-5371-9266
+                        <strong className="text-ink">📞 전화 문의:</strong> 010-5371-9266
                       </p>
                       <p>
-                        <strong className={isNight ? 'text-white' : 'text-zinc-900'}>⏰ 운영 시간:</strong> 평일 10:00 - 18:00 (주말/공휴일 제외)
+                        <strong className="text-ink">⏰ 운영 시간:</strong> 평일 10:00 - 18:00 (주말/공휴일 제외)
                       </p>
                     </div>
 
@@ -488,25 +489,25 @@ export const LegalModal: React.FC<Props> = ({
                     </p>
                   </div>
                 </div>
-                <div className={`${isNight ? 'bg-zinc-800/60 border-zinc-700/60' : 'bg-zinc-50 border-zinc-200 shadow-sm'} p-5 md:p-6 rounded-xl border`}>
-                  <h3 className={`${isNight ? 'text-white border-zinc-700/60' : 'text-zinc-900 border-zinc-200'} font-black text-base mb-4 border-b pb-2`}>
+                <div className={`bg-surface border-rule p-5 md:p-6 rounded-md border`}>
+                  <h3 className={`text-ink border-rule font-black text-base mb-4 border-b pb-2`}>
                     [EN] Customer Support
                   </h3>
-                  <div className={`${isNight ? 'text-zinc-200' : 'text-zinc-800'} text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
+                  <div className={`text-ink text-xs md:text-sm leading-relaxed space-y-4 font-normal`}>
                     <p>
                       Thank you for using Chekki AI. If you have any questions or need technical
                       assistance, please feel free to contact us.
                     </p>
 
-                    <div className={`space-y-2 p-4 rounded-lg border ${isNight ? 'bg-zinc-900/80 border-zinc-700/60 text-zinc-200' : 'bg-zinc-100 border-zinc-200 text-zinc-800'}`}>
+                    <div className={`space-y-2 p-4 rounded-lg border bg-sunken border-rule text-ink`}>
                       <p>
-                        <strong className={isNight ? 'text-white' : 'text-zinc-900'}>📧 Email Support:</strong> chekkihelp@gmail.com
+                        <strong className="text-ink">📧 Email Support:</strong> chekkihelp@gmail.com
                       </p>
                       <p>
-                        <strong className={isNight ? 'text-white' : 'text-zinc-900'}>📞 Phone Support:</strong> +82 10-5371-9266
+                        <strong className="text-ink">📞 Phone Support:</strong> +82 10-5371-9266
                       </p>
                       <p>
-                        <strong className={isNight ? 'text-white' : 'text-zinc-900'}>⏰ Business Hours:</strong> Weekdays 10:00 AM - 6:00 PM KST
+                        <strong className="text-ink">⏰ Business Hours:</strong> Weekdays 10:00 AM - 6:00 PM KST
                       </p>
                     </div>
 
@@ -522,7 +523,7 @@ export const LegalModal: React.FC<Props> = ({
         </div>
 
         <div
-          className={`${isNight ? 'bg-zinc-950 border-zinc-800' : 'bg-zinc-50 border-zinc-200'} p-6 border-t flex justify-end`}
+          className={`bg-surface border-rule p-6 border-t flex justify-end`}
         >
           <button
             onClick={() => {
@@ -531,9 +532,9 @@ export const LegalModal: React.FC<Props> = ({
               }
               close();
             }}
-            className={`${isNight ? 'bg-white text-black hover:bg-zinc-200' : 'bg-zinc-900 text-white hover:bg-black shadow-lg shadow-zinc-900/20'} px-10 py-3 rounded-xl font-black transition-colors text-xs active:scale-[0.97] uppercase tracking-widest cursor-pointer`}
+            className="btn-press bg-line text-[#2b211a] px-10 min-h-12 rounded-md font-bold text-[15px]"
           >
-            Confirm
+            확인 / OK
           </button>
         </div>
       </div>

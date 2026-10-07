@@ -4,7 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { ASSETS } from '../constants';
 import { FeedbackModal } from './FeedbackModal';
 import { LegalType } from '../types';
-import { ScreenshotCarousel } from './ScreenshotCarousel';
+import { Roundel } from './metro';
+import { ArrowLeft, ChatCircleText, Heart, LockSimple, PlayCircle, X } from '@phosphor-icons/react';
 import { useModalExit } from '../hooks/useModalExit';
 
 interface HelpViewProps {
@@ -23,301 +24,125 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
     setShowVideoModal(false)
   );
 
+  const isKo = language === 'ko';
+  const steps = [
+    {
+      ko: '찍으면 바로 채점',
+      en: 'Snap and grade',
+      koDesc: '아이가 푼 숙제를 찍으세요. 채키가 손글씨를 읽고 바로 채점해요.',
+      enDesc: "Take a photo of the homework. Chekki reads your child's handwriting and grades it.",
+    },
+    {
+      ko: '빠르게 또는 자세히',
+      en: 'Quick or detailed',
+      koDesc: '빠른 채점은 정답만, 튜터 모드는 원어민 발음과 쉬운 설명까지 보여줘요.',
+      enDesc: 'Speed mode shows just the answers. Tutor mode adds native audio and a simple explanation.',
+    },
+    {
+      ko: '틀린 문제는 대시보드에',
+      en: 'Misses go to the dashboard',
+      koDesc: '틀린 문제는 대시보드에 모여요. 따로 적어 둘 필요 없어요.',
+      enDesc: 'Missed questions collect in the dashboard. No need to write them down.',
+    },
+    {
+      ko: '아이와 같이 복습',
+      en: 'Review together',
+      koDesc: '모인 문제로 카드 놀이와 말하기 연습을 아이와 함께 해 보세요.',
+      enDesc: 'Turn the saved misses into flashcards and speaking practice with your child.',
+    },
+  ];
+
   return (
-    <div className="animate-fade-in pb-32">
+    <div className="min-h-screen bg-ground pb-24 animate-fade-in">
       {showFeedbackModal && (
-        <FeedbackModal onClose={() => setShowFeedbackModal(false)} isNight={isNight} />
+        <FeedbackModal onClose={() => setShowFeedbackModal(false)} isNight={isNight} warm />
       )}
       {showVideoModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div
-            className={`absolute inset-0 bg-black/95 backdrop-blur-2xl ${isVideoClosing ? 'modal-backdrop-exit' : ''}`}
+            className={`absolute inset-0 bg-[#2b211a]/80 ${isVideoClosing ? 'modal-backdrop-exit' : 'animate-fade-in'}`}
             onClick={closeVideo}
-          ></div>
+            aria-hidden="true"
+          />
           <div
-            className={`relative w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10 ${isVideoClosing ? 'modal-exit' : 'modal-enter'}`}
+            role="dialog"
+            aria-modal="true"
+            aria-label={isKo ? '사용 가이드 영상' : 'Walkthrough video'}
+            className={`relative aspect-video w-full max-w-4xl overflow-hidden rounded-lg bg-black ${isVideoClosing ? 'modal-exit' : 'modal-enter'}`}
           >
-            <video src={ASSETS.VIDEO_WALKTHROUGH} controls autoPlay className="w-full h-full" />
+            <video src={ASSETS.VIDEO_WALKTHROUGH} controls autoPlay className="h-full w-full" />
             <button
               onClick={closeVideo}
-              className="absolute top-6 right-6 bg-black/50 hover:bg-black text-white p-3 rounded-full transition-colors z-10 border border-white/10 backdrop-blur-md"
+              aria-label={isKo ? '닫기' : 'Close'}
+              className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-md bg-sign text-on-sign"
             >
-              ✕
+              <X size={20} weight="bold" />
             </button>
           </div>
         </div>
       )}
 
-      <div className="max-w-5xl mx-auto px-4 pt-[calc(env(safe-area-inset-top)+1.5rem)] md:pt-[calc(env(safe-area-inset-top)+4rem)] mb-8 flex justify-start">
-        <button
-          onClick={onClose}
-          className={`group flex items-center gap-3 px-6 py-3 rounded-2xl border transition-all active:scale-[0.97] ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-900 shadow-sm'}`}
-        >
-          <span className="text-xl transition-transform group-hover:-translate-x-1">←</span>
-          <span className="text-xs font-black uppercase tracking-widest">
-            {t('btn_back') || 'Back to Scan'}
-          </span>
-        </button>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 space-y-20 md:space-y-40">
-        <section>
-          <h2
-            className={`text-balance text-2xl md:text-5xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} font-display text-center mb-12 md:mb-24`}
+      <div className="mx-auto max-w-2xl px-4 pt-[calc(env(safe-area-inset-top)+1rem)]">
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="-ml-2 flex min-h-11 items-center gap-2 rounded-md px-2 text-[15px] font-semibold text-ink-2 hover:text-ink"
           >
-            {t('how_title')}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mt-12">
-            {[
-              {
-                step: 1,
-                img: '/assets/onboarding_icon_grader_1782545224150.png',
-                ko: '찰칵! 1초 채점',
-                en: 'Instant Grader',
-                koDesc:
-                  '아이가 푼 문제집을 촬영하세요. AI가 손글씨를 인식해 즉시 채점하고 정답을 알려줍니다.',
-                enDesc:
-                  'Take a picture of the homework. Chekki will instantly grade their handwriting and show you the answers.',
-              },
-              {
-                step: 2,
-                img: '/assets/bento_speed_mode.png',
-                ko: '스피드 채점 & 튜터',
-                en: 'Speed & Tutor Modes',
-                koDesc:
-                  '빠른 채점 모드로 터치 없이 정답만 보거나, 튜터 모드로 전환해 AI 원어민 오디오 설명을 들어보세요.',
-                enDesc:
-                  'Toggle Speed Mode for instant grading of handwriting, or use Tutor Mode to let the AI explain the grammar with native audio.',
-              },
-              {
-                step: 3,
-                img: '/assets/onboarding_icon_dashboard_1782545238800.png',
-                ko: '자동 대시보드',
-                en: 'Learning Dashboard',
-                koDesc:
-                  '틀린 문제는 자동으로 학습 대시보드에 저장됩니다. 번거롭게 따로 기록할 필요가 없어요.',
-                enDesc:
-                  'Wrong answers are automatically saved to your Dashboard. No need to manually keep track.',
-              },
-              {
-                step: 4,
-                img: '/assets/onboarding_icon_loop_1782545249835.png',
-                ko: '무한 복습 루프',
-                en: 'The Infinite Loop',
-                koDesc:
-                  '저장된 오답을 모아 맞춤형 복습 프린트물을 만들어주세요. 빈틈없는 영어 학습이 완성됩니다.',
-                enDesc:
-                  'Generate practice worksheets from their mistakes. Close the learning gap automatically.',
-              },
-            ].map((item) => (
-              <div key={item.step} className="flex flex-col items-center text-center group">
-                <div
-                  className={`w-32 h-32 md:w-48 md:h-48 rounded-[2rem] md:rounded-[3rem] flex items-center justify-center mb-6 md:mb-10 shadow-[0_30px_60px_rgba(249,115,22,0.2)] ring-1 ${isNight ? 'ring-white/10 bg-black/20' : 'ring-black/5 bg-zinc-50'} overflow-hidden group-hover:-translate-y-2 transition-transform duration-200`}
-                >
-                  <img
-                    src={item.img}
-                    alt=""
-                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-200"
-                  />
-                </div>
-                <h4
-                  className={`text-xl md:text-2xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display tracking-tight leading-tight mb-3`}
-                >
-                  {language === 'ko' ? item.ko : item.en}
-                </h4>
-                <p
-                  className={`${isNight ? 'text-zinc-400' : 'text-zinc-500'} text-sm md:text-base font-korean max-w-xs leading-relaxed`}
-                >
-                  {language === 'ko' ? item.koDesc : item.enDesc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
+            <ArrowLeft size={18} weight="bold" />
+            {t('btn_back') || (isKo ? '돌아가기' : 'Back')}
+          </button>
+        )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto px-4 mb-20 md:mb-40">
-          {[
-            {
-              icon: '🎬',
-              label: 'Walkthrough',
-              korean: '사용 가이드',
-              onClick: () => setShowVideoModal(true),
-              color: 'text-indigo-400',
-            },
-            {
-              icon: '💬',
-              label: 'Send Feedback',
-              korean: '의견 보내기',
-              onClick: () => setShowFeedbackModal(true),
-              color: 'text-emerald-400',
-            },
-          ].map((item, i) => (
-            <button
-              key={i}
-              onClick={item.onClick}
-              className={`group ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200 shadow-xl'} border p-6 md:p-8 rounded-3xl flex items-center gap-4 transition-all text-left backdrop-blur-sm`}
-            >
-              <div
-                className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'} border flex items-center justify-center text-2xl md:text-3xl shadow-xl transition-all group-hover:scale-110`}
-              >
-                {item.icon}
+        <h1 className="mt-4 text-[28px] font-extrabold tracking-[-0.02em] text-ink sm:text-[34px] break-keep">{t('how_title')}</h1>
+
+        <ol className="mt-6 space-y-3">
+          {steps.map((step, i) => (
+            <li key={step.en} className="flex gap-4 rounded-md bg-surface p-4 ring-1 ring-inset ring-rule sm:p-5">
+              <Roundel state={i === 0 ? 'current' : 'next'} size={36}>
+                {i + 1}
+              </Roundel>
+              <div className="min-w-0">
+                <h2 className="text-[17px] font-extrabold text-ink break-keep">{isKo ? step.ko : step.en}</h2>
+                <p className="mt-1 text-[15px] leading-relaxed text-ink-2 break-keep">{isKo ? step.koDesc : step.enDesc}</p>
               </div>
-              <div>
-                <p
-                  className={`text-[10px] font-black uppercase tracking-widest ${item.color} mb-1`}
-                >
-                  {language === 'ko' ? item.korean : item.label}
-                </p>
-                <h4
-                  className={`text-sm md:text-lg font-bold ${isNight ? 'text-white' : 'text-zinc-900'} font-korean`}
-                >
-                  {language === 'ko' ? item.korean : item.label}
-                </h4>
-              </div>
-            </button>
+            </li>
           ))}
+        </ol>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <button
+            onClick={() => setShowVideoModal(true)}
+            className="btn-press flex min-h-14 items-center justify-center gap-2 rounded-md bg-line text-[16px] font-bold text-[#2b211a]"
+          >
+            <PlayCircle size={22} weight="fill" />
+            {isKo ? '사용 가이드 영상 보기' : 'Watch the walkthrough'}
+          </button>
+          <button
+            onClick={() => setShowFeedbackModal(true)}
+            className="btn-press flex min-h-14 items-center justify-center gap-2 rounded-md bg-surface text-[16px] font-bold text-ink ring-1 ring-inset ring-rule hover:ring-ink-3"
+          >
+            <ChatCircleText size={20} weight="bold" />
+            {isKo ? '의견 보내기' : 'Send feedback'}
+          </button>
         </div>
 
-        <section className="text-center space-y-4">
-          <h2
-            className={`text-balance text-3xl md:text-7xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} font-display uppercase`}
-          >
-            {t('magic_title')}
-          </h2>
-          <p
-            className={`text-[10px] md:text-sm font-black ${isNight ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-[0.4em]`}
-          >
-            {t('magic_subtitle')}
-          </p>
-          <div className="pt-10">
-            <ScreenshotCarousel />
-          </div>
-        </section>
-
-        <section>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-10 mb-20 md:mb-40">
-            {[
-              { id: 'brand', emoji: '🪄', title: t('diff_brand'), desc: t('diff_brand_desc') },
-              { id: 'ocr', emoji: '✨', title: t('diff_ocr'), desc: t('diff_ocr_desc') },
-              { id: 'script', emoji: '💌', title: t('diff_script'), desc: t('diff_script_desc') },
-            ].map((feat) => (
-              <div
-                key={feat.id}
-                className={`p-6 md:p-10 rounded-3xl ${isNight ? 'bg-zinc-900/40 border-white/5 hover:border-orange-500/20' : 'bg-white border-zinc-200 hover:border-orange-500/30 shadow-sm'} border hover:-translate-y-1 hover:shadow-lg transition-all duration-200`}
-              >
-                <span className="text-3xl md:text-5xl block mb-4 md:mb-6">{feat.emoji}</span>
-                <h3
-                  className={`text-balance text-lg md:text-2xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} font-display mb-2 md:mb-3`}
-                >
-                  {feat.title}
-                </h3>
-                <p
-                  className={`${isNight ? 'text-zinc-400 opacity-80' : 'text-zinc-600'} text-xs md:text-base leading-relaxed font-korean`}
-                >
-                  {feat.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Why Chekki Section */}
-        <section className="pt-20 md:pt-40 space-y-12 md:space-y-24">
-          <h2
-            className={`text-balance text-3xl md:text-6xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} text-center font-display`}
-          >
-            {t('diff_title')}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 max-w-6xl mx-auto px-4">
-            <div
-              className={`flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-3xl ${isNight ? 'bg-zinc-900/30' : 'bg-white shadow-xl'} border ${isNight ? 'border-white/5' : 'border-zinc-100'} backdrop-blur-xl relative overflow-hidden group hover:${isNight ? 'bg-zinc-900/50' : 'bg-white'} hover:-translate-y-1 transition-all duration-200`}
-            >
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-200">
-                <span className="text-8xl md:text-[12rem]">✨</span>
-              </div>
-              <span className="text-4xl md:text-7xl mb-2">✨</span>
-              <h3
-                className={`text-balance text-2xl md:text-4xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} leading-tight`}
-              >
-                {t('diff_ocr')}
-              </h3>
-              <p
-                className={`${isNight ? 'text-zinc-500 opacity-90' : 'text-zinc-600'} text-base md:text-2xl font-korean leading-relaxed max-w-md`}
-              >
-                {t('diff_ocr_desc')}
-              </p>
-            </div>
-            <div
-              className={`flex flex-col space-y-4 md:space-y-8 p-8 md:p-16 rounded-3xl ${isNight ? 'bg-zinc-900/30' : 'bg-white shadow-xl'} border ${isNight ? 'border-white/5' : 'border-zinc-100'} backdrop-blur-xl relative overflow-hidden group hover:${isNight ? 'bg-zinc-900/50' : 'bg-white'} hover:-translate-y-1 transition-all duration-200`}
-            >
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-200">
-                <span className="text-8xl md:text-[12rem]">💌</span>
-              </div>
-              <span className="text-4xl md:text-7xl mb-2">💌</span>
-              <h3
-                className={`text-balance text-2xl md:text-4xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} leading-tight`}
-              >
-                {t('diff_script')}
-              </h3>
-              <p
-                className={`${isNight ? 'text-zinc-500 opacity-90' : 'text-zinc-600'} text-base md:text-2xl font-korean leading-relaxed max-w-md`}
-              >
-                {t('diff_script_desc')}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Privacy Section */}
-        <section className="pt-24 md:pt-60 pb-24 md:pb-60 space-y-12 md:space-y-24">
-          <div className="text-center space-y-4 md:space-y-8">
-            <h2
-              className={`text-balance text-3xl md:text-6xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'} font-display`}
-            >
-              {t('trust_title')}
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-24 max-w-6xl mx-auto px-4">
-            <div className="flex flex-col items-center text-center space-y-6 md:space-y-10 group">
-              <div
-                className={`w-20 h-20 md:w-32 md:h-32 rounded-3xl ${isNight ? 'bg-zinc-900/50 border-white/10' : 'bg-white border-zinc-200 shadow-xl'} border flex items-center justify-center text-4xl md:text-6xl group-hover:scale-110 transition-all duration-200 group-hover:border-orange-500/30`}
-              >
-                🔒
-              </div>
-              <div className="space-y-4 md:space-y-6">
-                <h3
-                  className={`text-balance text-2xl md:text-4xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'}`}
-                >
-                  {t('trust_privacy')}
-                </h3>
-                <p
-                  className={`${isNight ? 'text-zinc-500 opacity-90' : 'text-zinc-600'} text-base md:text-2xl font-korean leading-relaxed max-w-xl mx-auto`}
-                >
-                  {t('trust_privacy_desc')}
-                </p>
+        <h2 className="mt-12 text-[20px] font-extrabold tracking-[-0.02em] text-ink break-keep">{t('trust_title')}</h2>
+        <div className="mt-4 space-y-3">
+          {[
+            { icon: <LockSimple size={20} weight="bold" />, title: t('trust_privacy'), desc: t('trust_privacy_desc') },
+            { icon: <Heart size={20} weight="bold" />, title: t('trust_safety'), desc: t('trust_safety_desc') },
+          ].map((row) => (
+            <div key={row.title} className="flex gap-4 rounded-md bg-surface p-4 ring-1 ring-inset ring-rule sm:p-5">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-line-soft text-line-ink">
+                {row.icon}
+              </span>
+              <div className="min-w-0">
+                <h3 className="text-[17px] font-extrabold text-ink break-keep">{row.title}</h3>
+                <p className="mt-1 text-[15px] leading-relaxed text-ink-2 break-keep">{row.desc}</p>
               </div>
             </div>
-            <div className="flex flex-col items-center text-center space-y-6 md:space-y-10 group">
-              <div
-                className={`w-20 h-20 md:w-32 md:h-32 rounded-3xl ${isNight ? 'bg-zinc-900/50 border-white/10' : 'bg-white border-zinc-200 shadow-xl'} border flex items-center justify-center text-4xl md:text-6xl group-hover:scale-110 transition-all duration-200 group-hover:border-orange-500/30`}
-              >
-                👥
-              </div>
-              <div className="space-y-4 md:space-y-6">
-                <h3
-                  className={`text-balance text-2xl md:text-4xl font-black tracking-tight ${isNight ? 'text-white' : 'text-zinc-900'}`}
-                >
-                  {t('trust_safety')}
-                </h3>
-                <p
-                  className={`${isNight ? 'text-zinc-500 opacity-90' : 'text-zinc-600'} text-base md:text-2xl font-korean leading-relaxed max-w-xl mx-auto`}
-                >
-                  {t('trust_safety_desc')}
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+          ))}
+        </div>
       </div>
     </div>
   );

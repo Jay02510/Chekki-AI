@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X, CheckCircle, XCircle, Repeat, HandsClapping } from '@phosphor-icons/react';
+import { X, Repeat } from '@phosphor-icons/react';
 import { WorksheetItem } from '../types';
 import { cleanAnswerText } from '../utils/speechUtils';
 import { playSuccessSound, hapticLight, hapticSuccess, hapticError } from '../utils/feedbackUtils';
 import confetti from 'canvas-confetti';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 interface FlashcardsViewProps {
   mistakes: WorksheetItem[];
@@ -23,7 +24,8 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ mistakes, langua
         particleCount: 150,
         spread: 80,
         origin: { y: 0.6 },
-        colors: ['#10B981', '#F59E0B', '#3B82F6'],
+        colors: ['#ef7c1c', '#fdebd8', '#1f8a4c', '#3a2c22'],
+        disableForReducedMotion: true,
       });
     }
   }, [isDone]);
@@ -49,43 +51,64 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ mistakes, langua
   };
 
   const currentMistake = mistakes[currentIndex];
+  const isKo = language === 'ko';
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen: true, onClose });
+  const flip = () => {
+    setIsFlipped((f) => !f);
+    hapticLight();
+  };
 
   return (
-    <div className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4">
-      <div className="relative w-full max-w-2xl bg-zinc-900 border border-white/10 rounded-[2.5rem] p-6 md:p-12 shadow-2xl flex flex-col h-[80vh] md:h-[600px]">
+    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-ground tile-ground p-4 animate-fade-in">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="flashcards-title"
+        tabIndex={-1}
+        className="relative flex h-full max-h-[720px] w-full max-w-2xl flex-col"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 shrink-0 relative z-10">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-xl md:text-2xl font-black text-white font-korean">
-              {language === 'ko' ? '디지털 플래시카드' : 'Digital Flashcards'}
+        <div className="mb-4 flex shrink-0 items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h2 id="flashcards-title" className="text-[22px] font-extrabold tracking-[-0.02em] text-ink break-keep">
+              {isKo ? '아이와 카드 놀이' : 'Flashcards together'}
             </h2>
             {!isDone && (
-              <span className="text-zinc-400 text-sm font-bold tracking-widest uppercase">
+              <p className="num mt-0.5 text-[15px] font-semibold text-ink-3">
                 {currentIndex + 1} / {mistakes.length}
-              </span>
+              </p>
             )}
           </div>
           <button
             onClick={onClose}
-            aria-label="Close"
-            className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors active:scale-[0.97]"
+            aria-label={isKo ? '닫기' : 'Close'}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-ink-3 ring-1 ring-inset ring-rule hover:text-ink hover:ring-ink-3"
           >
             <X size={20} weight="bold" />
           </button>
         </div>
 
+        {/* progress along the line */}
+        {!isDone && (
+          <div className="mb-5 h-1.5 shrink-0 rounded-full bg-rule" aria-hidden="true">
+            <div
+              className="h-full rounded-full bg-line transition-[width] duration-500 ease-[var(--ease-arrive)]"
+              style={{ width: `${(currentIndex / mistakes.length) * 100}%` }}
+            />
+          </div>
+        )}
+
         {/* Content Area */}
-        <div className="flex-1 w-full relative" style={{ perspective: '1000px' }}>
+        <div className="relative min-h-0 w-full flex-1" style={{ perspective: '1000px' }}>
           {isDone ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center animate-fade-in">
-              <div className="w-24 h-24 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mb-6">
-                <HandsClapping size={48} weight="fill" />
-              </div>
-              <h3 className="text-3xl font-black text-white mb-2 font-korean">
-                {language === 'ko' ? '복습 완료!' : 'Review Complete!'}
+            <div className="absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-surface p-8 text-center ring-1 ring-inset ring-rule animate-fade-in">
+              <img src="/images/chekki-thumbs.webp" alt="" className="h-28 w-28 object-contain" />
+              <h3 className="mt-3 text-[28px] font-extrabold tracking-[-0.02em] text-ink break-keep">
+                {isKo ? '다 했어요!' : 'All done!'}
               </h3>
-              <p className="text-xl text-emerald-400 font-bold mb-8">
-                {score} / {mistakes.length} {language === 'ko' ? '정답' : 'Correct'}
+              <p className="num mt-1 text-[17px] font-bold text-line-ink">
+                {isKo ? `${mistakes.length}개 중 ${score}개 알았어요` : `Knew ${score} of ${mistakes.length}`}
               </p>
               <button
                 onClick={() => {
@@ -94,26 +117,21 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ mistakes, langua
                   setIsFlipped(false);
                   setIsDone(false);
                 }}
-                className="group px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all duration-200 active:scale-[0.97] border border-white/5 flex items-center gap-3 font-korean"
+                className="btn-press mt-7 flex min-h-12 items-center gap-2 rounded-md bg-surface px-6 text-[15px] font-bold text-ink ring-1 ring-inset ring-rule hover:ring-ink-3"
               >
-                <Repeat
-                  size={20}
-                  weight="bold"
-                  className="group-hover:-rotate-180 transition-transform duration-200"
-                />
-                {language === 'ko' ? '다시 복습하기' : 'Review Again'}
+                <Repeat size={18} weight="bold" />
+                {isKo ? '한 번 더 하기' : 'Play again'}
               </button>
             </div>
           ) : (
-            <div
-              className="w-full h-full relative cursor-pointer group"
-              onClick={() => {
-                setIsFlipped(!isFlipped);
-                hapticLight();
-              }}
+            <button
+              type="button"
+              className="absolute inset-0 block cursor-pointer text-center"
+              onClick={flip}
+              aria-label={isFlipped ? (isKo ? '문제 다시 보기' : 'Show question') : isKo ? '정답 보기' : 'Show answer'}
             >
               <div
-                className="w-full h-full absolute transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]"
+                className="absolute inset-0 transition-transform duration-500 ease-[var(--ease-arrive)] motion-reduce:transition-none"
                 style={{
                   transformStyle: 'preserve-3d',
                   transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
@@ -121,57 +139,51 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ mistakes, langua
               >
                 {/* Front of Card */}
                 <div
-                  className="absolute inset-0 bg-black/40 border border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:bg-white/5 transition-colors"
+                  className="absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-surface p-8 ring-1 ring-inset ring-rule"
                   style={{ backfaceVisibility: 'hidden' }}
                 >
-                  <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 mb-6 absolute top-8">
-                    {language === 'ko' ? '문제' : 'Question'}
-                  </span>
-                  <p className="text-2xl md:text-3xl lg:text-4xl font-medium text-white leading-relaxed">
+                  <span className="absolute top-6 text-[14px] font-bold text-ink-3">{isKo ? '문제' : 'Question'}</span>
+                  <p className="text-[26px] font-bold leading-relaxed text-ink md:text-[34px] break-keep">
                     {currentMistake?.question_text}
                   </p>
-                  <p className="text-zinc-400 text-sm mt-8 absolute bottom-8 font-korean">
-                    {language === 'ko' ? '카드를 탭해서 정답 확인하기' : 'Tap card to flip'}
-                  </p>
+                  <span className="absolute bottom-6 text-[14px] font-semibold text-line-ink">
+                    {isKo ? '눌러서 정답 보기' : 'Tap to see the answer'}
+                  </span>
                 </div>
 
                 {/* Back of Card */}
                 <div
-                  className="absolute inset-0 bg-emerald-900/20 border border-emerald-500/20 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-[inset_0_1px_1px_rgba(16,185,129,0.1)]"
-                  style={{
-                    backfaceVisibility: 'hidden',
-                    transform: 'rotateY(180deg)',
-                  }}
+                  className="absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-line-soft p-8 ring-2 ring-inset ring-line"
+                  style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
                 >
-                  <span className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-500 mb-6 absolute top-8">
-                    {language === 'ko' ? '정답' : 'Answer'}
-                  </span>
-                  <p className="text-3xl md:text-4xl lg:text-5xl font-black text-emerald-400 leading-tight">
+                  <span className="absolute top-6 text-[14px] font-bold text-line-ink">{isKo ? '정답' : 'Answer'}</span>
+                  <p className="text-[34px] font-extrabold leading-tight text-ink md:text-[46px] break-keep">
                     {cleanAnswerText(currentMistake?.correct_answer || '')}
                   </p>
                 </div>
               </div>
-            </div>
+            </button>
           )}
         </div>
 
-        {/* Controls */}
+        {/* Controls: only once the answer is showing */}
         <div
-          className={`mt-8 flex items-center justify-center gap-4 transition-all duration-200 shrink-0 ${isFlipped && !isDone ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+          className={`mt-5 flex shrink-0 gap-3 transition-[opacity,transform] duration-200 ${isFlipped && !isDone ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-3 opacity-0'}`}
+          aria-hidden={!(isFlipped && !isDone)}
         >
           <button
             onClick={() => handleNext(false)}
-            className="flex-1 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-2xl border border-red-500/20 transition-all duration-200 active:scale-[0.97] flex items-center justify-center gap-2 font-korean"
+            tabIndex={isFlipped && !isDone ? 0 : -1}
+            className="btn-press min-h-14 flex-1 rounded-md bg-surface text-[16px] font-bold text-ink ring-1 ring-inset ring-rule hover:ring-ink-3"
           >
-            <XCircle size={24} weight="fill" />
-            {language === 'ko' ? '다시 연습' : 'Needs Practice'}
+            {isKo ? '다시 볼래요' : 'Again later'}
           </button>
           <button
             onClick={() => handleNext(true)}
-            className="flex-1 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl transition-all duration-200 active:scale-[0.97] flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)] font-korean"
+            tabIndex={isFlipped && !isDone ? 0 : -1}
+            className="btn-press min-h-14 flex-1 rounded-md bg-line text-[16px] font-extrabold text-[#2b211a]"
           >
-            <CheckCircle size={24} weight="fill" />
-            {language === 'ko' ? '맞았어요!' : 'Got it!'}
+            {isKo ? '알았어요!' : 'Got it!'}
           </button>
         </div>
       </div>

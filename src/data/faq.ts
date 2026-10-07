@@ -26,12 +26,12 @@ export const FAQ_DATA: FaqItem[] = [
   {
     id: 'p2',
     category: 'parent',
-    tagKo: '2차 재도전 스캔',
-    tagEn: '2nd Rescan Loop',
+    tagKo: '다시 찍기',
+    tagEn: 'Rescan',
     questionKo: '아이 답안을 스캔한 후 틀린 문제가 나오면 어떻게 재도전하나요?',
     questionEn: 'How does the 2nd attempt rescan work when a child gets wrong answers?',
-    answerKo: '채키의 "⚡ 2차 재도전 스캔"을 활용해보세요! 첫 채점 후 오답이 나오면 채키가 엄마에게 칭찬 가이드를 전달합니다. 아이가 종이에 직접 정답을 고쳐 쓴 뒤 "2차 재도전 스캔"을 올리면, 100% 완벽 마스터로 즉시 업데이트되어 눈물이나 실랑이 없이 성취감을 얻을 수 있습니다.',
-    answerEn: 'Use Chekki\'s "⚡ 2nd Rescan Loop"! When errors are detected, Mom shares a warm 5-second coaching tip. The child fixes the paper response, rescans, and instantly updates their grade to 100% Mastered without arguments.'
+    answerKo: '틀린 문제는 아이와 하나씩 같이 본 뒤, 아이가 종이에 직접 고쳐 쓰게 해 주세요. 고친 숙제를 다시 찍으면 채키가 다시 채점해요. 혼내지 않고 스스로 고치는 경험을 하게 하는 게 목적이에요.',
+    answerEn: 'Go through the misses together, then let your child fix them on paper. Scan the corrected page again and Chekki grades it again. The point is that your child fixes it themselves, without a scolding.'
   },
   {
     id: 'p3',
@@ -40,8 +40,8 @@ export const FAQ_DATA: FaqItem[] = [
     tagEn: 'Ease of Use',
     questionKo: '앱 사용 시 긴 프롬프트를 입력하거나 타이핑해야 하나요?',
     questionEn: 'Do I need to type long prompts or instructions to use the app?',
-    answerKo: '아닙니다. 채키는 100% 무(無)프롬프트 방식입니다. 바쁜 엄마들을 위해 복잡한 키보드 입력이나 프롬프트 지시어 없이 오직 카메라 스캔 1회만으로 모든 채점과 코칭 가이드가 자동 완성됩니다.',
-    answerEn: 'No! Chekki is 100% prompt-less. Designed for busy moms, zero typing or complex prompts are required. A single camera scan handles all grading and coaching guides automatically.'
+    answerKo: '아니요. 질문을 쓰거나 지시어를 입력할 필요 없어요. 숙제 사진을 한 장 찍으면 채점과 한국어 설명이 함께 나와요.',
+    answerEn: 'No. There is nothing to type. Take one photo of the homework and you get the grading and a Korean explanation together.'
   },
   {
     id: 'p4',
@@ -60,8 +60,8 @@ export const FAQ_DATA: FaqItem[] = [
     tagEn: 'Pricing & Trial',
     questionKo: '학부모용 Chekki 모바일 앱 이용 가격은 어떻게 되나요?',
     questionEn: 'How much does the Chekki Parent Mobile App cost?',
-    answerKo: '기본 무료 스캔이 제공되며, 신용카드 등록 없이 언제든지 시작하실 수 있습니다. 연동 학원에 재원 중인 원생은 학원 플랜을 통해 100% 무제한 무료로 모든 기능을 이용하실 수 있습니다.',
-    answerEn: 'Chekki offers free daily scans with no credit card required. Students enrolled in partner academies get 100% unlimited free access through their academy subscription.'
+    answerKo: '웹에서 가입 없이 바로 채점해 볼 수 있고, 무료 계정은 하루 무료 채점이 제공돼요. 더 쓰고 싶으면 앱에서 월 9,900원 또는 연 99,000원으로 구독할 수 있고, 7일 무료 체험부터 시작해요. 체키를 쓰는 학원에 다니면 학원 초대로 무료로 이용할 수 있어요.',
+    answerEn: 'You can try grading on the web without signing up, and free accounts get free scans every day. For more, subscribe in the app for ₩9,900 a month or ₩99,000 a year, starting with a 7-day free trial. If your academy uses Chekki, its invite makes it free for you.'
   },
 
   // --- TEACHER FAQS ---
@@ -88,12 +88,12 @@ export const FAQ_DATA: FaqItem[] = [
   {
     id: 't3',
     category: 'teacher',
-    tagKo: '오답 맞춤 프린트',
-    tagEn: 'Printable Review',
-    questionKo: '오답 맞춤 복습 프린트 및 학원 성적표는 어떻게 인쇄하나요?',
-    questionEn: 'How do I generate printable review sheets and academy branded report cards?',
-    answerKo: '원생 상세 화면에서 학부모용 리포트 카드를 바로 인쇄할 수 있습니다(등록하신 학원 로고가 함께 표시됩니다). 틀린 문제 복습 학습지는 학부모 앱의 오답 노트에서 아이가 실제로 틀린 문제로 만들 수 있습니다.',
-    answerEn: "Print a parent report card from any student's detail view (with your academy logo, if you've added one). Review worksheets are made in the parent app's mistake notebook from the questions each child actually missed."
+    tagKo: '성적표와 복습',
+    tagEn: 'Reports & Review',
+    questionKo: '학원 성적표는 어떻게 인쇄하고, 오답 복습은 어떻게 하나요?',
+    questionEn: 'How do I print academy report cards, and how are misses reviewed?',
+    answerKo: '원생 상세 화면에서 학부모용 리포트 카드를 바로 인쇄할 수 있습니다(등록하신 학원 로고가 함께 표시됩니다). 아이가 집에서 틀린 문제는 학부모 앱 대시보드의 "다시 볼 문제"에 모이고, 플래시카드와 말하기 연습으로 복습할 수 있습니다.',
+    answerEn: "Print a parent report card from any student's detail view (with your academy logo, if you've added one). Questions a child misses at home collect in the parent app's dashboard, where they can be reviewed as flashcards and speaking practice."
   },
   {
     id: 't4',

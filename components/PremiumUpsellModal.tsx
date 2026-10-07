@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useModalExit } from '../hooks/useModalExit';
 import { useDialogA11y } from '../hooks/useDialogA11y';
+import { BookOpenText, Check, Microphone, SpeakerHigh, X } from '@phosphor-icons/react';
 
 interface Props {
   isOpen: boolean;
@@ -19,7 +20,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({
   isNight = false,
 }) => {
   const { setShowPaywall } = useAuth();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { isClosing, close } = useModalExit(onClose);
   const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen, onClose: close });
 
@@ -27,7 +28,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({
 
   const featureInfo = {
     pronunciation: {
-      icon: '🎤',
+      icon: Microphone,
       title_en: 'Speaking Coach',
       title_ko: '발음 연습',
       desc_en:
@@ -35,14 +36,14 @@ export const PremiumUpsellModal: React.FC<Props> = ({
       desc_ko: '아이가 원어민처럼 발음을 연습하고 디지털 도장을 받을 수 있어요!',
     },
     audio: {
-      icon: '🔊',
+      icon: SpeakerHigh,
       title_en: 'Native Pronunciation',
       title_ko: '원어민 발음 듣기',
       desc_en: 'Hear the correct pronunciation of each answer read aloud in natural English.',
       desc_ko: '각 답을 자연스러운 영어 원어민 발음으로 들을 수 있어요.',
     },
     guide: {
-      icon: '📖',
+      icon: BookOpenText,
       title_en: "Teacher's Guide",
       title_ko: '티칭 가이드',
       desc_en: 'Teach with absolute confidence using a step-by-step bilingual script.',
@@ -51,104 +52,71 @@ export const PremiumUpsellModal: React.FC<Props> = ({
   };
 
   const info = featureInfo[featureName];
+  const isKo = language === 'ko';
+  const Icon = info.icon;
+  const perks = [t('bene_unlimited'), t('bene_scripts'), t('bene_pronounce')];
 
   return createPortal(
-    <div className="fixed inset-0 z-[10005] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[10005] flex items-end justify-center sm:items-center sm:p-4">
       <div
-        className={`absolute inset-0 bg-black/85 backdrop-blur-xl ${isClosing ? 'modal-backdrop-exit' : 'animate-fade-in'}`}
+        className={`absolute inset-0 bg-[#2b211a]/55 ${isClosing ? 'modal-backdrop-exit' : 'animate-fade-in'}`}
         onClick={close}
+        aria-hidden="true"
       />
-
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="premium-upsell-title"
         tabIndex={-1}
-        className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} flex flex-col max-h-[95vh] w-full max-w-md mx-2 sm:mx-4`}
+        className={`relative w-full overflow-hidden rounded-t-lg bg-surface ring-1 ring-inset ring-rule shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)] sm:max-w-md sm:rounded-lg ${isClosing ? 'modal-exit' : 'modal-enter'}`}
       >
-        <div
-          className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-brand-dark' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}
+        <button
+          onClick={close}
+          aria-label={isKo ? '닫기' : 'Close'}
+          className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-md text-ink-3 hover:bg-sunken hover:text-ink"
         >
-          {/* Back Button */}
-          <div className="p-4 flex items-center">
-            <button
-              onClick={close}
-              className={`flex items-center gap-2 ${isNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} transition-colors text-sm font-bold active:scale-[0.97]`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-              {language === 'ko' ? '뒤로' : 'Back'}
-            </button>
-          </div>
+          <X size={20} weight="bold" />
+        </button>
 
-          {/* Feature Preview */}
-          <div className="px-6 pb-6 text-center">
-            <div className="w-20 h-20 rounded-3xl bg-brand-orange flex items-center justify-center text-4xl mx-auto mb-4 shadow-2xl shadow-orange-500/30">
-              {info.icon}
-            </div>
-            <h2
-              id="premium-upsell-title"
-              className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} mb-2 font-display break-keep`}
-            >
-              {language === 'ko' ? info.title_ko : info.title_en}
-            </h2>
-            <p
-              className={`text-sm ${isNight ? 'text-zinc-400' : 'text-zinc-500'} font-korean leading-relaxed max-w-sm mx-auto break-keep`}
-            >
-              {language === 'ko' ? info.desc_ko : info.desc_en}
-            </p>
-          </div>
+        <div className="px-5 pb-6 pt-7 sm:px-6">
+          <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-line-soft text-line-ink">
+            <Icon size={28} weight="bold" />
+          </span>
+          <p className="mt-4 text-[13px] font-bold text-line-ink">Premium</p>
+          <h2 id="premium-upsell-title" className="mt-0.5 text-[22px] font-extrabold tracking-[-0.02em] text-ink break-keep">
+            {isKo ? info.title_ko : info.title_en}
+          </h2>
+          <p className="mt-1.5 text-[15px] leading-relaxed text-ink-2 break-keep">{isKo ? info.desc_ko : info.desc_en}</p>
 
-          {/* Pro Badge */}
-          <div className="mx-6 mb-4">
-            <div
-              className={`${isNight ? 'bg-orange-500/10 border-orange-500/20' : 'bg-orange-50 border-orange-200'} rounded-2xl p-4 flex items-center gap-4`}
-            >
-              <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-black text-lg shrink-0 shadow-lg">
-                ⭐
-              </div>
-              <div className="flex-1">
-                <h4
-                  className={`${isNight ? 'text-white' : 'text-orange-600'} font-bold text-xs uppercase tracking-wide`}
-                >
-                  Premium
-                </h4>
-                <p
-                  className={`text-[10px] ${isNight ? 'text-zinc-400' : 'text-zinc-600'} font-medium break-keep`}
-                >
-                  {language === 'ko'
-                    ? '매일 밤의 숙제 전쟁을 끝내줄 무제한 1초 채점과 자동 오답 워크시트'
-                    : 'Stop the homework fights with unlimited Instant Grading and Automated Worksheets'}
-                </p>
-              </div>
-            </div>
-          </div>
+          <ul className="mt-5 space-y-2.5 rounded-md bg-sunken px-4 py-4">
+            {perks.map((perk) => (
+              <li key={perk} className="flex items-start gap-2.5 text-[15px] font-semibold text-ink break-keep">
+                <Check size={18} weight="bold" className="mt-0.5 shrink-0 text-line-ink" />
+                {perk}
+              </li>
+            ))}
+          </ul>
 
-          {/* Action Buttons */}
-          <div className="px-6 pb-8">
-            {/* Primary CTA — opens PaywallModal which handles platform detection */}
-            <button
-              onClick={() => {
-                close();
-                setTimeout(
-                  () =>
-                    setShowPaywall(true, featureName === 'guide' ? 'moms_scripts' : featureName),
-                  300
-                );
-              }}
-              className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-black font-black text-base shadow-xl active:scale-[0.97] transition-[background-color,transform] ring-2 ring-white/10 min-h-[52px] flex items-center justify-center gap-2"
-            >
-              <span>💳</span>
-              {language === 'ko' ? '구독 옵션 보기' : 'View Subscription Options'}
-            </button>
-          </div>
+          {/* Opens PaywallModal, which handles platform detection */}
+          <button
+            onClick={() => {
+              close();
+              setTimeout(
+                () => setShowPaywall(true, featureName === 'guide' ? 'moms_scripts' : featureName),
+                300
+              );
+            }}
+            className="btn-press mt-5 flex min-h-12 w-full items-center justify-center rounded-md bg-line text-[15px] font-bold text-[#2b211a]"
+          >
+            {isKo ? '요금제 보기' : 'See plans'}
+          </button>
+          <button
+            onClick={close}
+            className="mt-2 min-h-11 w-full rounded-md text-[14px] font-semibold text-ink-3 hover:text-ink"
+          >
+            {isKo ? '나중에' : 'Maybe later'}
+          </button>
         </div>
       </div>
     </div>,

@@ -30,7 +30,7 @@ export const Roundel: React.FC<{
         : state === 'wrong'
           ? 'bg-surface text-wrong border-wrong'
           : state === 'right'
-            ? 'bg-surface text-right border-right'
+            ? 'bg-surface text-correct border-right'
             : state === 'off'
               ? 'bg-surface text-ink-3 border-rule'
               : 'bg-surface text-ink border-line';
@@ -79,7 +79,7 @@ export const StationSign: React.FC<{
             </div>
           )}
           {n && (
-            <div className="min-w-0 text-right sm:hidden">
+            <div className="min-w-0 text-correct sm:hidden">
               <p className="text-on-sign-2 text-[13px] font-semibold flex items-center justify-end gap-1.5">
                 <span className="truncate">{n.primary}</span>
                 <ArrowRight size={14} weight="bold" aria-hidden="true" className="shrink-0" />
@@ -95,7 +95,7 @@ export const StationSign: React.FC<{
             <p className="sign-en text-on-sign-2 text-[15px] sm:text-lg mt-1">{c.secondary}</p>
           </div>
         </div>
-        <div className="order-3 hidden sm:block min-w-0 text-right">
+        <div className="order-3 hidden sm:block min-w-0 text-correct">
           {n && (
             <>
               <p className="text-on-sign-2 text-[13px] font-semibold flex items-center justify-end gap-1.5">

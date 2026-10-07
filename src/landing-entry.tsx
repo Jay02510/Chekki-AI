@@ -83,7 +83,7 @@ function LandingRoot() {
 
   // Dedicated FAQ Page route: chekkiai.com/faq
   if (pathname === '/faq' || pathname.startsWith('/faq')) {
-    return <FaqPage isNight={isNight} setIsNight={setIsNight} />;
+    return <FaqPage />;
   }
 
 

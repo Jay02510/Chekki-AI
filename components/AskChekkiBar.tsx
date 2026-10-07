@@ -5,6 +5,8 @@ import { useToast } from '../contexts/ToastContext';
 import { toJpeg } from 'html-to-image';
 import { renderMarkdown } from '../utils/markdownUtils';
 import { ChekkiMascot } from './Icons';
+import { DownloadSimple, PaperPlaneRight, X } from '@phosphor-icons/react';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 // --- AskChekkiBar Component ---
 
@@ -40,60 +42,50 @@ export const AskChekkiBar: React.FC<AskChekkiBarProps> = ({
         ];
 
   return (
-    <div className="flex flex-col w-full gap-3">
-      {/* Suggestions */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
-        {suggestions.map((suggestion, idx) => (
-          <button
-            key={idx}
-            onClick={() => onSubmit(suggestion)}
-            className={`shrink-0 px-4 py-2 ${isNight ? 'bg-orange-500/10 hover:bg-orange-500/20 text-orange-200 border-orange-500/30' : 'bg-orange-50 hover:bg-orange-100 text-orange-950 border-orange-200'} text-[11px] sm:text-xs font-medium font-korean rounded-full border transition-colors whitespace-nowrap active:scale-[0.97] shadow-sm`}
-          >
-            {suggestion}
-          </button>
-        ))}
-      </div>
-
+    <div className="flex w-full flex-col gap-3">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           onSubmit(query);
         }}
-        className={`relative flex items-center ${isNight ? 'bg-zinc-900' : 'bg-white shadow-xl border-zinc-200'} border border-transparent hover:border-orange-500/30 focus-within:border-orange-500 rounded-3xl pl-4 pr-6 py-2.5 md:pl-8 md:pr-10 md:py-5 shadow-2xl transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 w-full`}
+        className="flex w-full items-center gap-2 rounded-md bg-surface py-1.5 pl-4 pr-1.5 ring-1 ring-inset ring-rule focus-within:ring-2 focus-within:ring-line"
       >
-        <button
-          type="submit"
-          disabled={!query.trim() || isAsking}
-          className={`shrink-0 mr-3 md:mr-4 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100  active:scale-[0.97] ${query.trim() ? 'text-orange-500' : 'text-zinc-400'}`}
-          title="Search"
-        >
-          {isAsking ? (
-            <div className="w-5 h-5 md:w-6 md:h-6 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-          ) : (
-            <svg
-              className="w-5 h-5 md:w-7 md:h-7"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              strokeWidth={2.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          )}
-        </button>
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('ask_placeholder')}
-          className={`flex-1 bg-transparent ${isNight ? 'text-white' : 'text-zinc-900'} text-[11px] sm:text-xs md:text-sm lg:text-base font-korean placeholder:text-zinc-500 focus:outline-none`}
+          aria-label={t('ask_placeholder')}
+          className="min-w-0 flex-1 bg-transparent text-[16px] text-ink placeholder:text-ink-3 focus:outline-none"
           enterKeyHint="send"
         />
+        <button
+          type="submit"
+          disabled={!query.trim() || isAsking}
+          aria-label={language === 'ko' ? '물어보기' : 'Ask'}
+          className="btn-press flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-line text-[#2b211a] disabled:bg-sunken disabled:text-ink-3"
+        >
+          {isAsking ? (
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#2b211a]/30 border-t-[#2b211a]" />
+          ) : (
+            <PaperPlaneRight size={18} weight="bold" />
+          )}
+        </button>
       </form>
+
+      {/* Suggestions: wrap instead of a hidden side-scroll */}
+      <div className="flex flex-wrap gap-2">
+        {suggestions.map((suggestion) => (
+          <button
+            key={suggestion}
+            onClick={() => onSubmit(suggestion)}
+            disabled={isAsking}
+            className="btn-press min-h-10 rounded-full bg-line-soft px-3.5 text-[14px] font-semibold text-line-ink hover:ring-1 hover:ring-inset hover:ring-line/50 disabled:opacity-50 break-keep"
+          >
+            {suggestion}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
@@ -132,6 +124,12 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [followUpText, setFollowUpText] = useState('');
   const [showConfirmClose, setShowConfirmClose] = useState(false);
+  const isKo = language === 'ko';
+  const isOpen = !!answer || isAsking || history.length > 0;
+  // Escape: first dismiss the confirm overlay, then attempt close. Ref so the
+  // hook (which captures onClose once per open) always sees current state.
+  const escRef = useRef<() => void>(() => {});
+  const dialogRef = useDialogA11y<HTMLDivElement>({ isOpen, onClose: () => escRef.current() });
 
   const handleCloseAttempt = () => {
     // If there's an answer from Chekki, warn them before wiping
@@ -160,7 +158,7 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
     try {
       const dataUrl = await toJpeg(chatContainerRef.current, {
         quality: 0.95,
-        backgroundColor: isNight ? '#09090b' : '#ffffff',
+        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--m-surface').trim() || '#ffffff',
         pixelRatio: 2,
         skipFonts: true, // Speeds up capture on mobile
       });
@@ -190,74 +188,82 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
     setFollowUpText('');
   };
 
+  escRef.current = () => (showConfirmClose ? setShowConfirmClose(false) : handleCloseAttempt());
+
   // Don't render if there's no content at all and not loading
-  if (!answer && !isAsking && history.length === 0) return null;
+  if (!isOpen) return null;
 
   // We show all completed turns from history, plus the last pending question if isAsking
   const completedTurns = history;
   // The current pending question is `question` when `isAsking` is true
 
+  const userBubble = (text: string, key?: React.Key) => (
+    <div key={key} className="flex justify-end">
+      <p className="max-w-[85%] rounded-md rounded-tr-sm bg-line-soft px-4 py-3 text-[15px] font-semibold leading-relaxed text-ink break-keep">
+        {text}
+      </p>
+    </div>
+  );
+  const chekkiAvatar = (mood: 'happy' | 'thinking') => (
+    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-line-soft ring-[3px] ring-line">
+      <ChekkiMascot className="h-full w-full scale-110" mood={mood} />
+    </span>
+  );
+
   return (
-    <div className="fixed inset-0 z-[200] flex items-start justify-center p-4 pt-[calc(env(safe-area-inset-top)+1rem)] sm:pt-10">
+    <div className="fixed inset-0 z-[200] flex items-end justify-center sm:items-start sm:p-4 sm:pt-10">
       <div
-        className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+        className="absolute inset-0 bg-[#2b211a]/55 animate-fade-in"
         onClick={() => {
           if (showConfirmClose) setShowConfirmClose(false);
           else handleCloseAttempt();
         }}
+        aria-hidden="true"
       />
       <div
-        className={`relative ${isNight ? 'bg-zinc-950 border-white/5' : 'bg-white border-zinc-200'} border rounded-3xl w-full max-w-lg max-h-[85dvh] flex flex-col shadow-2xl animate-fade-in-down overflow-hidden`}
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ask-title"
+        tabIndex={-1}
+        className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-lg bg-surface ring-1 ring-inset ring-rule shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)] sm:max-w-lg sm:rounded-lg modal-enter"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/5 shrink-0">
-          <div className="flex items-center gap-4">
-            <span className="text-2xl shrink-0">{isAsking ? '💭' : '🙋‍♂️'}</span>
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] text-orange-400 font-black uppercase tracking-wide leading-normal">
-                {language === 'ko' ? '채키에게 물어보기' : 'Ask Chekki'}
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-rule px-5 py-4">
+          <div className="min-w-0">
+            <h2 id="ask-title" className="text-[17px] font-extrabold text-ink">
+              {isKo ? '채키에게 물어보기' : 'Ask Chekki'}
+            </h2>
+            {history.length > 1 && (
+              <p className="num text-[13px] text-ink-3">
+                {isKo
+                  ? `대화 ${Math.ceil(history.length / 2)}번`
+                  : `${Math.ceil(history.length / 2)} exchange${Math.ceil(history.length / 2) > 1 ? 's' : ''}`}
               </p>
-              <p
-                className={`${isNight ? 'text-white' : 'text-zinc-900'} text-xs font-semibold font-korean mt-0.5 opacity-60 leading-snug break-keep pr-4`}
-              >
-                {history.length > 0
-                  ? language === 'ko'
-                    ? `${Math.ceil(history.length / 2)}번의 대화`
-                    : `${Math.ceil(history.length / 2)} exchange${Math.ceil(history.length / 2) > 1 ? 's' : ''}`
-                  : `"${question}"`}
-              </p>
-            </div>
+            )}
           </div>
           <button
             onClick={handleCloseAttempt}
-            className={`w-9 h-9 rounded-full ${isNight ? 'bg-white/5 border-white/10 text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500'} hover:opacity-80 flex items-center justify-center transition-colors shrink-0 ml-3`}
+            aria-label={isKo ? '닫기' : 'Close'}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-ink-3 hover:bg-sunken hover:text-ink"
           >
-            ✕
+            <X size={20} weight="bold" />
           </button>
         </div>
 
         {/* Confirmation Overlay */}
         {showConfirmClose && (
-          <div
-            className={`absolute inset-0 z-[210] ${isNight ? 'bg-zinc-950/90' : 'bg-white/95'} backdrop-blur-md flex items-center justify-center p-8 animate-fade-in shadow-2xl`}
-          >
-            <div className="text-center space-y-6 max-w-sm">
-              <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-2">
-                <span className="text-3xl">⚠️</span>
-              </div>
-              <div>
-                <h3
-                  className={`text-xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display uppercase tracking-tight mb-2`}
-                >
-                  {language === 'ko' ? '대화를 종료할까요?' : 'Close Conversation?'}
-                </h3>
-                <p className="text-zinc-400 text-sm font-korean leading-relaxed">
-                  {language === 'ko'
-                    ? '지금 닫으면 대화 내용이 모두 사라집니다. 답변을 이미지로 저장하시겠어요?'
-                    : 'Closing will wipe your current chat history. Would you like to save the answer as an image first?'}
-                </p>
-              </div>
-              <div className="flex flex-col gap-3 pt-2">
+          <div className="absolute inset-0 z-[210] flex items-center justify-center bg-surface p-6 animate-fade-in">
+            <div className="w-full max-w-sm text-center">
+              <h3 className="text-[20px] font-extrabold tracking-[-0.02em] text-ink break-keep">
+                {isKo ? '대화를 닫을까요?' : 'Close this chat?'}
+              </h3>
+              <p className="mt-2 text-[15px] leading-relaxed text-ink-2 break-keep">
+                {isKo
+                  ? '닫으면 대화가 사라져요. 답변을 사진으로 저장해 둘까요?'
+                  : "Closing clears this chat. Save the answer as a picture first?"}
+              </p>
+              <div className="mt-6 flex flex-col gap-2.5">
                 <button
                   onClick={async () => {
                     if (isSaving) return;
@@ -265,27 +271,30 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
                     if (success) onClose();
                   }}
                   disabled={isSaving}
-                  className={`w-full ${isNight ? 'bg-white text-black' : 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'} py-4 rounded-2xl font-black text-xs uppercase tracking-wide shadow-xl active:scale-[0.97] transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 disabled:opacity-50 flex items-center justify-center`}
+                  className="btn-press flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-line text-[15px] font-bold text-[#2b211a] disabled:opacity-50"
                 >
                   {isSaving ? (
-                    <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#2b211a]/30 border-t-[#2b211a]" />
                   ) : (
-                    <>📥 {language === 'ko' ? '이미지로 저장하고 닫기' : 'Save & Close'}</>
+                    <>
+                      <DownloadSimple size={18} weight="bold" />
+                      {isKo ? '사진으로 저장하고 닫기' : 'Save and close'}
+                    </>
                   )}
                 </button>
                 <button
                   onClick={onClose}
                   disabled={isSaving}
-                  className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-2xl font-black text-xs uppercase tracking-wide border border-red-500/20 active:scale-[0.97] transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 disabled:opacity-50"
+                  className="btn-press min-h-12 w-full rounded-md bg-surface text-[15px] font-bold text-ink ring-1 ring-inset ring-rule hover:ring-ink-3 disabled:opacity-50"
                 >
-                  {language === 'ko' ? '저장하지 않고 종료' : 'Close Anyway'}
+                  {isKo ? '저장 안 하고 닫기' : 'Close without saving'}
                 </button>
                 <button
                   onClick={() => setShowConfirmClose(false)}
                   disabled={isSaving}
-                  className="w-full text-zinc-400 py-2 font-bold text-xs uppercase tracking-wide hover:text-white transition-colors disabled:opacity-50"
+                  className="min-h-11 w-full text-[14px] font-semibold text-ink-3 hover:text-ink disabled:opacity-50"
                 >
-                  {language === 'ko' ? '취소' : 'Cancel'}
+                  {isKo ? '계속 대화하기' : 'Keep chatting'}
                 </button>
               </div>
             </div>
@@ -293,34 +302,16 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
         )}
 
         {/* Chat Body */}
-        <div
-          ref={chatContainerRef}
-          className={`overflow-y-auto px-5 py-4 flex-1 custom-scrollbar space-y-5 ${isNight ? 'bg-[#09090b]' : 'bg-zinc-50/50'}`}
-        >
-          {/* Render conversation history */}
+        <div ref={chatContainerRef} className="custom-scrollbar flex-1 space-y-4 overflow-y-auto bg-surface px-5 py-4">
           {completedTurns.map((turn, idx) =>
             turn.role === 'user' ? (
-              /* User bubble */
-              <div key={idx} className="flex justify-end">
-                <div
-                  className={`${isNight ? 'bg-orange-500/25 border-orange-500/40 text-orange-100' : 'bg-orange-500/15 border-orange-500/30 text-orange-950 shadow-sm'} border rounded-2xl rounded-tr-sm px-4 py-3 max-w-[85%]`}
-                >
-                  <p className="text-xs sm:text-sm font-semibold font-korean leading-relaxed">
-                    &ldquo;{turn.text}&rdquo;
-                  </p>
-                </div>
-              </div>
+              userBubble(turn.text, idx)
             ) : (
-              /* Chekki answer bubble */
               <div key={idx} className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center border-2 border-white/10 shadow-lg shrink-0 overflow-hidden mt-0.5">
-                  <ChekkiMascot className="w-full h-full scale-110" mood="happy" />
-                </div>
-                <div
-                  className={`${isNight ? 'bg-zinc-900 border-white/5' : 'bg-white border-zinc-200 shadow-sm'} rounded-2xl rounded-tl-sm px-4 py-3 flex-1 prose-answer`}
-                >
+                {chekkiAvatar('happy')}
+                <div className="prose-answer min-w-0 flex-1 rounded-md rounded-tl-sm bg-sunken px-4 py-3">
                   <div
-                    className={`${isNight ? 'text-zinc-100' : 'text-zinc-900'} text-sm font-korean leading-relaxed`}
+                    className="text-[15px] leading-relaxed text-ink break-keep"
                     dangerouslySetInnerHTML={{ __html: renderMarkdown(turn.text) }}
                   />
                 </div>
@@ -328,140 +319,85 @@ export const AskChekkiAnswerModal: React.FC<AskChekkiAnswerModalProps> = ({
             )
           )}
 
-          {/* Thinking / loading state for the current pending question */}
+          {/* Pending question + thinking bubble */}
           {isAsking && (
             <>
-              {/* Show the pending user question bubble */}
-              <div className="flex justify-end">
-                <div
-                  className={`${isNight ? 'bg-orange-500/25 border-orange-500/40 text-orange-100' : 'bg-orange-500/15 border-orange-500/30 text-orange-950 shadow-sm'} border rounded-2xl rounded-tr-sm px-4 py-3 max-w-[85%]`}
-                >
-                  <p className="text-xs sm:text-sm font-semibold font-korean leading-relaxed">
-                    &ldquo;{question}&rdquo;
-                  </p>
-                </div>
-              </div>
-              {/* Thinking bubble */}
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center border-2 border-white/10 shadow-lg shrink-0 overflow-hidden mt-0.5">
-                  <ChekkiMascot className="w-full h-full scale-110 animate-float" mood="thinking" />
-                </div>
-                <div
-                  className={`${isNight ? 'bg-zinc-900 border-white/5' : 'bg-white border-zinc-200 shadow-sm'} rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2`}
-                >
-                  <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-orange-400 rounded-full animate-[bounce_1s_infinite_0ms]" />
-                    <span className="w-2 h-2 bg-orange-400 rounded-full animate-[bounce_1s_infinite_150ms]" />
-                    <span className="w-2 h-2 bg-orange-400 rounded-full animate-[bounce_1s_infinite_300ms]" />
-                  </div>
-                  <p className="text-zinc-400 text-xs font-korean">
-                    {language === 'ko' ? '생각하는 중...' : 'Thinking...'}
-                  </p>
+              {userBubble(question)}
+              <div className="flex items-start gap-3" role="status">
+                {chekkiAvatar('thinking')}
+                <div className="flex items-center gap-2 rounded-md rounded-tl-sm bg-sunken px-4 py-3">
+                  <span className="flex gap-1" aria-hidden="true">
+                    <span className="h-2 w-2 rounded-full bg-line animate-[bounce_1s_infinite_0ms]" />
+                    <span className="h-2 w-2 rounded-full bg-line animate-[bounce_1s_infinite_150ms]" />
+                    <span className="h-2 w-2 rounded-full bg-line animate-[bounce_1s_infinite_300ms]" />
+                  </span>
+                  <span className="text-[14px] text-ink-3">{isKo ? '생각하는 중...' : 'Thinking...'}</span>
                 </div>
               </div>
             </>
           )}
 
-          {/* Scroll anchor */}
           <div ref={chatBottomRef} />
         </div>
 
-        {/* Follow-up Input */}
-        {!isAsking && history.length > 0 && isAuthenticated && (
-          <div
-            className={`px-4 pt-3 pb-3 border-t border-white/5 shrink-0 ${isNight ? 'bg-zinc-950/80' : 'bg-zinc-50/80'}`}
-          >
-            <form
-              onSubmit={handleFollowUpSubmit}
-              className={`flex items-center gap-2 ${isNight ? 'bg-zinc-900 border-white/10' : 'bg-white border-zinc-200 shadow-sm'} focus-within:border-orange-500/60 rounded-2xl px-4 py-2.5 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100`}
-            >
-              <input
-                type="text"
-                value={followUpText}
-                onChange={(e) => setFollowUpText(e.target.value)}
-                placeholder={
-                  language === 'ko'
-                    ? '더 궁금한 게 있나요?'
-                    : 'Want more examples? Ask a follow-up!'
-                }
-                className={`flex-1 bg-transparent ${isNight ? 'text-white' : 'text-zinc-900'} text-xs font-korean placeholder:text-zinc-500 focus:outline-none`}
-                enterKeyHint="send"
-                autoFocus={false}
-              />
-              <button
-                type="submit"
-                disabled={!followUpText.trim() || isAsking}
-                className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97] ${followUpText.trim() ? 'bg-orange-500 text-black' : 'bg-zinc-800 text-zinc-400'}`}
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.269 20.876L5.999 12zm0 0h7.5"
-                  />
-                </svg>
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* Save button row (only show when we have answers) */}
+        {/* Follow-up + save */}
         {!isAsking && history.some((t) => t.role === 'model') && (
-          <div
-            className={`px-4 pb-4 shrink-0 border-t ${isNight ? 'border-white/5' : 'border-zinc-100'}`}
-          >
+          <div className="shrink-0 space-y-2 border-t border-rule bg-surface px-4 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3">
+            {isAuthenticated ? (
+              <form
+                onSubmit={handleFollowUpSubmit}
+                className="flex items-center gap-2 rounded-md bg-sunken py-1.5 pl-4 pr-1.5 ring-1 ring-inset ring-rule focus-within:ring-2 focus-within:ring-line"
+              >
+                <input
+                  type="text"
+                  value={followUpText}
+                  onChange={(e) => setFollowUpText(e.target.value)}
+                  placeholder={isKo ? '더 궁금한 게 있나요?' : 'Ask a follow-up'}
+                  aria-label={isKo ? '이어서 물어보기' : 'Follow-up question'}
+                  className="min-w-0 flex-1 bg-transparent text-[16px] text-ink placeholder:text-ink-3 focus:outline-none"
+                  enterKeyHint="send"
+                />
+                <button
+                  type="submit"
+                  disabled={!followUpText.trim()}
+                  aria-label={isKo ? '보내기' : 'Send'}
+                  className="btn-press flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-line text-[#2b211a] disabled:bg-transparent disabled:text-ink-3"
+                >
+                  <PaperPlaneRight size={18} weight="bold" />
+                </button>
+              </form>
+            ) : (
+              <div className="flex items-center justify-between gap-3 rounded-md bg-line-soft px-4 py-3">
+                <p className="min-w-0 text-[14px] font-semibold text-ink break-keep">
+                  {isKo ? '무료로 가입하면 이어서 물어볼 수 있어요' : 'Sign up free to ask follow-ups'}
+                </p>
+                <button
+                  onClick={() => {
+                    onClose();
+                    openLoginModal();
+                  }}
+                  className="btn-press min-h-11 shrink-0 rounded-md bg-sign px-4 text-[14px] font-bold text-on-sign"
+                >
+                  {isKo ? '가입하기' : 'Sign up'}
+                </button>
+              </div>
+            )}
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className={`w-full mt-3 py-3.5 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wide transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97] border ${isNight ? 'bg-zinc-900 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-800 shadow-sm'} disabled:opacity-50`}
+              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-md text-[14px] font-semibold text-ink-2 hover:bg-sunken hover:text-ink disabled:opacity-50"
             >
               {isSaving ? (
-                <div className="w-4 h-4 border-2 border-zinc-500/20 border-t-zinc-500 rounded-full animate-spin" />
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink-3/30 border-t-ink-3" />
               ) : saveSuccess ? (
-                <span className="text-emerald-500 flex items-center gap-2">
-                  ✅ {language === 'ko' ? '저장 완료!' : 'Saved!'}
-                </span>
+                <span className="text-correct">{isKo ? '저장했어요' : 'Saved'}</span>
               ) : (
                 <>
-                  <span>📥</span> {language === 'ko' ? '이미지로 저장' : 'Save as Image'}
+                  <DownloadSimple size={16} weight="bold" />
+                  {isKo ? '답변 사진으로 저장' : 'Save answer as a picture'}
                 </>
               )}
             </button>
-          </div>
-        )}
-
-        {/* Footer upsell for guests */}
-        {!isAsking && !isAuthenticated && history.some((t) => t.role === 'model') && (
-          <div
-            className={`px-6 pb-6 pt-3 border-t ${isNight ? 'border-white/5 bg-zinc-950/50' : 'border-zinc-100 bg-zinc-50/50'} shrink-0`}
-          >
-            <div className="flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <p className="text-[10px] text-orange-400 font-black uppercase tracking-wide mb-0.5">
-                  {language === 'ko' ? '도움이 되셨나요?' : 'Was this helpful?'}
-                </p>
-                <p className="text-[10px] text-zinc-400 font-korean truncate">
-                  {language === 'ko'
-                    ? '무료 로그인하고 대화를 이어가세요!'
-                    : 'Login to ask follow-ups & get deeper answers!'}
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  onClose();
-                  openLoginModal();
-                }}
-                className="text-[10px] bg-orange-500 hover:bg-orange-600 text-black px-5 py-2.5 rounded-xl font-black uppercase tracking-wider whitespace-nowrap shadow-lg shadow-orange-500/20 transition-transform duration-200 ease-[var(--ease-out-strong)] opacity-100 active:scale-[0.97]"
-              >
-                {language === 'ko' ? '회원가입' : 'Sign Up'}
-              </button>
-            </div>
           </div>
         )}
       </div>

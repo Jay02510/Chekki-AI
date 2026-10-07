@@ -4,6 +4,8 @@ import { WorksheetItem } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ConfirmDialog } from './ConfirmDialog';
 import { useModalExit } from '../hooks/useModalExit';
+import { useDialogA11y } from '../hooks/useDialogA11y';
+import { X } from '@phosphor-icons/react';
 
 interface Props {
   item: WorksheetItem;
@@ -28,6 +30,13 @@ export const RefineModal: React.FC<Props> = ({
   const [customReason, setCustomReason] = useState('');
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const { isClosing, close } = useModalExit(onClose);
+  // Escape routes through the latest handleClose so typed text isn't lost
+  // silently (the a11y hook captures onClose once per open).
+  const handleCloseRef = useRef<() => void>(() => {});
+  const dialogRef = useDialogA11y<HTMLDivElement>({
+    isOpen: isOpen && !showDiscardConfirm,
+    onClose: () => handleCloseRef.current(),
+  });
 
   const handleClose = () => {
     if (customReason.trim()) {
@@ -36,6 +45,7 @@ export const RefineModal: React.FC<Props> = ({
     }
     close();
   };
+  handleCloseRef.current = handleClose;
 
   useEffect(() => {
     if (isOpen && scrollRef.current) {
@@ -112,150 +122,113 @@ export const RefineModal: React.FC<Props> = ({
     }
   };
 
+  const canSubmit = !isSubmitting && (!!selectedReason || !!customReason.trim());
+
   const modalContent = (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
-      onClick={handleClose}
-    >
+    <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-4">
       <div
-        className={`relative p-1.5 bg-white/5 border border-white/10 rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] ${isClosing ? 'modal-exit' : 'modal-enter'} w-full sm:max-w-md md:max-w-lg flex flex-col max-h-[92vh] sm:max-h-[85vh] mx-2 sm:mx-4`}
-        onClick={(e) => e.stopPropagation()}
+        className={`absolute inset-0 bg-[#2b211a]/55 ${isClosing ? 'modal-backdrop-exit' : 'animate-fade-in'}`}
+        onClick={handleClose}
+        aria-hidden="true"
+      />
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="refine-title"
+        tabIndex={-1}
+        className={`relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-lg bg-surface ring-1 ring-inset ring-rule shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)] sm:max-w-lg sm:rounded-lg ${isClosing ? 'modal-exit' : 'modal-enter'}`}
       >
-        <div
-          className={`relative w-full h-full rounded-[calc(2rem-0.375rem)] ${isNight ? 'bg-brand-dark' : 'bg-white'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col overflow-hidden`}
-        >
-          {/* Animated Glow Background */}
-          <div className="absolute -top-24 -left-24 w-48 h-48 bg-orange-500/10 blur-[100px] rounded-full animate-pulse"></div>
-          <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-orange-500/10 blur-[100px] rounded-full animate-pulse delay-700"></div>
-
-          {/* Fade-out overlay at the top to prevent content from cutting off when scrolled */}
-          <div
-            className={`absolute top-0 left-0 right-0 h-10 bg-gradient-to-b ${isNight ? 'from-[#09090b] via-[#09090b]/95' : 'from-white via-white/95'} to-transparent pointer-events-none z-20 rounded-t-3xl`}
-          />
-
-          <div
-            ref={scrollRef}
-            className="p-5 sm:p-8 md:p-10 pt-8 sm:pt-10 md:pt-12 flex-1 overflow-y-auto custom-scrollbar relative z-10"
-          >
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-5">
-                <div className="w-14 h-14 rounded-2xl bg-brand-orange flex items-center justify-center text-3xl shadow-[0_10px_30px_rgba(249,115,22,0.3)]">
-                  🪄
-                </div>
-                <div>
-                  <h3
-                    className={`text-2xl md:text-3xl font-black ${isNight ? 'text-white' : 'text-zinc-900'} font-display leading-tight tracking-tight`}
-                  >
-                    {language === 'ko' ? '상세 설명 요청' : 'Explain More'}
-                  </h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
-                    <p className="text-xs text-orange-500 font-black uppercase tracking-[0.2em]">
-                      ASK CHEKKI
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {!isSubmitting && (
-                <button
-                  onClick={handleClose}
-                  className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-[color,background-color,transform] active:scale-90 border border-white/5 relative z-30"
-                  aria-label="Close"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2.5}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
-            </div>
-
-            <div
-              className={`${isNight ? 'bg-zinc-900/40 border-white/5 shadow-inner' : 'bg-zinc-50 border-zinc-200'} rounded-3xl p-6 border mb-8 group transition-[border-color] hover:border-white/10`}
+        <div className="flex shrink-0 items-start justify-between gap-3 px-5 pt-5 sm:px-6 sm:pt-6">
+          <div className="min-w-0">
+            <h3 id="refine-title" className="text-[22px] font-extrabold tracking-[-0.02em] text-ink break-keep">
+              {language === 'ko' ? '채키에게 더 물어보기' : 'Ask Chekki for more'}
+            </h3>
+            <p className="mt-1 text-[14px] text-ink-3 break-keep">
+              {language === 'ko' ? '이 문제를 다시 설명해 드릴게요.' : "Chekki will explain this one again."}
+            </p>
+          </div>
+          {!isSubmitting && (
+            <button
+              onClick={handleClose}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-ink-3 hover:bg-sunken hover:text-ink"
+              aria-label={language === 'ko' ? '닫기' : 'Close'}
             >
-              <p className="text-[10px] text-zinc-400 font-black uppercase tracking-[0.2em] mb-2">
-                {language === 'ko' ? '질문' : 'Question'}
-              </p>
-              <p
-                className={`${isNight ? 'text-zinc-100' : 'text-zinc-900'} text-base md:text-lg break-keep leading-relaxed font-bold italic`}
-              >
-                &quot;{item.question_text}&quot;
-              </p>
-            </div>
+              <X size={20} weight="bold" />
+            </button>
+          )}
+        </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div>
-                <p className="text-[10px] text-zinc-400 font-black uppercase tracking-[0.2em] mb-4">
-                  {language === 'ko'
-                    ? '어떤 부분이 궁금하신가요?'
-                    : 'What would you like explained?'}
-                </p>
-                <div className="flex flex-col gap-3">
-                  {quickChips.map((chip) => (
+        <div ref={scrollRef} className="custom-scrollbar flex-1 overflow-y-auto px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
+          <div className="rounded-md bg-sunken px-4 py-3">
+            <p className="text-[13px] font-semibold text-ink-3">{language === 'ko' ? '문제' : 'Question'}</p>
+            <p className="mt-0.5 text-[16px] font-semibold leading-relaxed text-ink break-keep">{item.question_text}</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="mt-5 space-y-5">
+            <fieldset>
+              <legend className="mb-2.5 text-[15px] font-bold text-ink">
+                {language === 'ko' ? '어떤 게 필요하세요?' : 'What would help?'}
+              </legend>
+              <div className="flex flex-col gap-2">
+                {quickChips.map((chip) => {
+                  const on = selectedReason === chip.id;
+                  return (
                     <button
                       key={chip.id}
                       type="button"
+                      aria-pressed={on}
                       onClick={() => handleChipSelect(chip.id, chip.text)}
-                      className={`text-left px-6 py-4 rounded-2xl border text-sm md:text-base font-black transition-[background-color,border-color,color,transform] transform active:scale-[0.98] break-keep ${
-                        selectedReason === chip.id
-                          ? 'bg-brand-orange text-white border-transparent shadow-[0_15px_40px_rgba(249,115,22,0.4)]'
-                          : `${isNight ? 'bg-zinc-900/60 border-white/5 text-zinc-300' : 'bg-zinc-100 border-zinc-200 text-zinc-500'} hover:bg-zinc-800 hover:border-white/10`
+                      className={`btn-press flex min-h-12 items-center gap-3 rounded-md px-4 py-3 text-left text-[15px] font-semibold break-keep ${
+                        on ? 'bg-line-soft text-ink ring-2 ring-inset ring-line' : 'bg-surface text-ink-2 ring-1 ring-inset ring-rule hover:ring-ink-3'
                       }`}
                     >
+                      <span
+                        aria-hidden="true"
+                        className={`h-5 w-5 shrink-0 rounded-full border-2 ${on ? 'border-line bg-line shadow-[inset_0_0_0_3px_var(--m-line-soft)]' : 'border-rule'}`}
+                      />
                       {chip.label}
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
+            </fieldset>
 
-              <div className="space-y-3">
-                <label className="text-[10px] text-zinc-400 font-black uppercase tracking-[0.2em]">
-                  {language === 'ko' ? '직접 입력 (선택)' : 'Or type your reason (Optional)'}
-                </label>
-                <textarea
-                  value={customReason}
-                  onChange={(e) => {
-                    setCustomReason(e.target.value);
-                    if (e.target.value) setSelectedReason(''); // Clear chip if typing
-                  }}
-                  className={`w-full ${isNight ? 'bg-zinc-900/40 border-white/5 text-white' : 'bg-zinc-50 border-zinc-200 text-zinc-900'} rounded-2xl p-5 text-sm focus:outline-none focus:border-orange-500/50 focus:ring-4 focus:ring-orange-500/10 transition-all font-korean resize-none h-32 shadow-inner`}
-                  placeholder={
-                    language === 'ko'
-                      ? '예: 이 문제의 문법 규칙이나 단어 쓰임새를 더 자세히 설명해주세요.'
-                      : 'e.g., Explain the grammar rules or word usage for this question in more detail.'
-                  }
-                />
-              </div>
+            <div>
+              <label htmlFor="refine-custom" className="mb-2 block text-[14px] font-semibold text-ink-2">
+                {language === 'ko' ? '직접 적어도 돼요 (선택)' : 'Or write your own (optional)'}
+              </label>
+              <textarea
+                id="refine-custom"
+                value={customReason}
+                onChange={(e) => {
+                  setCustomReason(e.target.value);
+                  if (e.target.value) setSelectedReason(''); // Clear chip if typing
+                }}
+                className="h-28 w-full resize-none rounded-md bg-sunken p-3 text-[16px] text-ink ring-1 ring-inset ring-rule placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-line"
+                placeholder={
+                  language === 'ko'
+                    ? '예: 아이가 헷갈려해요. 더 쉬운 예를 들어 주세요.'
+                    : 'e.g. My child is confused. Can you use an easier example?'
+                }
+              />
+            </div>
 
-              <button
-                type="submit"
-                disabled={isSubmitting || (!selectedReason && !customReason.trim())}
-                className={`w-full py-5 md:py-6 rounded-full font-black text-sm md:text-base uppercase tracking-[0.3em] transition-[background-color,color,transform] transform active:scale-[0.95] flex items-center justify-center gap-4 relative overflow-hidden shadow-2xl ${
-                  isSubmitting || (!selectedReason && !customReason.trim())
-                    ? 'bg-zinc-800 text-zinc-400 cursor-not-allowed opacity-50'
-                    : `${isNight ? 'bg-white hover:bg-zinc-100 text-black' : 'bg-zinc-900 hover:bg-black text-white'}`
-                }`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="w-6 h-6 border-3 border-zinc-400 border-t-black rounded-full animate-spin"></div>
-                    <span>{language === 'ko' ? '설명 준비 중...' : 'Explaining...'}</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-xl">✨</span>
-                    <span>{language === 'ko' ? '새로운 추천 받기' : 'Submit Request'}</span>
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className="btn-press flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-line text-[15px] font-bold text-[#2b211a] disabled:opacity-40"
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#2b211a]/30 border-t-[#2b211a]" />
+                  <span>{language === 'ko' ? '다시 설명하는 중...' : 'Explaining...'}</span>
+                </>
+              ) : (
+                <span>{language === 'ko' ? '다시 설명 받기' : 'Explain again'}</span>
+              )}
+            </button>
+          </form>
         </div>
       </div>
 
@@ -268,6 +241,7 @@ export const RefineModal: React.FC<Props> = ({
           cancelText={language === 'ko' ? '취소' : 'Cancel'}
           variant="destructive"
           isNight={isNight}
+          warm
           onConfirm={() => {
             setShowDiscardConfirm(false);
             close();

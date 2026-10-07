@@ -9,6 +9,8 @@ interface ConfirmDialogProps {
   isSaving?: boolean;
   isNight: boolean;
   variant?: 'default' | 'destructive';
+  /** Parent app look (warm tokens). Staff pages keep the old dark look. */
+  warm?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -20,6 +22,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isSaving,
   isNight,
   variant = 'default',
+  warm = false,
   onConfirm,
   onCancel,
 }) => {
@@ -33,6 +36,45 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     isKo = localStorage.getItem('chekki_lang') === 'ko';
   } catch {
     /* storage blocked */
+  }
+  if (warm) {
+    return (
+      <div className="fixed inset-0 z-[10010] flex items-center justify-center p-4">
+        <div
+          className={`absolute inset-0 bg-[#2b211a]/55 ${isClosing ? 'modal-backdrop-exit' : 'animate-fade-in'}`}
+          onClick={close}
+          aria-hidden="true"
+        />
+        <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirm-title"
+          tabIndex={-1}
+          className={`relative w-full max-w-sm rounded-lg bg-surface p-6 ring-1 ring-inset ring-rule shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)] ${isClosing ? 'modal-exit' : 'modal-enter'}`}
+        >
+          <p id="confirm-title" className="text-[17px] font-extrabold leading-snug text-ink break-keep text-center">
+            {title}
+          </p>
+          <div className="mt-6 flex flex-col gap-2.5">
+            <button
+              onClick={onConfirm}
+              disabled={isSaving}
+              className={`btn-press min-h-12 w-full rounded-md text-[15px] font-bold disabled:opacity-50 ${isDestructive ? 'bg-wrong text-white' : 'bg-line text-[#2b211a]'}`}
+            >
+              {confirmText || (isKo ? '확인' : 'Confirm')}
+            </button>
+            <button
+              onClick={close}
+              disabled={isSaving}
+              className="btn-press min-h-12 w-full rounded-md bg-surface text-[15px] font-bold text-ink ring-1 ring-inset ring-rule hover:ring-ink-3 disabled:opacity-50"
+            >
+              {cancelText || (isKo ? '취소' : 'Cancel')}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
   return (
     <div className="fixed inset-0 z-[10010] flex items-center justify-center p-4">
