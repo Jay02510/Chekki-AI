@@ -6,8 +6,10 @@ import { Ratelimit } from '@upstash/ratelimit';
 // in-memory fallback. Centralized so every endpoint gets the same
 // preview/non-Redis-env fallback behavior for free, and new endpoints don't
 // have to re-derive it (Audit: rate-limit coverage gaps).
-const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
-const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+// Vercel's Upstash integration names these KV_REST_API_*; a direct Upstash
+// setup uses UPSTASH_REDIS_REST_*. Accept either.
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
 const redis = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisToken }) : null;
 
 const memoryStores = new Map<string, Map<string, number[]>>();
