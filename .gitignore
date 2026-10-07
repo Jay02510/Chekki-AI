@@ -41,3 +41,6 @@ local.properties
 .gemini/
 .cursor/
 
+
+# /brag launch video output
+brag-output*/
