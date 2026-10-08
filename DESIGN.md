@@ -153,7 +153,7 @@ components:
 
 # Design System: Chekki AI (parent app)
 
-Scope: the parent app (`app.html` → `App.tsx`, `components/`) the marketing landing page (`index.html` → `src/Landing.tsx`), and the parent pages that render through the landing bundle (`/subscribe`, `/privacy`, `/terms`, `/refund`, `/youth`, `/support`). `/faq` (`src/pages/FaqPage.tsx`) and the academy landing `/schools` (`src/pages/SchoolsLandingPage.tsx`) are covered too. The staff dashboards (`src/pages/TeacherPage.tsx`, `src/components/`) still use the older dark look and are **not** covered here.
+Scope: the parent app (`app.html` → `App.tsx`, `components/`) the marketing landing page (`index.html` → `src/Landing.tsx`), and the parent pages that render through the landing bundle (`/subscribe`, `/privacy`, `/terms`, `/refund`, `/youth`, `/support`). `/faq` (`src/pages/FaqPage.tsx`) and the academy landing `/schools` (`src/pages/SchoolsLandingPage.tsx`) are covered too. The staff dashboards (`src/pages/TeacherPage.tsx`, `src/components/`) still use their older zinc/brand-dark class pairs and are **not** covered here, except for a palette remap: `tokens.css` re-points zinc, slate-50, black, orange-400/500/600 and the brand-dark surfaces to warm values under `body.schools-ui` (which TeacherPage sets) and switches them to Pretendard. It is a stopgap until each role's screens move to the tokens; do not add new zinc classes there.
 
 ## Overview
 
@@ -360,5 +360,5 @@ Toasts: cocoa panel (or `wrong` for errors), white text, slide down under the ap
 
 ## Known gaps
 
-- Staff dashboards (FT, KT, Director) are not on this system yet.
+- Staff dashboards (FT, KT, Director) are not on this system yet; they only get the palette remap in `tokens.css`.
 - The landing bundle's `font-sans` is Onest (for the staff pages). Parent pages on that bundle opt into Pretendard with `font-warm`; use it on any new parent page there.

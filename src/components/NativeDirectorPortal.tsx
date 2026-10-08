@@ -569,7 +569,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             aria-labelledby="seat-expansion-title"
             tabIndex={-1}
             className={`relative w-full max-w-md p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 text-left transition-colors ${
-            isNight ? 'bg-[#0a0a0d] border-white/15 text-white' : 'bg-white border-zinc-300 text-zinc-900'
+            isNight ? 'bg-brand-dark border-white/15 text-white' : 'bg-white border-zinc-300 text-zinc-900'
           }`}>
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="flex items-center gap-3">

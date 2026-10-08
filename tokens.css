@@ -95,3 +95,34 @@
   }
 }
 
+
+/* Staff dashboards (TeacherPage adds .schools-ui to <body>) still pick their
+   colours from zinc/slate and the brand-dark surfaces, with hand-written
+   night/day class pairs. Until each screen moves to the tokens above, this
+   warms those scales in place: the same steps, cocoa instead of cool grey,
+   with contrast kept at or above the zinc values they replace. Orange moves
+   to Chekki orange (every orange fill here carries dark text); the status
+   colours are unchanged. */
+body.schools-ui {
+  --color-zinc-50: #fbf6ee;
+  --color-zinc-100: #f5ecdf;
+  --color-zinc-200: #ebdfcf;
+  --color-zinc-300: #dccab8;
+  --color-zinc-400: #a8988a;
+  --color-zinc-500: #807064;
+  --color-zinc-600: #5b4b3f;
+  --color-zinc-700: #4a3b30;
+  --color-zinc-800: #3a2c22;
+  --color-zinc-850: #2e241d;
+  --color-zinc-900: #2b211a;
+  --color-zinc-950: #17120f;
+  --color-slate-50: #fbf6ee;
+  --color-brand-dark: #17120f;
+  --color-brand-card: #221b16;
+  --color-black: #120e0b;
+  --color-orange-400: #f28a35;
+  --color-orange-500: #ef7c1c;
+  --color-orange-600: #dd6a0c;
+  --font-sans: var(--font-warm);
+  font-family: var(--font-warm);
+}
