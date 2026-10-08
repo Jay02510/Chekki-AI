@@ -10,10 +10,9 @@
  *   Korean, a KT checks every parent report, parents pay nothing, and what it
  *   costs; then starts the 7-day trial.
  * FIRST VIEWPORT: headline, one line, orange "start 7-day free trial" left;
- *   right, a card listing the six questions as roundel links.
+ *   right, Chekki holding a laptop.
  * FORM: dealt structure 7 of 7 (objection ledger), locked by the user.
- *   Signature: on wide screens a sticky roundel rail tracks the question
- *   being read.
+ *   Signature: the open question carries the orange line down its edge.
  * FINISH: unreviewed and undocumented is unfinished; this build ends with the
  *   finish review, the verdict, DESIGN.md, and every shipping raster carrying
  *   its provenance.
@@ -23,13 +22,9 @@ import {
   ArrowRight,
   ArrowSquareOut,
   CaretDown,
-  ChartBar,
   Check,
-  FilePdf,
-  GraduationCap,
   List,
   Moon,
-  PlayCircle,
   Sun,
   X,
 } from '@phosphor-icons/react';
@@ -88,10 +83,7 @@ const QFold: React.FC<{ i: number; title: string; open: boolean; onToggle: (open
   children,
 }) => (
   <details id={`q${i + 1}`} open={open} onToggle={(e) => onToggle(e.currentTarget.open)} className="group scroll-mt-20">
-    <summary className="flex min-h-[72px] cursor-pointer list-none items-center gap-3 py-4 [&::-webkit-details-marker]:hidden">
-      <Roundel state={open ? 'current' : 'next'} size={34} className="transition-colors duration-200">
-        {i + 1}
-      </Roundel>
+    <summary className="relative flex min-h-[72px] cursor-pointer list-none items-center gap-3 rounded-md py-4 before:absolute before:-left-3 before:bottom-4 before:top-4 before:w-[3px] before:rounded-full before:bg-line before:opacity-0 before:transition-opacity group-open:before:opacity-100 focus-visible:outline-2 focus-visible:-outline-offset-2 [&::-webkit-details-marker]:hidden">
       <h2 className="flex-1 text-[19px] font-extrabold leading-snug tracking-[-0.01em] text-ink group-hover:text-line-ink sm:text-[22px]">{title}</h2>
       <CaretDown size={20} weight="bold" className="shrink-0 text-ink-3 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
     </summary>
@@ -104,7 +96,6 @@ const SchoolsLandingPage: React.FC = () => {
   const [isNight, toggleTheme] = useWarmTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [yearly, setYearly] = useState(false);
-  const [activeQ, setActiveQ] = useState(-1);
   const [showBar, setShowBar] = useState(false);
 
   // Grading-time calculator: the director's own numbers, nothing claimed.
@@ -143,7 +134,7 @@ const SchoolsLandingPage: React.FC = () => {
   }, []);
   const [openQs, setOpenQs] = useState<boolean[]>(() => Array(6).fill(false));
   const setQ = (i: number, v: boolean) => setOpenQs((prev) => (prev[i] === v ? prev : prev.map((o, j) => (j === i ? v : o))));
-  // Links to a question (rail, header "Pricing", #q5 URLs) open it, then scroll to it.
+  // Links to a question (header "Pricing", #q5 URLs) open it, then scroll to it.
   const openQ = (i: number) => (e?: React.MouseEvent) => {
     e?.preventDefault();
     setQ(i, true);
@@ -191,7 +182,6 @@ const SchoolsLandingPage: React.FC = () => {
 
   const questions = SCHOOLS_QA.map((x) => (isKo ? x.qKo : x.qEn));
   const answer = (i: number) => (isKo ? SCHOOLS_QA[i].aKo : SCHOOLS_QA[i].aEn);
-  const qId = (i: number) => `q${i + 1}`;
 
   useEffect(() => {
     const fromHash = () => {
@@ -204,21 +194,6 @@ const SchoolsLandingPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Sticky rail: the question whose section crosses the upper third is current.
-  useEffect(() => {
-    const els = questions.map((_, i) => document.getElementById(qId(i)));
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) setActiveQ(els.indexOf(e.target as HTMLElement));
-        });
-      },
-      { rootMargin: '-30% 0px -60% 0px' }
-    );
-    els.forEach((el) => el && io.observe(el));
-    return () => io.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isKo]);
 
   const submitConsult = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -401,31 +376,17 @@ const SchoolsLandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* QUESTIONS, with a sticky rail on wide screens */}
-      <div className="mx-auto grid max-w-6xl gap-4 px-4 py-8 md:py-12 lg:gap-10 lg:grid-cols-[220px_1fr]">
-        <nav aria-labelledby="ask-title" className="lg:block">
-          <h2 id="ask-title" className="text-[22px] font-extrabold leading-snug tracking-[-0.02em] text-ink sm:text-[26px] lg:pt-4">
-            {isKo ? '원장님들이 먼저 묻는 것' : 'What directors ask first'}
-          </h2>
-          <p className="mt-1.5 text-[15px] text-ink-3">{isKo ? '궁금한 질문을 눌러 보세요.' : 'Tap a question to see the answer.'}</p>
-          <ol className={`sticky top-24 mt-6 hidden space-y-1 lg:block transition-[opacity,visibility] duration-500 ${activeQ < 0 || !openQs.some(Boolean) ? 'invisible opacity-0' : 'visible opacity-100'}`}>
-            {questions.map((q, i) => (
-              <li key={q}>
-                <a href={`#${qId(i)}`} onClick={openQ(i)} aria-current={activeQ === i ? 'true' : undefined} className="flex min-h-11 items-center gap-2.5 rounded-md px-1 text-[14px] font-semibold text-ink-2 hover:text-ink">
-                  <Roundel state={activeQ === i ? 'current' : activeQ > i ? 'done' : 'next'} size={26} className="transition-colors duration-300">
-                    {i + 1}
-                  </Roundel>
-                  <span className={`leading-snug ${activeQ === i ? 'font-bold text-ink' : ''}`}>{q}</span>
-                </a>
-              </li>
-            ))}
-          </ol>
-        </nav>
+      {/* QUESTIONS */}
+      <div className="mx-auto max-w-6xl px-4 py-8 md:py-12">
+        <h2 className="text-[22px] font-extrabold leading-snug tracking-[-0.02em] text-ink sm:text-[26px]">
+          {isKo ? '원장님들이 먼저 묻는 것' : 'What directors ask first'}
+        </h2>
+        <p className="mt-1.5 text-[15px] text-ink-3">{isKo ? '궁금한 질문을 눌러 보세요.' : 'Tap a question to see the answer.'}</p>
 
-        <div className="min-w-0 divide-y divide-rule border-y border-rule">
+        <div className="mt-6 divide-y divide-rule border-y border-rule">
           {/* Q1: grading accuracy */}
           <QFold i={0} title={questions[0]} open={openQs[0]} onToggle={(v) => setQ(0, v)}>
-            <div className="grid gap-8 md:grid-cols-[1fr_1.05fr]">
+            <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
               <div>
                 <p className="text-[17px] font-semibold leading-relaxed text-ink">{answer(0)}</p>
                 <Points
@@ -483,7 +444,7 @@ const SchoolsLandingPage: React.FC = () => {
 
           {/* Q2: FT log, AI draft, KT sends */}
           <QFold i={1} title={questions[1]} open={openQs[1]} onToggle={(v) => setQ(1, v)}>
-            <div className="grid gap-8 md:grid-cols-[1fr_1.05fr]">
+            <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
               <div>
                 <p className="text-[17px] font-semibold leading-relaxed text-ink">{answer(1)}</p>
                 <Points
@@ -539,7 +500,7 @@ const SchoolsLandingPage: React.FC = () => {
 
           {/* Q3: home homework reaches the teacher */}
           <QFold i={2} title={questions[2]} open={openQs[2]} onToggle={(v) => setQ(2, v)}>
-            <div className="grid gap-8 md:grid-cols-[1fr_1.05fr]">
+            <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
               <div>
                 <p className="text-[17px] font-semibold leading-relaxed text-ink">{answer(2)}</p>
                 <Points
@@ -582,7 +543,7 @@ const SchoolsLandingPage: React.FC = () => {
 
           {/* Q4: what the parent sees, and what it costs them */}
           <QFold i={3} title={questions[3]} open={openQs[3]} onToggle={(v) => setQ(3, v)}>
-            <div className="grid gap-8 md:grid-cols-[1fr_1.05fr]">
+            <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
               <div>
                 <p className="text-[17px] font-semibold leading-relaxed text-ink">{answer(3)}</p>
                 <a href={langPath('/')} className="mt-3 inline-flex min-h-11 items-center gap-1.5 text-[15px] font-bold text-line-ink">
@@ -763,7 +724,7 @@ const SchoolsLandingPage: React.FC = () => {
               ))}
             </div>
           </div>
-          <div className="flex flex-col justify-center rounded-md bg-line-soft p-5" aria-live="polite">
+          <div className="flex flex-col justify-center border-t border-rule pt-6 md:border-l md:border-t-0 md:pl-8 md:pt-0" aria-live="polite">
             <p className="text-[15px] font-semibold text-ink-2">{isKo ? '매주 손 채점에 쓰는 시간' : 'Hand-grading every week'}</p>
             <p className="num mt-1 text-[40px] font-extrabold leading-none tracking-[-0.02em] text-ink">
               {isKo ? `약 ${fmtHours(weeklyHours)}시간` : `~${fmtHours(weeklyHours)} hours`}
@@ -780,51 +741,21 @@ const SchoolsLandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* EXTRAS: readiness check and free teaching resources */}
-      <section className="bg-sunken">
-        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-12 md:grid-cols-[1fr_1.4fr] md:py-14">
-          <a
-            href="https://ai-readiness.chekkiai.com?utm_source=chekki_schools&utm_medium=banner&utm_campaign=ai_readiness"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex flex-col rounded-md bg-surface p-5 ring-1 ring-inset ring-rule hover:ring-ink-3"
-          >
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-line-soft text-line-ink">
-              <ChartBar size={22} weight="bold" aria-hidden="true" />
-            </span>
-            <h2 className="mt-3 text-[18px] font-extrabold text-ink">{isKo ? '우리 학원, AI를 쓸 준비가 얼마나 됐을까요?' : 'How ready is your academy for AI?'}</h2>
-            <p className="mt-1 flex-1 text-[15px] leading-relaxed text-ink-2">
-              {isKo ? '몇 가지 질문에 답하면 우리 학원이 어디쯤인지 알려 줘요.' : 'Answer a few questions to see where your academy stands.'}
-            </p>
-            <span className="mt-4 inline-flex items-center gap-1.5 text-[15px] font-bold text-line-ink">
-              {isKo ? '준비도 확인하기' : 'Check your readiness'}
-              <ArrowSquareOut size={16} weight="bold" />
-            </span>
-          </a>
-
-          <div>
-            <h2 className="text-[18px] font-extrabold text-ink">{isKo ? '선생님을 위한 무료 자료' : 'Free resources for teachers'}</h2>
-            <ul className="mt-3 divide-y divide-rule rounded-md bg-surface ring-1 ring-inset ring-rule">
-              {[
-                { href: 'https://www.youtube.com/@ChekkiAI', Icon: PlayCircle, t: isKo ? '유튜브 채널' : 'YouTube channel', d: isKo ? '이중언어 교육과 학습 습관 영상' : 'Bilingual teaching and study habits' },
-                { href: 'https://www.teacherspayteachers.com/store/chekki-ai', Icon: GraduationCap, t: 'TPT Store', d: isKo ? '출력해서 쓰는 워크시트와 수업 자료' : 'Printable worksheets and lesson plans' },
-                { href: 'https://chekkiai.netlify.app/', Icon: FilePdf, t: isKo ? '문법 PPT' : 'Grammar slides', d: isKo ? '한국 학생들이 자주 틀리는 영문법 정리' : 'Grammar mistakes Korean students make most' },
-              ].map(({ href, Icon, t, d }) => (
-                <li key={href}>
-                  <a href={href} target="_blank" rel="noopener noreferrer" className="flex min-h-16 items-center gap-3 px-4 py-3 hover:bg-sunken/60">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-line-soft text-line-ink">
-                      <Icon size={20} weight="bold" aria-hidden="true" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-[15px] font-bold text-ink">{t}</span>
-                      <span className="block text-[14px] text-ink-2">{d}</span>
-                    </span>
-                    <ArrowSquareOut size={18} weight="bold" className="shrink-0 text-ink-3" aria-hidden="true" />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+      {/* EXTRAS: one quiet row of free links */}
+      <section className="mx-auto max-w-6xl px-4">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-1 border-t border-rule pt-6 text-[15px]">
+          <h2 className="font-semibold text-ink-3">{isKo ? '선생님을 위한 무료 자료' : 'Free for teachers'}</h2>
+          {[
+            { href: 'https://ai-readiness.chekkiai.com?utm_source=chekki_schools&utm_medium=banner&utm_campaign=ai_readiness', t: isKo ? 'AI 준비도 진단' : 'AI readiness check' },
+            { href: 'https://www.youtube.com/@ChekkiAI', t: isKo ? '유튜브 채널' : 'YouTube channel' },
+            { href: 'https://www.teacherspayteachers.com/store/chekki-ai', t: isKo ? 'TPT 워크시트' : 'TPT worksheets' },
+            { href: 'https://chekkiai.netlify.app/', t: isKo ? '문법 PPT' : 'Grammar slides' },
+          ].map(({ href, t }) => (
+            <a key={href} href={href} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-1 font-bold text-ink-2 hover:text-line-ink">
+              {t}
+              <ArrowSquareOut size={14} weight="bold" aria-hidden="true" />
+            </a>
+          ))}
         </div>
       </section>
 
