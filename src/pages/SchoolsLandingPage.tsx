@@ -20,13 +20,16 @@
 import React, { useEffect, useState } from 'react';
 import {
   ArrowRight,
-  ArrowSquareOut,
   CaretDown,
+  ChartBar,
   Check,
   List,
   Moon,
+  PresentationChart,
+  Storefront,
   Sun,
   X,
+  YoutubeLogo,
 } from '@phosphor-icons/react';
 import { PLAN_SEATS, PRICING_BILLING } from '../../api/_lib/pricingTiers';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
@@ -98,12 +101,12 @@ const SchoolsLandingPage: React.FC = () => {
   const [yearly, setYearly] = useState(false);
   const [showBar, setShowBar] = useState(false);
 
-  // Grading-time calculator: the director's own numbers, nothing claimed.
-  const [students, setStudents] = useState(60);
-  const [sheets, setSheets] = useState(3);
-  const [minutes, setMinutes] = useState(2);
+  // Report-writing calculator: the director's own numbers, nothing claimed.
+  const [classes, setClasses] = useState(6);
+  const [reports, setReports] = useState(3);
+  const [minutes, setMinutes] = useState(15);
   const [calcUsed, setCalcUsed] = useState(false);
-  const weeklyHours = (students * sheets * minutes) / 60;
+  const weeklyHours = (classes * reports * minutes) / 60;
   const fmtHours = (h: number) => (h >= 10 ? Math.round(h) : Math.round(h * 10) / 10).toLocaleString(isKo ? 'ko-KR' : 'en-US');
   const numField = (set: (n: number) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
     set(Math.min(9999, Math.max(0, Number(e.target.value) || 0)));
@@ -337,22 +340,22 @@ const SchoolsLandingPage: React.FC = () => {
             <h1 className="text-[34px] font-extrabold leading-[1.12] tracking-[-0.03em] text-ink sm:text-[42px]">
               {isKo ? (
                 <>
-                  정답지는 한 번만.
+                  수업 기록은 영어로.
                   <br />
-                  채점과 학부모 리포트는 채키가.
+                  학부모 리포트는 한국어로.
                 </>
               ) : (
                 <>
-                  Upload the answer key once.
+                  Class notes in English.
                   <br />
-                  Chekki grades and drafts the parent reports.
+                  Parent reports in Korean.
                 </>
               )}
             </h1>
             <p className="mt-4 max-w-xl text-[17px] leading-relaxed text-ink-2">
               {isKo
-                ? '집에서 한 영어 숙제를 학원 정답지로 채점하고, 원어민 선생님의 수업 기록을 한국어 리포트로 바꿔요. 학부모님께 가기 전에는 한국인 선생님이 꼭 확인해요.'
-                : "Homework scanned at home is graded against your own answer key, and your foreign teachers' class notes become Korean parent reports. A Korean teacher checks each one before it goes out."}
+                ? '채키가 리포트를 쓰고, 한국인 선생님이 확인해서 보내요. 숙제는 학원 정답지로 채점해요.'
+                : 'Chekki drafts each report and a Korean teacher checks it before it goes out. Homework is graded against your answer key.'}
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
               <a id="hero-cta" href={trialHref()} onClick={startTrial('hero')} className={`${primaryBtn} min-h-14 px-7 text-[17px]`}>
@@ -360,7 +363,7 @@ const SchoolsLandingPage: React.FC = () => {
                 <ArrowRight size={20} weight="bold" />
               </a>
               <p className="text-[14px] font-semibold text-ink-3 sm:max-w-[14rem]">
-                {isKo ? '카드·사업자번호 없이 학원명과 이메일만 있으면 돼요' : 'No card or business number. Just your academy name and email.'}
+                {isKo ? '카드·사업자번호 없이 시작해요' : 'No card or business number.'}
               </p>
             </div>
           </div>
@@ -384,11 +387,67 @@ const SchoolsLandingPage: React.FC = () => {
         <p className="mt-1.5 text-[15px] text-ink-3">{isKo ? '궁금한 질문을 눌러 보세요.' : 'Tap a question to see the answer.'}</p>
 
         <div className="mt-6 divide-y divide-rule border-y border-rule">
-          {/* Q1: grading accuracy */}
+          {/* Q1: FT log, AI draft, KT sends */}
           <QFold i={0} title={questions[0]} open={openQs[0]} onToggle={(v) => setQ(0, v)}>
             <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
               <div>
                 <p className="text-[17px] font-semibold leading-relaxed text-ink">{answer(0)}</p>
+                <Points
+                  items={
+                    isKo
+                      ? ['한국인 선생님이 확인하기 전에는 학부모님께 아무것도 가지 않아요.', '한국인 선생님은 반 단위로 한꺼번에 검토해요.', '카카오톡에 붙여 넣을 문구도 같이 만들어 줘요.']
+                      : ['Nothing reaches a parent until a Korean teacher has checked it.', 'Korean teachers review a whole class at once.', 'A KakaoTalk-ready copy is made alongside.']
+                  }
+                />
+              </div>
+
+              <figure className="rounded-md bg-surface p-4 ring-1 ring-inset ring-rule sm:p-5" aria-label={isKo ? '예시: 수업 기록에서 학부모 리포트까지' : 'Sample: from class note to parent report'}>
+                <figcaption className="flex items-center justify-between gap-3">
+                  <span className="text-[14px] font-bold text-ink">{isKo ? '3반 · 오늘 수업' : "Class 3 · today's lesson"}</span>
+                  <SampleTag isKo={isKo} />
+                </figcaption>
+                <ol className="relative mt-4 space-y-4 before:absolute before:bottom-6 before:left-[15px] before:top-6 before:w-1 before:rounded-full before:bg-line">
+                  <li className="relative flex gap-3">
+                    <Roundel state="done" size={34} className="text-[12px]">
+                      FT
+                    </Roundel>
+                    <div className="min-w-0 flex-1 rounded-md bg-sunken p-3">
+                      <p className="text-[13px] font-bold text-ink-3">{isKo ? '원어민 선생님 기록 (영어)' : 'Foreign teacher note'}</p>
+                      <p className="mt-1 text-[15px] leading-relaxed text-ink">Read “The Big Hat” together. Jiho still mixes up b and d. Please practice at home.</p>
+                    </div>
+                  </li>
+                  <li className="relative flex gap-3">
+                    <Roundel state="done" size={34} className="text-[12px]">
+                      AI
+                    </Roundel>
+                    <div className="min-w-0 flex-1 rounded-md bg-sunken p-3">
+                      <p className="text-[13px] font-bold text-ink-3">{isKo ? '한국어 초안' : 'Korean draft'}</p>
+                      <p lang="ko" className="mt-1 text-[15px] leading-relaxed text-ink">
+                        오늘은 ‘The Big Hat’을 함께 읽었어요. 지호는 아직 b와 d를 헷갈려 해요. 집에서 한 번 더 봐 주세요.
+                      </p>
+                    </div>
+                  </li>
+                  <li className="relative flex items-center gap-3">
+                    <Roundel state="current" size={34} className="text-[12px]">
+                      KT
+                    </Roundel>
+                    <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2 rounded-md bg-line-soft p-3">
+                      <p className="text-[15px] font-bold text-ink">{isKo ? '한국인 선생님 확인 대기' : 'Waiting for the Korean teacher'}</p>
+                      <span className="rounded-md bg-line px-3 py-1.5 text-[14px] font-bold text-[#2b211a]" aria-hidden="true">
+                        {isKo ? '확인하고 보내기' : 'Check and send'}
+                      </span>
+                    </div>
+                  </li>
+                </ol>
+              </figure>
+            </div>
+          </QFold>
+
+          {/* Q2: grading accuracy */}
+          <QFold i={1} title={questions[1]} open={openQs[1]} onToggle={(v) => setQ(1, v)}>
+            <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+              <div>
+                <p className="text-[17px] font-semibold leading-relaxed text-ink">{answer(1)}</p>
                 <Points
                   items={
                     isKo
@@ -438,62 +497,6 @@ const SchoolsLandingPage: React.FC = () => {
                     </tr>
                   </tbody>
                 </table>
-              </figure>
-            </div>
-          </QFold>
-
-          {/* Q2: FT log, AI draft, KT sends */}
-          <QFold i={1} title={questions[1]} open={openQs[1]} onToggle={(v) => setQ(1, v)}>
-            <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-              <div>
-                <p className="text-[17px] font-semibold leading-relaxed text-ink">{answer(1)}</p>
-                <Points
-                  items={
-                    isKo
-                      ? ['한국인 선생님이 확인하기 전에는 학부모님께 아무것도 가지 않아요.', '한국인 선생님은 반 단위로 한꺼번에 검토해요.', '카카오톡에 붙여 넣을 문구도 같이 만들어 줘요.']
-                      : ['Nothing reaches a parent until a Korean teacher has checked it.', 'Korean teachers review a whole class at once.', 'A KakaoTalk-ready copy is made alongside.']
-                  }
-                />
-              </div>
-
-              <figure className="rounded-md bg-surface p-4 ring-1 ring-inset ring-rule sm:p-5" aria-label={isKo ? '예시: 수업 기록에서 학부모 리포트까지' : 'Sample: from class note to parent report'}>
-                <figcaption className="flex items-center justify-between gap-3">
-                  <span className="text-[14px] font-bold text-ink">{isKo ? '3반 · 오늘 수업' : "Class 3 · today's lesson"}</span>
-                  <SampleTag isKo={isKo} />
-                </figcaption>
-                <ol className="relative mt-4 space-y-4 before:absolute before:bottom-6 before:left-[15px] before:top-6 before:w-1 before:rounded-full before:bg-line">
-                  <li className="relative flex gap-3">
-                    <Roundel state="done" size={34} className="text-[12px]">
-                      FT
-                    </Roundel>
-                    <div className="min-w-0 flex-1 rounded-md bg-sunken p-3">
-                      <p className="text-[13px] font-bold text-ink-3">{isKo ? '원어민 선생님 기록 (영어)' : 'Foreign teacher note'}</p>
-                      <p className="mt-1 text-[15px] leading-relaxed text-ink">Read “The Big Hat” together. Jiho still mixes up b and d. Please practice at home.</p>
-                    </div>
-                  </li>
-                  <li className="relative flex gap-3">
-                    <Roundel state="done" size={34} className="text-[12px]">
-                      AI
-                    </Roundel>
-                    <div className="min-w-0 flex-1 rounded-md bg-sunken p-3">
-                      <p className="text-[13px] font-bold text-ink-3">{isKo ? '한국어 초안' : 'Korean draft'}</p>
-                      <p lang="ko" className="mt-1 text-[15px] leading-relaxed text-ink">
-                        오늘은 ‘The Big Hat’을 함께 읽었어요. 지호는 아직 b와 d를 헷갈려 해요. 집에서 한 번 더 봐 주세요.
-                      </p>
-                    </div>
-                  </li>
-                  <li className="relative flex items-center gap-3">
-                    <Roundel state="current" size={34} className="text-[12px]">
-                      KT
-                    </Roundel>
-                    <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2 rounded-md bg-line-soft p-3">
-                      <p className="text-[15px] font-bold text-ink">{isKo ? '한국인 선생님 확인 대기' : 'Waiting for the Korean teacher'}</p>
-                      <span className="rounded-md bg-line px-3 py-1.5 text-[14px] font-bold text-[#2b211a]" aria-hidden="true">
-                        {isKo ? '확인하고 보내기' : 'Check and send'}
-                      </span>
-                    </div>
-                  </li>
-                </ol>
               </figure>
             </div>
           </QFold>
@@ -701,19 +704,19 @@ const SchoolsLandingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* CALCULATOR: how much hand-grading the academy does today */}
+      {/* CALCULATOR: how long parent reports take the academy today */}
       <section className="mx-auto max-w-6xl px-4 pb-12 md:pb-16">
         <div className="grid gap-6 rounded-lg bg-surface p-5 ring-1 ring-inset ring-rule sm:p-6 md:grid-cols-[1.3fr_1fr] md:p-8">
           <div>
             <h2 className="text-[22px] font-extrabold leading-snug tracking-[-0.02em] text-ink sm:text-[26px]">
-              {isKo ? '우리 학원은 채점에 얼마나 쓰고 있을까요?' : 'How much time does grading take at your academy?'}
+              {isKo ? '우리 학원은 학부모 리포트에 얼마나 쓰고 있을까요?' : 'How much time do parent reports take at your academy?'}
             </h2>
             <p className="mt-1.5 text-[15px] text-ink-3">{isKo ? '우리 학원 숫자로 바꿔 보세요.' : 'Put in your own numbers.'}</p>
             <div className="mt-5 grid gap-4 sm:grid-cols-3">
               {[
-                { id: 'calc-students', label: isKo ? '원생 수' : 'Students', value: students, set: setStudents },
-                { id: 'calc-sheets', label: isKo ? '학생당 주간 숙제 장수' : 'Sheets per student a week', value: sheets, set: setSheets },
-                { id: 'calc-minutes', label: isKo ? '한 장 채점 시간 (분)' : 'Minutes to grade a sheet', value: minutes, set: setMinutes },
+                { id: 'calc-classes', label: isKo ? '반 수' : 'Classes', value: classes, set: setClasses },
+                { id: 'calc-reports', label: isKo ? '반별 주간 리포트 수' : 'Reports per class a week', value: reports, set: setReports },
+                { id: 'calc-minutes', label: isKo ? '리포트 한 건 작성 시간 (분)' : 'Minutes to write one', value: minutes, set: setMinutes },
               ].map((f) => (
                 <div key={f.id}>
                   <label htmlFor={f.id} className={label}>
@@ -725,7 +728,7 @@ const SchoolsLandingPage: React.FC = () => {
             </div>
           </div>
           <div className="flex flex-col justify-center border-t border-rule pt-6 md:border-l md:border-t-0 md:pl-8 md:pt-0" aria-live="polite">
-            <p className="text-[15px] font-semibold text-ink-2">{isKo ? '매주 손 채점에 쓰는 시간' : 'Hand-grading every week'}</p>
+            <p className="text-[15px] font-semibold text-ink-2">{isKo ? '매주 리포트 작성에 쓰는 시간' : 'Writing reports every week'}</p>
             <p className="num mt-1 text-[40px] font-extrabold leading-none tracking-[-0.02em] text-ink">
               {isKo ? `약 ${fmtHours(weeklyHours)}시간` : `~${fmtHours(weeklyHours)} hours`}
             </p>
@@ -734,26 +737,26 @@ const SchoolsLandingPage: React.FC = () => {
             </p>
             <p className="mt-4 text-[14px] leading-relaxed text-ink-2">
               {isKo
-                ? '채키를 쓰면 이 채점은 학부모님이 집에서 숙제를 찍을 때 학원 정답지로 이뤄져요.'
-                : 'With Chekki, this grading happens when parents scan homework at home, against your answer key.'}
+                ? '채키를 쓰면 원어민 선생님의 수업 기록이 리포트 초안이 되고, 한국인 선생님은 확인해서 보내요.'
+                : "With Chekki, the foreign teacher's class note becomes the draft, and a Korean teacher checks and sends it."}
             </p>
           </div>
         </div>
       </section>
 
-      {/* EXTRAS: one quiet row of free links */}
+      {/* EXTRAS: one quiet row of teacher links */}
       <section className="mx-auto max-w-6xl px-4">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-1 border-t border-rule pt-6 text-[15px]">
-          <h2 className="font-semibold text-ink-3">{isKo ? '선생님을 위한 무료 자료' : 'Free for teachers'}</h2>
+          <h2 className="font-semibold text-ink-3">{isKo ? '선생님을 위한 자료' : 'For teachers'}</h2>
           {[
-            { href: 'https://ai-readiness.chekkiai.com?utm_source=chekki_schools&utm_medium=banner&utm_campaign=ai_readiness', t: isKo ? 'AI 준비도 진단' : 'AI readiness check' },
-            { href: 'https://www.youtube.com/@ChekkiAI', t: isKo ? '유튜브 채널' : 'YouTube channel' },
-            { href: 'https://www.teacherspayteachers.com/store/chekki-ai', t: isKo ? 'TPT 워크시트' : 'TPT worksheets' },
-            { href: 'https://chekkiai.netlify.app/', t: isKo ? '문법 PPT' : 'Grammar slides' },
-          ].map(({ href, t }) => (
-            <a key={href} href={href} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-1 font-bold text-ink-2 hover:text-line-ink">
+            { href: 'https://ai-readiness.chekkiai.com?utm_source=chekki_schools&utm_medium=banner&utm_campaign=ai_readiness', Icon: ChartBar, t: isKo ? 'AI 준비도 진단' : 'AI readiness check' },
+            { href: 'https://www.youtube.com/@ChekkiAI', Icon: YoutubeLogo, t: isKo ? '유튜브 채널' : 'YouTube channel' },
+            { href: 'https://www.teacherspayteachers.com/store/chekki-ai', Icon: Storefront, t: isKo ? 'TPT 워크시트' : 'TPT worksheets' },
+            { href: 'https://chekkiai.netlify.app/', Icon: PresentationChart, t: isKo ? '문법 PPT' : 'Grammar slides' },
+          ].map(({ href, Icon, t }) => (
+            <a key={href} href={href} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 font-bold text-ink-2 hover:text-line-ink">
+              <Icon size={20} weight="duotone" className="text-line-ink" aria-hidden="true" />
               {t}
-              <ArrowSquareOut size={14} weight="bold" aria-hidden="true" />
             </a>
           ))}
         </div>
@@ -765,7 +768,7 @@ const SchoolsLandingPage: React.FC = () => {
           <img src="/images/chekki-wave.webp" alt="" width={112} height={112} className="hidden h-28 w-28 object-contain md:block" />
           <div>
             <h2 className="text-[24px] font-extrabold tracking-[-0.02em] sm:text-[28px]">
-              {isKo ? '이번 주 정답지 한 장으로 시작해 보세요' : "Start with this week's answer key"}
+              {isKo ? '이번 주 학부모 리포트부터 채키로 보내 보세요' : "Send this week's parent reports with Chekki"}
             </h2>
             <p className="mt-2 text-[15px] leading-relaxed text-on-sign-2">
               {isKo

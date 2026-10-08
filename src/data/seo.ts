@@ -32,14 +32,14 @@ export const ROUTE_META: Record<'home' | 'faq' | 'schools', { path: string; ko: 
   schools: {
     path: '/schools',
     ko: {
-      title: '학원용 채키 AI | 어학원 숙제 자동 채점 · 카카오톡 학부모 리포트',
+      title: '학원용 채키 AI | 원어민 수업 기록을 한국어 학부모 리포트로',
       description:
-        '정답지는 한 번만 등록하세요. 가정 숙제 스캔을 학원 정답지 기준으로 자동 채점하고, 원어민 선생님 수업 기록을 한국어 카카오톡 학부모 리포트로 바꿔줍니다.',
+        '원어민 선생님의 영어 수업 기록을 한국어 학부모 리포트로 바꿔요. 한국인 선생님이 확인해서 보내고, 가정 숙제는 학원 정답지 기준으로 자동 채점합니다.',
     },
     en: {
-      title: 'Chekki AI for Academies | Hagwon Homework Grading & Parent Reporting',
+      title: 'Chekki AI for Academies | Korean Parent Reports from Foreign Teacher Notes',
       description:
-        "Upload the week's answer key once and autograde every home scan against it. Foreign Teacher class logs become Korean KakaoTalk parent updates, reviewed by a Korean Teacher.",
+        "Foreign teachers' English class notes become Korean parent reports, checked by a Korean teacher before they go out. Homework scanned at home is graded against your answer key.",
     },
   },
 };

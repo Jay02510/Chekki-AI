@@ -9,16 +9,16 @@ const high = PRICING_BILLING.enterprise.monthly.krw;
 
 export const SCHOOLS_QA: { qKo: string; qEn: string; aKo: string; aEn: string }[] = [
   {
-    qKo: '채점이 정확한가요?',
-    qEn: 'Can we trust the grading?',
-    aKo: '선생님이 올린 이번 주 정답지로 먼저 채점해요. 정답지에 있는 문항은 AI가 답을 추측하지 않아요.',
-    aEn: "Chekki grades against the answer key your teacher uploaded this week. For anything on the key, the AI doesn't guess the answer.",
-  },
-  {
     qKo: '원어민 선생님이 한국어를 써야 하나요?',
     qEn: 'Do foreign teachers have to write Korean?',
     aKo: '아니요. 원어민 선생님은 영어로 짧은 수업 기록만 남겨요. 말로 해도 돼요. AI가 한국어 리포트 초안을 쓰고, 한국인 선생님이 고쳐서 보내요.',
     aEn: 'No. Foreign teachers leave a short class note in English, typed or spoken. The AI drafts the Korean report, and a Korean teacher edits and sends it.',
+  },
+  {
+    qKo: '채점이 정확한가요?',
+    qEn: 'Can we trust the grading?',
+    aKo: '선생님이 올린 이번 주 정답지로 먼저 채점해요. 정답지에 있는 문항은 AI가 답을 추측하지 않아요.',
+    aEn: "Chekki grades against the answer key your teacher uploaded this week. For anything on the key, the AI doesn't guess the answer.",
   },
   {
     qKo: '집에서 한 숙제가 선생님께 보이나요?',

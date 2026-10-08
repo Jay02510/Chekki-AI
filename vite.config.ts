@@ -177,12 +177,12 @@ const BODIES: Record<keyof typeof ROUTE_META, Record<'ko' | 'en', string>> = {
     en: faqBody('en') + `<p><a href="/en">Chekki AI home</a> &middot; <a href="/en/schools">Chekki AI for academies</a> &middot; <a href="/faq">한국어</a></p>`,
   },
   schools: {
-    ko: `<h1>학원용 채키 AI: 정답지는 한 번만, 채점과 학부모 리포트는 채키가</h1>
-      <p>집에서 한 영어 숙제를 학원 정답지로 채점하고, 원어민 선생님의 수업 기록을 한국어 리포트로 바꿔요. 학부모님께 가기 전에는 한국인 선생님이 꼭 확인해요.</p>` +
+    ko: `<h1>학원용 채키 AI: 수업 기록은 영어로, 학부모 리포트는 한국어로</h1>
+      <p>채키가 리포트를 쓰고, 한국인 선생님이 확인해서 보내요. 숙제는 학원 정답지로 채점해요.</p>` +
       schoolsQaBody('ko') +
       `<p><a href="/faq">자주 묻는 질문</a> &middot; <a href="/">학부모용 채키 AI</a> &middot; <a href="/teacher">선생님·원장님 로그인</a> &middot; <a href="/en/schools">English</a></p>`,
-    en: `<h1>Chekki AI for academies: upload the answer key once, Chekki grades and drafts the parent reports</h1>
-      <p>Homework scanned at home is graded against your own answer key, and your foreign teachers' class notes become Korean parent reports. A Korean teacher checks each one before it goes out.</p>` +
+    en: `<h1>Chekki AI for academies: class notes in English, parent reports in Korean</h1>
+      <p>Chekki drafts each report and a Korean teacher checks it before it goes out. Homework is graded against your answer key.</p>` +
       schoolsQaBody('en') +
       `<p><a href="/en/faq">FAQ</a> &middot; <a href="/en">Chekki AI for families</a> &middot; <a href="/teacher">Teacher &amp; Director portal</a> &middot; <a href="/schools">한국어</a></p>`,
   },
