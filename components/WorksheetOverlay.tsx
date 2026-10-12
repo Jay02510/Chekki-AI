@@ -290,7 +290,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                 <div
                   key={item.id}
                   style={getStyle(item, idx)}
-                  className={`absolute pointer-events-auto transform-gpu animate-[fadeIn_200ms_ease-out] ${isFocused ? 'opacity-100' : 'opacity-20 blur-[2px]'}`}
+                  className={`absolute pointer-events-auto transform-gpu animate-[fadeIn_200ms_ease-out] before:absolute before:-inset-2 before:content-[''] ${isFocused ? 'opacity-100' : 'opacity-20 blur-[2px]'}`}
                   role="button"
                   tabIndex={0}
                   aria-label={bubbleAriaLabel}
