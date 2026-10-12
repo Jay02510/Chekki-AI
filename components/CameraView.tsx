@@ -7,19 +7,22 @@ import { useAuth } from '../contexts/AuthContext';
 import { CropModal } from './CropModal';
 import { LoopStrip, Stop } from './metro';
 import { ParentClassLogs } from './ParentClassLogs';
+import { useMistakes } from '../contexts/MistakeContext';
 
 interface Props {
   onImageSelected: (base64: string) => void;
   isNight?: boolean;
   minimal?: boolean;
   onOpenHelp?: () => void;
+  onOpenDashboard?: () => void;
 }
 
 // Scan home: Chekki greets the parent, one big button takes the photo.
 // Everything else stays quiet so a tired parent with a child on their lap
 // sees exactly one thing to do.
-export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }) => {
+export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, onOpenDashboard }) => {
   const { showToast } = useToast();
+  const { mistakes } = useMistakes();
   const { user, isAuthenticated, openLoginModal, setShowPaywall } = useAuth();
   const { t, language } = useLanguage();
   const ko = language === 'ko';
@@ -309,6 +312,28 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false }
             ))}
           </ul>
         </section>
+      )}
+
+      {/* saved questions: the returning parent's fastest value, one tap from home */}
+      {isAuthenticated && mistakes.length > 0 && onOpenDashboard && (
+        <button
+          type="button"
+          onClick={onOpenDashboard}
+          className="mt-8 flex w-full min-h-14 items-center gap-4 rounded-md bg-line-soft px-4 py-4 text-left btn-press cursor-pointer sm:px-6"
+        >
+          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface text-line-ink">
+            <Target size={22} weight="bold" aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[17px] font-extrabold text-ink break-keep">
+              {ko ? `다시 볼 문제 ${mistakes.length}개` : `${mistakes.length} to look at together`}
+            </span>
+            <span className="mt-0.5 block text-[14px] text-ink-2 break-keep">
+              {ko ? '아이와 같이 카드로 연습해 봐요' : 'Practice them with your child'}
+            </span>
+          </span>
+          <ArrowRight size={20} weight="bold" className="shrink-0 text-line-ink" aria-hidden="true" />
+        </button>
       )}
 
       {/* this week, for families linked to an academy */}

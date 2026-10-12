@@ -804,6 +804,7 @@ function AppContent() {
                     onImageSelected={(data) => handleImageSelected(data)}
                     minimal
                     onOpenHelp={() => window.dispatchEvent(new CustomEvent('open-help'))}
+                    onOpenDashboard={() => setShowDashboard(true)}
                   />
                 )}
               </div>

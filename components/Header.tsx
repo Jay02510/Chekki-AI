@@ -240,7 +240,7 @@ export const Header: React.FC<Props> = ({
                             {t('tt_review_note')}
                           </span>
                           {mistakes.length > 0 && (
-                            <span className="num rounded bg-wrong-soft px-1.5 text-xs font-bold text-wrong">{mistakes.length}</span>
+                            <span className="num rounded bg-line-soft px-1.5 text-xs font-bold text-line-ink">{mistakes.length}</span>
                           )}
                         </button>
                         <button
