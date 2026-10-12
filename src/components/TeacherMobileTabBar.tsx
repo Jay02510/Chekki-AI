@@ -31,7 +31,7 @@ export function TeacherMobileTabBar({ isNight, isKo, educatorRole, activeTab, se
         ];
 
   const itemClass = (active: boolean) =>
-    `flex-1 min-h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold cursor-pointer transition-colors ${
+    `flex-1 min-h-14 flex flex-col items-center justify-center gap-0.5 text-xs font-bold cursor-pointer transition-colors ${
       active ? 'text-line-ink' : 'text-ink-3'
     }`;
 

@@ -74,7 +74,7 @@ export const LegalModal: React.FC<Props> = ({
                 {title}
               </h2>
               <p
-                className={`text-[10px] text-ink-3 `}
+                className={`text-xs text-ink-3 `}
               >
                 {date}
               </p>

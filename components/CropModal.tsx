@@ -319,7 +319,7 @@ export const CropModal: React.FC<Props> = ({
             {/* Low-res warning overlay */}
             {lowResWarning && (
               <div
-                className={`mt-3 px-3 py-1.5 rounded-full text-[10px] md:text-xs font-semibold font-korean flex items-center gap-1.5 bg-line-soft text-line-ink shrink-0`}
+                className={`mt-3 px-3 py-1.5 rounded-full text-xs font-semibold font-korean flex items-center gap-1.5 bg-line-soft text-line-ink shrink-0`}
               >
                 <span>⚠️</span>
                 <span>

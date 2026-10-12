@@ -240,7 +240,7 @@ export function ScannedModal({
           <div className="space-y-6">
             {/* Guardrail Warning Banner */}
             {hasInappropriateContent && (
-              <div className="p-4 rounded-lg bg-wrong-soft border border-rule text-xs text-wrong font-bold flex items-center gap-3 animate-bounce">
+              <div className="p-4 rounded-lg bg-wrong-soft border border-rule text-xs text-wrong font-bold flex items-center gap-3">
                 <Warning size={20} weight="bold" className="shrink-0 text-wrong" />
                 <div>
                   <p>{isKo ? 'AI 세이프티 가드레일: 부적절한 단어 또는 비속어가 감지되었습니다.' : 'Content Safety Guardrail: Inappropriate language detected.'}</p>

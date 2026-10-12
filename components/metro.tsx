@@ -174,7 +174,7 @@ export const LoopStrip: React.FC<{ stops: Stop[]; language: 'en' | 'ko'; classNa
             >
               {p.primary}
             </span>
-            <span className={`text-[11px] sign-en leading-tight mt-0.5 ${s.state === 'off' ? 'text-ink-3/80' : 'text-ink-3'}`}>
+            <span className={`text-xs sign-en leading-tight mt-0.5 ${s.state === 'off' ? 'text-ink-3/80' : 'text-ink-3'}`}>
               {p.secondary}
             </span>
           </li>

@@ -87,7 +87,7 @@ export const StatTile: React.FC<StatTileProps> = ({
           </span>
           {badge && (
             <span
-              className={`px-2.5 py-1 rounded-full text-[10px] font-black font-mono border ${badgeToneClasses[badge.tone]}`}
+              className={`px-2.5 py-1 rounded-full text-xs font-black font-mono border ${badgeToneClasses[badge.tone]}`}
             >
               {badge.text}
             </span>

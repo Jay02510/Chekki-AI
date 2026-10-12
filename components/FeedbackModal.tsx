@@ -266,7 +266,7 @@ export const FeedbackModal: React.FC<Props> = ({ onClose, context, isNight = tru
                   </button>
 
                   <div className="pt-2">
-                    <p className="text-[10px] text-zinc-400 uppercase tracking-[0.2em] mb-2">
+                    <p className="text-xs text-zinc-400 uppercase tracking-[0.2em] mb-2">
                       Or email us directly
                     </p>
                     <a
