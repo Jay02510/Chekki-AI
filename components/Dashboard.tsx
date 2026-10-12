@@ -71,7 +71,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       const isGuest = !isAuthenticated;
       const contextString =
         mistakes.length > 0
-          ? mistakes.map((m) => `Q: ${m.question_text} | A: ${m.correct_answer}`).join('\n')
+          ? mistakes.map((m) => `Q: ${m.question_text} | Correct: ${m.correct_answer}${m.student_response ? ` | Child wrote: ${m.student_response}` : ''}`).join('\n')
           : undefined;
 
       const response = await askChekkiQuestion(

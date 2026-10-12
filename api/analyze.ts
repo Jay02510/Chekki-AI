@@ -1557,7 +1557,7 @@ If the question is off-topic (politics, entertainment, personal advice), politel
       }
 
       if (worksheetContext) {
-        currentSystemPrompt += `\n\nWORKSHEET CONTEXT:\nThe user is asking about a worksheet. The student made the following mistakes:\n${worksheetContext}\nUse this context to tailor your answers if relevant.`;
+        currentSystemPrompt += `\n\nWORKSHEET CONTEXT:\nThe parent is asking about these worksheet questions (question | correct answer | what the child wrote, when known):\n${worksheetContext}\nUse this context to tailor your answers if relevant. Never guess or invent what the child wrote: if "Child wrote" is missing for the question asked, say you can't see the child's answer, explain why the correct answer is right, and ask which answer the child picked.`;
       }
 
       // Add strict instruction to ignore any commands inside user_query

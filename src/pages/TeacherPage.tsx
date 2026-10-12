@@ -1979,6 +1979,46 @@ export default function TeacherPage({ isNight = true }: Props) {
     );
   }
 
+  // Parent docs carry no `role`, so resolveTeacherRole fell through to the
+  // URL hint (?role=director from the /schools trial CTA) and a parent who
+  // signed in here got the Director shell. Staff = a server-assigned role,
+  // or the role this device wrote at staff signup/invite (pre-reload).
+  const localStaffRole = localStorage.getItem(`chekki_user_role_${user?.uid}`);
+  const isStaffAccount =
+    ['teacher', 'director', 'admin'].includes(user?.role || '') ||
+    localStaffRole === 'teacher' || localStaffRole === 'director';
+  if (!isStaffAccount) {
+    return (
+      <div className="fixed inset-0 z-[500] overflow-y-auto bg-ground text-ink-2 flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md bg-surface rounded-lg p-8 sm:p-10 flex flex-col items-center text-center ring-1 ring-inset ring-rule">
+          <div className="w-16 h-16 mb-5">
+            <ChekkiMascot className="w-full h-full" mood="happy" />
+          </div>
+          <h1 className="text-xl font-bold text-ink mb-2">
+            {isKo ? '학부모 계정으로 로그인되어 있어요' : "You're signed in as a parent"}
+          </h1>
+          <p className="text-sm text-ink-3 mb-6">
+            {isKo
+              ? `${user?.email || ''} 계정은 학부모용이에요. 이 화면은 학원 선생님·원장님 전용이에요.`
+              : `${user?.email || ''} is a parent account. This page is for academy teachers and directors.`}
+          </p>
+          <a
+            href="/app"
+            className="w-full min-h-12 inline-flex items-center justify-center rounded-md bg-line text-on-line font-bold mb-3"
+          >
+            {isKo ? '숙제 확인하러 가기' : 'Go check homework'}
+          </a>
+          <button
+            type="button"
+            onClick={() => logout()}
+            className="w-full min-h-12 rounded-md text-sm font-bold text-ink-2 ring-1 ring-inset ring-rule hover:ring-ink-3 cursor-pointer"
+          >
+            {isKo ? '로그아웃하고 다른 계정으로 로그인' : 'Sign out and use a staff account'}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const activeClass = selectedClass || fallbackDemoClass;
   const isKtInbox = !isDirectorUser && educatorRole === 'kt' && activeTab === 'kt_script';

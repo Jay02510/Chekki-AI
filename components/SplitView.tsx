@@ -323,9 +323,9 @@ export const SplitView: React.FC<SplitViewProps> = ({
           ? localItems
               .map(
                 (i) =>
-                  `Question ${i.id}: Text: "${i.question_text}". Correct Answer: "${i.correct_answer}"`
+                  `Q${i.id}: ${i.question_text} | Correct: ${i.correct_answer}${i.student_response ? ` | Child wrote: ${i.student_response}` : ''}${i.is_correct === false ? ' | Marked wrong' : ''}`
               )
-              .join('\\n')
+              .join('\n')
           : undefined;
       // Pass history along with the new question
       const response = await askChekkiQuestion(
