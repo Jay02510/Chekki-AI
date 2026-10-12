@@ -622,9 +622,21 @@ function DirectorTodayPanel({
                   <p className={`truncate text-[13px] ${row.missStreak >= 2 ? 'font-semibold text-wrong' : 'text-ink-3'}`}>
                     {[
                       row.teacherName,
-                      row.missStreak >= 2 && (isKo ? `${row.missStreak}일 연속 미제출` : `Missed ${row.missStreak} days in a row`),
+                      row.missStreak >= 2 && (isKo ? `수업일 ${row.missStreak}일 연속 미제출` : `No log for ${row.missStreak} class days`),
                     ].filter(Boolean).join(' · ')}
                   </p>
+                  {row.pendingCount > 0 && (
+                    <p className="truncate text-[13px] font-semibold text-line-ink">
+                      {(() => {
+                        const age = row.oldestPendingDate
+                          ? Math.max(0, Math.round((Date.parse(new Date().toISOString().split('T')[0]) - Date.parse(row.oldestPendingDate)) / 86400000))
+                          : 0;
+                        return isKo
+                          ? `KT 검토 대기 ${row.pendingCount}건${age > 0 ? ` · 가장 오래된 일지 ${age}일 전` : ''}`
+                          : `${row.pendingCount} waiting for KT review${age > 0 ? ` · oldest ${age} ${age === 1 ? 'day' : 'days'} ago` : ''}`;
+                      })()}
+                    </p>
+                  )}
                 </div>
                 <span className={`shrink-0 rounded-md px-2.5 py-1 text-[13px] font-bold ${status.tone}`}>{status.label}</span>
               </li>

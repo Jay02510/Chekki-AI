@@ -26,7 +26,14 @@ export interface ComplianceRow {
   missStreak: number;
   /** Today's log(s): none yet, any still waiting for KT review, or all sent. */
   todayStatus: 'none' | 'pending' | 'sent';
+  /** Every log still waiting for KT review, any date, and the oldest one's date. */
+  pendingCount: number;
+  oldestPendingDate: string | null;
 }
+
+// ponytail: weekends count as days off; read a per-class schedule here if
+// academies start running Saturday classes.
+const isWeekend = (iso: string) => [0, 6].includes(new Date(`${iso}T00:00:00Z`).getUTCDay());
 
 // Cross-class rollup of "did the assigned teacher submit a log today" —
 // classes/{classId}/logs is already queried per-class elsewhere
@@ -77,7 +84,11 @@ export function useLogCompliance(classes: any[]) {
           realClasses.map(async (c: any) => {
             const logsRef = collection(dbInstance, 'classes', c.id, 'logs');
             const logsQuery = query(logsRef, where('date', '>=', days[0]), orderBy('date', 'asc'));
-            const snap = await getDocs(logsQuery);
+            const [snap, pendingSnap] = await Promise.all([
+              getDocs(logsQuery),
+              getDocs(query(logsRef, where('reviewStatus', '==', 'pending_review'))),
+            ]);
+            const pendingDates = pendingSnap.docs.map((d) => d.data().date).filter(Boolean).sort();
             const submittedDates = new Set(snap.docs.map((d) => d.data().date));
             const todayLogs = snap.docs.map((d) => d.data()).filter((l) => l.date === todayIso);
             // Discarded logs (duplicates/mistakes) don't count either way.
@@ -98,7 +109,7 @@ export function useLogCompliance(classes: any[]) {
             let missStreak = 0;
             for (let i = dayResults.length - 1; i >= 0; i--) {
               const day = dayResults[i];
-              if (day.isToday && !day.submitted) continue;
+              if ((day.isToday || isWeekend(day.date)) && !day.submitted) continue;
               if (day.submitted) break;
               missStreak++;
             }
@@ -114,6 +125,8 @@ export function useLogCompliance(classes: any[]) {
               days: dayResults,
               missStreak,
               todayStatus,
+              pendingCount: pendingSnap.size,
+              oldestPendingDate: pendingDates[0] ?? null,
             } as ComplianceRow;
           })
         );
