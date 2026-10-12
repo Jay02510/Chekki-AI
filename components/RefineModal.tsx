@@ -137,7 +137,7 @@ export const RefineModal: React.FC<Props> = ({
         aria-modal="true"
         aria-labelledby="refine-title"
         tabIndex={-1}
-        className={`relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-lg bg-surface ring-1 ring-inset ring-rule shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)] sm:max-w-lg sm:rounded-lg ${isClosing ? 'modal-exit' : 'modal-enter'}`}
+        className={`relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-lg bg-surface pb-[env(safe-area-inset-bottom)] ring-1 ring-inset ring-rule sm:pb-0 shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)] sm:max-w-lg sm:rounded-lg ${isClosing ? 'modal-exit' : 'modal-enter'}`}
       >
         <div className="flex shrink-0 items-start justify-between gap-3 px-5 pt-5 sm:px-6 sm:pt-6">
           <div className="min-w-0">

@@ -62,11 +62,11 @@ export const ParentClassLogs: React.FC<Props> = ({ classId, studentUid, studentN
       title={isKo ? '선생님 수업 리포트' : "Teacher's class report"}
       sub={isKo ? '한국인 선생님이 확인하고 보낸 수업 기록이에요.' : "Checked and sent by your child's Korean teacher."}
     >
-      <ol className="space-y-2">
+      <ol className="divide-y divide-rule">
         {logs.map((log, i) => (
           <li key={log.id}>
-            <details open={i === 0} className="group/log rounded-md bg-sunken">
-              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
+            <details open={i === 0} className="group/log">
+              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 py-3 [&::-webkit-details-marker]:hidden">
                 <span className="min-w-0">
                   <span className="block text-[15px] font-bold text-ink">{log.className}</span>
                   {log.lessonTopic && <span className="block truncate text-[13px] text-ink-3">{log.lessonTopic}</span>}
@@ -76,7 +76,7 @@ export const ParentClassLogs: React.FC<Props> = ({ classId, studentUid, studentN
                   <CaretDown size={16} weight="bold" className="text-ink-3 transition-transform group-open/log:rotate-180" />
                 </span>
               </summary>
-              <div className="px-4 pb-4">
+              <div className="pb-4">
                 {log.summary && (
                   <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink break-keep">{!isKo && log.summaryEn ? log.summaryEn : log.summary}</p>
                 )}

@@ -12,7 +12,7 @@ const translations = {
   en: {
     app_name: 'Chekki AI',
     tagline: 'Your AI Homework Helper',
-    login: 'Sign In',
+    login: 'Sign in',
     logout: 'Sign Out',
     scans: 'Magic Scans',
     pro_plan: 'Premium 🚀',
@@ -494,7 +494,7 @@ const translations = {
     billing_next: '다음 결제일',
     billing_expires: '만료일',
     billing_canceled_notice:
-      '구독이 해지되었습니다. 만료일까지는 모든 기능을 이용하실 수 있습니다.',
+      '구독이 해지됐어요. 만료일까지는 모든 기능을 그대로 쓸 수 있어요.',
     billing_back: '앱으로 돌아가기',
     billing_cancel_btn: '정말 구독을 해지하시겠습니까?',
     billing_cancel_desc:
@@ -585,7 +585,7 @@ const translations = {
       '아이 숙제는 개인정보처리방침에 적힌 대로만 쓰고, 탈퇴하면 바로 모두 지워요.',
     trust_safety: '혼내지 않는 즐거운 학습',
     trust_safety_desc:
-      '숙제 시간이 전쟁터가 아닌, 아이와 웃으며 하이파이브하는 칭찬과 교감의 시간으로 바뀝니다.',
+      '숙제 시간이 전쟁터가 아니라, 아이와 웃으며 하이파이브하는 칭찬과 교감의 시간으로 바뀌어요.',
 
     diff_title: '채키와 함께라면 다릅니다',
     diff_ocr: '매직 스캔 & 발음 듣기',
@@ -653,7 +653,7 @@ const translations = {
 
     // Security Settings
     sec_audit_title: '보안 감사 완료',
-    sec_audit_desc: '채키는 개인정보 보호를 최우선으로 합니다.',
+    sec_audit_desc: '채키는 개인정보 보호를 가장 먼저 생각해요.',
     sec_point_1: '안전한 데이터 보관',
     sec_point_2: '데이터 암호화 전송',
     sec_point_3: '익명 분석 처리',

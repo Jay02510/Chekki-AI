@@ -484,10 +484,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-2xl space-y-3 px-4 pb-24 animate-fade-in-up">
-        {user?.classId && user?.classStatus === 'active' && (
-          <ParentClassLogs classId={user.classId} studentUid={user.uid} studentName={user.studentName} language={language} />
-        )}
-
         {/* saved mistakes: each one opens to its answer */}
         <Fold
           defaultOpen
@@ -546,6 +542,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
             </>
           )}
         </Fold>
+
+        {/* After the saved problems: the home card and the menu badge both point here for them. */}
+        {user?.classId && user?.classStatus === 'active' && (
+          <ParentClassLogs classId={user.classId} studentUid={user.uid} studentName={user.studentName} language={language} />
+        )}
 
         <Fold
           icon={<ChatCircleDots size={20} weight="bold" />}

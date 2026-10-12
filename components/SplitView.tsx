@@ -679,7 +679,6 @@ export const SplitView: React.FC<SplitViewProps> = ({
           context={reportContext}
           onClose={() => setReportContext(null)}
           isNight={isNight}
-          warm
         />
       )}
       <PremiumUpsellModal

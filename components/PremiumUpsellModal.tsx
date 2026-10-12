@@ -69,7 +69,7 @@ export const PremiumUpsellModal: React.FC<Props> = ({
         aria-modal="true"
         aria-labelledby="premium-upsell-title"
         tabIndex={-1}
-        className={`relative w-full overflow-hidden rounded-t-lg bg-surface ring-1 ring-inset ring-rule shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)] sm:max-w-md sm:rounded-lg ${isClosing ? 'modal-exit' : 'modal-enter'}`}
+        className={`relative w-full overflow-hidden rounded-t-lg bg-surface pb-[env(safe-area-inset-bottom)] ring-1 ring-inset ring-rule sm:pb-0 shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)] sm:max-w-md sm:rounded-lg ${isClosing ? 'modal-exit' : 'modal-enter'}`}
       >
         <button
           onClick={close}

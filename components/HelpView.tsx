@@ -55,7 +55,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
   return (
     <div className="min-h-screen bg-ground pb-24 animate-fade-in">
       {showFeedbackModal && (
-        <FeedbackModal onClose={() => setShowFeedbackModal(false)} isNight={isNight} warm />
+        <FeedbackModal onClose={() => setShowFeedbackModal(false)} isNight={isNight} />
       )}
       {showVideoModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
@@ -63,7 +63,7 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
             className={`absolute inset-0 bg-[#2b211a]/80 ${isVideoClosing ? 'modal-backdrop-exit' : 'animate-fade-in'}`}
             onClick={closeVideo}
             aria-hidden="true"
-          />
+         />
           <div
             role="dialog"
             aria-modal="true"

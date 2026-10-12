@@ -206,14 +206,14 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
   return (
     <>
       {showLegal && <LegalModal type={showLegal} onClose={() => setShowLegal(null)} />}
-      {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} warm />}
+      {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
 
       <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-4">
         <div
           className={`absolute inset-0 bg-[#2b211a]/55 ${isClosing ? 'modal-backdrop-exit' : 'animate-fade-in'}`}
           onClick={close}
           aria-hidden="true"
-        />
+       />
 
         <div
           ref={dialogRef}
@@ -325,7 +325,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                           maxLength={6}
                           autoCapitalize="characters"
                           className={`${input} min-w-0 flex-1 uppercase tracking-widest`}
-                        />
+                       />
                         <button
                           type="submit"
                           disabled={isUpgradingCode}
@@ -392,7 +392,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                       onChange={(e) => setStudentName(e.target.value)}
                       placeholder={language === 'ko' ? '예: 김유나' : 'e.g. Yuna Kim'}
                       className={input}
-                    />
+                   />
                   </div>
                   <button
                     onClick={() => setShowLeaveClassConfirm(true)}
@@ -693,7 +693,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
             });
           }}
           onCancel={() => setShowLeaveClassConfirm(false)}
-        />
+       />
       )}
     </>
   );

@@ -89,8 +89,11 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
   const scansUsed = user && user.lastScanDate === today ? user.scansUsedToday || 0 : 0;
   const scansLeft = Math.max(0, (user?.maxScansPerDay || 2) - scansUsed);
 
+    // Only "숙제" is the parent's step right now. Parents can't read the
+    // class's curriculum doc, so "정답지" can't be shown as done without
+    // claiming a key we never checked.
     const stops: Stop[] = [
-    { ko: '정답지', en: 'Key', state: 'done' },
+    { ko: '정답지', en: 'Key', state: 'next' },
     { ko: '숙제', en: 'Scan', state: 'current' },
     { ko: '설명', en: 'Explain', state: 'next' },
     { ko: '수업', en: 'Class', state: 'next' },

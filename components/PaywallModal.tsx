@@ -58,7 +58,7 @@ export const PaywallModal: React.FC<Props> = ({ isNight = true }) => {
         aria-modal="true"
         aria-label="Premium"
         tabIndex={-1}
-        className={`relative flex w-full flex-col overflow-hidden rounded-t-lg bg-surface ring-1 ring-inset ring-rule shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)] sm:max-w-2xl sm:rounded-lg ${isClosing ? 'modal-exit' : 'modal-enter'} ${standaloneLegal ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+        className={`relative flex w-full flex-col overflow-hidden rounded-t-lg bg-surface pb-[env(safe-area-inset-bottom)] ring-1 ring-inset ring-rule sm:pb-0 shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)] sm:max-w-2xl sm:rounded-lg ${isClosing ? 'modal-exit' : 'modal-enter'} ${standaloneLegal ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
       >
         <button
           onClick={close}

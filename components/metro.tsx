@@ -132,7 +132,10 @@ export const LoopStrip: React.FC<{ stops: Stop[]; language: 'en' | 'ko'; classNa
 
   const n = stops.length;
   const pos = (i: number) => (n === 1 ? 50 : (i / (n - 1)) * 100);
-  const doneTo = stops.reduce((acc, s, i) => (s.state === 'done' || s.state === 'current' ? i : acc), 0);
+  // The orange rail means "done up to here", so it stays empty until a stop is really done.
+  const doneTo = stops.some((s) => s.state === 'done')
+    ? stops.reduce((acc, s, i) => (s.state === 'done' || s.state === 'current' ? i : acc), 0)
+    : 0;
 
   return (
     <ol

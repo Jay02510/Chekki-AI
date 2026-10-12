@@ -1,4 +1,4 @@
-import { X } from '@phosphor-icons/react';
+import { X, ArrowClockwise } from '@phosphor-icons/react';
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useModalExit } from '../hooks/useModalExit';
@@ -232,7 +232,7 @@ export const CropModal: React.FC<Props> = ({
                 className={`text-[14px] mt-1 leading-snug text-ink-3`}
               >
                 {isKo
-                  ? '필요하면 모서리를 끌어 영역을 맞추세요. 그대로 두면 전체 사진을 채점합니다.'
+                  ? '필요하면 모서리를 끌어 영역을 맞춰 주세요. 그대로 두면 사진 전체를 채점해요.'
                   : 'Drag the corners to frame the worksheet, or leave it to grade the whole photo.'}
               </p>
             </div>
@@ -340,7 +340,7 @@ export const CropModal: React.FC<Props> = ({
               disabled={isProcessing}
               className={`px-4 min-h-11 rounded-md text-[14px] font-bold flex items-center gap-1.5 text-ink-2 ring-1 ring-inset ring-rule hover:text-ink disabled:opacity-50`}
             >
-              <span aria-hidden="true">↻</span>
+              <ArrowClockwise size={16} weight="bold" aria-hidden="true" />
               <span>{isKo ? '회전' : 'Rotate'}</span>
             </button>
           </div>

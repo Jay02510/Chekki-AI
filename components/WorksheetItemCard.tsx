@@ -162,7 +162,7 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
               )}
               <p
                 className={`mt-2 flex items-center gap-1.5 text-[13px] font-bold ${
-                  isWrong ? 'text-wrong' : isRight ? 'text-correct' : 'text-line-ink'
+                  isRight ? 'text-correct' : 'text-line-ink'
                 }`}
               >
                 {isRight ? <Check size={14} weight="bold" /> : null}
