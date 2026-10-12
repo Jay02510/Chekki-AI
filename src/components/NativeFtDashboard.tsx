@@ -188,8 +188,10 @@ function WeekFocusCard({
   return (
     <section className="mx-auto w-full max-w-3xl space-y-3 text-left">
       <h2 className="break-keep text-[22px] font-extrabold tracking-[-0.01em]">
-        {isKo ? `${weekNumber}주차` : `Week ${weekNumber}`}
-        {topic.trim() && <span className={`font-semibold ${muted}`}> · {topic.trim()}</span>}
+        {/* Lead with the unit: "Week 1" next to "Unit 6" read as two
+            competing numbers. The week is the term calendar's. */}
+        {topic.trim() || (isKo ? `학기 ${weekNumber}주차` : `Term week ${weekNumber}`)}
+        {topic.trim() && <span className={`font-semibold ${muted}`}> · {isKo ? `학기 ${weekNumber}주차` : `term week ${weekNumber}`}</span>}
       </h2>
       {roster.length > 0 && (
         <div>

@@ -479,13 +479,14 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
                   <div key={`${r.studentName}-${i}`} className="space-y-2">
                     <div className="flex items-center gap-2">
                       <label htmlFor={`kt-note-${log.id}-${i}`} className="text-sm font-bold">{r.studentName}</label>
-                      <span className={`px-2 py-0.5 rounded-md text-[12px] font-bold ${
-                        r.category === 'praise'
-                          ? ('bg-right-soft text-correct')
-                          : ('bg-line-soft text-line-ink')
-                      }`}>
-                        {r.category === 'praise' ? (isKo ? '칭찬' : 'Praise') : (isKo ? '관심 필요' : 'Needs attention')}
-                      </span>
+                      {/* Only the concern tag: it's the FT's pick, and a green
+                          "Praise" on a note that also raises a concern told the
+                          KT the opposite of what they were about to send. */}
+                      {r.category === 'attention' && (
+                        <span className="px-2 py-0.5 rounded-md text-[12px] font-bold bg-line-soft text-line-ink">
+                          {isKo ? '관심 필요' : 'Needs attention'}
+                        </span>
+                      )}
                     </div>
                     {!noteReachesApp(r.studentUid) && notes[i]?.trim() && (
                       <p className="text-sm text-line-ink bg-line-soft rounded-md px-3 py-2 break-keep">

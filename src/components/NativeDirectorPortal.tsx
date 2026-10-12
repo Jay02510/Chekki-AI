@@ -347,7 +347,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                 <h3 className="text-[20px] font-extrabold tracking-[-0.01em]">
                   {isKo ? '이번 주' : 'This week'}
                   <span className="font-semibold text-ink-3">
-                    {' · '}{selectedClass.name || selectedClass.className || 'Class'}, {isKo ? `${selectedClass.activeWeekNumber || 1}주차` : `week ${selectedClass.activeWeekNumber || 1}`}
+                    {' · '}{selectedClass.name || selectedClass.className || 'Class'}, {isKo ? `학기 ${selectedClass.activeWeekNumber || 1}주차` : `term week ${selectedClass.activeWeekNumber || 1}`}
                   </span>
                 </h3>
                 {flaggedStudents.length > 0 && (
@@ -502,7 +502,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 id="seat-expansion-title" className="text-[20px] font-extrabold">{isKo ? '교사 좌석 추가' : 'Add staff seats'}</h3>
-                <p className="text-[14px] text-ink-3">{isKo ? `지금 ${seatCount}석` : `${seatCount} seats now`}</p>
+                <p className="text-[14px] text-ink-3">{isKo ? `지금 ${seatCount}석 · FT ${seatsTotal?.ft || 0} · KT ${seatsTotal?.kt || 0}` : `${seatCount} seats now · ${seatsTotal?.ft || 0} FT · ${seatsTotal?.kt || 0} KT`}</p>
               </div>
               <button
                 type="button"

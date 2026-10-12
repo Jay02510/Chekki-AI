@@ -42,7 +42,6 @@ import {
   Funnel,
   ShieldCheck,
   X,
-  List,
   Gear,
   UploadSimple,
   Image,
@@ -1888,7 +1887,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={loginRole === 'director' ? (isKo ? "예: 김지원" : "e.g. Kim Ji-won") : (isKo ? "예: 김지원" : "e.g. Sarah Lee")}
-                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3"
+                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3/60"
                   />
                 </div>
               )}
@@ -1904,7 +1903,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     value={academyNameInput}
                     onChange={(e) => setAcademyNameInput(e.target.value)}
                     placeholder={isKo ? '예: 첵키 잉글리시 아카데미' : 'e.g. Chekki English Academy'}
-                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3"
+                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3/60"
                   />
                 </div>
               )}
@@ -1919,7 +1918,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={loginRole === 'director' ? "director@school.com" : "teacher@school.com"}
-                  className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3"
+                  className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3/60"
                 />
               </div>
 
@@ -1933,7 +1932,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3"
+                  className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3/60"
                 />
                 {authMode === 'login' && (
                   <button
@@ -2525,17 +2524,6 @@ export default function TeacherPage({ isNight = true }: Props) {
           'bg-surface border-rule text-ink'
         }`}>
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-            <button
-              type="button"
-              onClick={() => setIsSidebarOpen(true)}
-              aria-label={isKo ? '메뉴 열기' : 'Open menu'}
-              // Teachers get the bottom tab bar's "More" instead on phones.
-              className={`${isDirectorUser ? 'md:hidden' : 'hidden'} p-2.5 rounded-md transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer shrink-0 border ${
-                'bg-sunken border-rule text-ink-2 hover:text-ink'
-              }`}
-            >
-              <List size={20} weight="bold" />
-            </button>
 
             {/* Class switcher — this used to be hidden for directors
                 entirely, which was fine while the Curriculum Preseed tab's
@@ -2607,7 +2595,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               <span className={`hidden sm:inline-flex items-center min-h-11 px-3.5 rounded-md border text-xs font-extrabold whitespace-nowrap ${
                 'border-rule text-ink-2'
               }`}>
-                {isKo ? `${selectedClass?.activeWeekNumber || 1}주차` : `Week ${selectedClass?.activeWeekNumber || 1}`}
+                {isKo ? `학기 ${selectedClass?.activeWeekNumber || 1}주차` : <><span className="hidden sm:inline">Term w</span><span className="sm:hidden">W</span>eek {selectedClass?.activeWeekNumber || 1}</>}
               </span>
             )}
             {showClassControls && selectedClass && !selectedClass.isDemo && isDirectorUser && (
@@ -2630,7 +2618,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     title={isKo ? '클릭하여 학기 주차별 커리큘럼 업로드 캘린더 열기' : 'Click to view semester calendar'}
                   >
                     {/* Phones drop the −/+ buttons; this opens the calendar to change week. */}
-                    {isKo ? `${selectedClass?.activeWeekNumber || 1}주차` : `Week ${selectedClass?.activeWeekNumber || 1}`}
+                    {isKo ? `학기 ${selectedClass?.activeWeekNumber || 1}주차` : <><span className="hidden sm:inline">Term w</span><span className="sm:hidden">W</span>eek {selectedClass?.activeWeekNumber || 1}</>}
                   </button>
                   <button
                     type="button"

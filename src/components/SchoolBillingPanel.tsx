@@ -207,14 +207,14 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isKo = false, schoolId, se
 
         <dl className="mt-6 grid grid-cols-2 divide-x divide-rule border-y border-rule">
           {([
-            ['ft', isKo ? '원어민 선생님 좌석' : 'FT seats'],
-            ['kt', isKo ? '한국인 선생님 좌석' : 'KT seats'],
+            ['ft', isKo ? 'FT 좌석 사용' : 'FT seats in use'],
+            ['kt', isKo ? 'KT 좌석 사용' : 'KT seats in use'],
           ] as const).map(([k, label], i) => (
             <div key={k} className={i === 0 ? 'py-4 pr-4' : 'py-4 pl-4'}>
               <dt className="text-[13px] font-bold text-ink-3">{label}</dt>
               <dd className="mt-1 text-[28px] font-extrabold tabular-nums">
                 {usedSeats[k]}
-                <span className="text-[14px] font-semibold text-ink-3"> / {seatsTotal[k]} {isKo ? '사용' : 'used'}</span>
+                <span className="text-[14px] font-semibold text-ink-3"> / {seatsTotal[k]}</span>
               </dd>
             </div>
           ))}
