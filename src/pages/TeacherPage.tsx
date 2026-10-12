@@ -2079,7 +2079,6 @@ export default function TeacherPage({ isNight = true }: Props) {
     };
     return (
       <div className={`min-h-dvh flex items-center justify-center p-4 font-sans bg-surface text-ink`}>
-        <div className="fixed inset-0 blur-[100px] pointer-events-none" />
         <div className={`relative w-full max-w-md rounded-lg border p-1.5 bg-surface border-rule`}>
           <div className={`rounded-lg p-8 sm:p-10 flex flex-col items-center bg-surface`}>
 

@@ -1028,7 +1028,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       type="button"
                       disabled={isGeneratingWorksheet}
                       onClick={handleGenerateWorksheet}
-                      className="w-full sm:w-auto px-5 py-2.5 disabled:opacity-50 text-ink font-extrabold text-xs rounded-md transition-[color,background-color,border-color,opacity,transform] active:scale-[0.97] cursor-pointer flex items-center justify-center gap-2 shrink-0"
+                      className="w-full sm:w-auto px-5 py-2.5 bg-line text-on-line disabled:opacity-50 font-extrabold text-xs rounded-md transition-[color,background-color,border-color,opacity,transform] active:scale-[0.97] cursor-pointer flex items-center justify-center gap-2 shrink-0"
                     >
                       {isGeneratingWorksheet ? (
                         <div className="w-3.5 h-3.5 border-2 border-rule border-t-white rounded-full animate-spin" />

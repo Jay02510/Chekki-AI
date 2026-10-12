@@ -146,9 +146,9 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-1">
-            <div className={`h-1.5 rounded-full transition-[color,background-color,border-color,opacity,transform] duration-500 ${step >= 1 ? 'bg-line' : 'bg-sunken'}`} />
-            <div className={`h-1.5 rounded-full transition-[color,background-color,border-color,opacity,transform] duration-500 ${step >= 2 ? 'bg-line' : 'bg-sunken'}`} />
-            <div className={`h-1.5 rounded-full transition-[color,background-color,border-color,opacity,transform] duration-500 ${step >= 3 ? 'bg-line' : 'bg-sunken'}`} />
+            <div className={`h-1.5 rounded-full transition-[color,background-color,border-color,opacity,transform] duration-300 ${step >= 1 ? 'bg-line' : 'bg-sunken'}`} />
+            <div className={`h-1.5 rounded-full transition-[color,background-color,border-color,opacity,transform] duration-300 ${step >= 2 ? 'bg-line' : 'bg-sunken'}`} />
+            <div className={`h-1.5 rounded-full transition-[color,background-color,border-color,opacity,transform] duration-300 ${step >= 3 ? 'bg-line' : 'bg-sunken'}`} />
           </div>
 
           {/* Trial Countdown — mirrors the dashboard banner (NativeDirectorPortal)
