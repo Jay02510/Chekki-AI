@@ -632,7 +632,7 @@ function DirectorTodayPanel({
                     ].filter(Boolean).join(' · ')}
                   </p>
                   {row.pendingCount > 0 && (
-                    <p className="truncate text-[13px] font-semibold text-line-ink">
+                    <p className="break-keep text-[13px] font-semibold text-line-ink">
                       {(() => {
                         const age = row.oldestPendingDate
                           ? Math.max(0, Math.round((Date.parse(new Date().toISOString().split('T')[0]) - Date.parse(row.oldestPendingDate)) / 86400000))
