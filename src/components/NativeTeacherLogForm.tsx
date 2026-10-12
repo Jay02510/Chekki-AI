@@ -4,6 +4,7 @@ import { ClassLogPayload, saveOfflineDraft, getOfflineDraft, clearOfflineDraft }
 import { VoiceFillException, VoiceFillFields } from '../services/voiceFill';
 import { UserProfile } from '../../types';
 import { VoiceFillAssistant } from './VoiceFillAssistant';
+import { staffUi } from './staffUi';
 
 interface Props {
   isNight?: boolean;
@@ -432,6 +433,12 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
     'Focused and Quiet': '집중하고 차분함',
     'A bit distracted': '다소 산만함',
   };
+  // The option values are stored on the log; these are display labels only.
+  const energyOptionLabelsEn: Record<string, string> = {
+    'High Energy and Engaged': 'High energy, engaged',
+    'Focused and Quiet': 'Focused and quiet',
+    'A bit distracted': 'A bit distracted',
+  };
 
   const activityOptions = ['Reading', 'Speaking', 'Writing', 'Worksheet', 'Game', 'Test'];
   const activityOptionLabelsKo: Record<string, string> = {
@@ -533,7 +540,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setShowVoiceFill(true)}
-            className="px-4 min-h-11 rounded-md flex items-center justify-center gap-2 text-sm font-extrabold transition-[background-color,transform] cursor-pointer active:scale-95 bg-line hover:bg-line text-on-line"
+            className={staffUi.primaryBtn}
           >
             <Microphone size={16} weight="fill" />
             {isKo ? '음성으로 채우기' : 'Fill by voice'}
@@ -558,7 +565,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
       {/* Draft Restored Banner */}
       {hasDraftRestored && (
-        <div className={`mb-6 p-3 rounded-lg border flex items-center gap-2.5 text-xs font-bold ${
+        <div className={`mb-6 p-3 rounded-lg border flex items-center gap-2.5 text-[14px] font-bold ${
           'bg-sunken border-rule text-ink-2'
         }`}>
           <FloppyDisk size={16} weight="fill" className="shrink-0" />
@@ -575,7 +582,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
       {/* Scripted Voice-Fill Listening Banner (demo only) */}
       {isDemo && demoScripted && isPlayingScriptedVoiceFill && (
-        <div className="mb-6 p-3.5 bg-line-soft border border-rule rounded-lg flex items-center gap-2.5 text-xs font-bold text-line-ink">
+        <div className="mb-6 p-3.5 bg-line-soft border border-rule rounded-lg flex items-center gap-2.5 text-[14px] font-bold text-line-ink">
           <Microphone size={18} weight="fill" className="animate-pulse text-line-ink shrink-0" />
           <span>{isKo ? '듣는 중... 말씀하신 수업 내용으로 양식을 채우고 있습니다.' : 'Listening... filling the form from a spoken class recap.'}</span>
         </div>
@@ -583,7 +590,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
       {/* Interactive Helper Banner */}
       {isDemo && (
-        <div className="mb-6 p-3.5 bg-line-soft border border-rule rounded-lg flex items-center justify-between text-xs font-bold text-line-ink">
+        <div className="mb-6 p-3.5 bg-line-soft border border-rule rounded-lg flex items-center justify-between text-[14px] font-bold text-line-ink">
           <div className="flex items-center gap-2">
             <Sparkle size={18} weight="fill" className="animate-pulse text-line-ink shrink-0" />
             <span>{isKo ? '데모 미리보기: 아래 버튼을 클릭하고 주황색 버튼을 눌러 AI 학부모 대본 생성을 체험해보세요!' : 'Demo Preview: Click any buttons below & hit orange button to see how AI parent script generation works!'}</span>
@@ -604,17 +611,15 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Class & Date */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <label htmlFor="log-class-name" className="text-xs font-bold text-ink-3 block">{isKo ? '학급명 *' : 'Class Name *'}</label>
+            <label htmlFor="log-class-name" className={staffUi.label}>{isKo ? '학급명 *' : 'Class name *'}</label>
             {isDemo ? (
               <select
                 id="log-class-name"
                 value={className}
                 onChange={(e) => setClassName(e.target.value)}
-                className={`w-full p-3 rounded-md border text-base md:text-xs font-bold focus:outline-none focus:border-line ${
-                  'bg-surface border-rule text-ink'
-                }`}
+                className={staffUi.field}
               >
                 <option value="Apex Seocho 7A">Apex Seocho 7A (Kindergarten 7yo)</option>
                 <option value="Apex Seocho 6B">Apex Seocho 6B (Kindergarten 6yo)</option>
@@ -626,13 +631,9 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               // wrong class). It used to render as a <select> with exactly
               // one option, which looked broken since a dropdown implies
               // there should be more to pick from.
-              <div
-                className={`w-full p-3 rounded-md border text-base md:text-xs font-bold flex items-center justify-between gap-2 ${
-                  'bg-surface border-rule text-ink'
-                }`}
-              >
-                <span>{selectedClassName || (isKo ? '선택된 학급 없음' : 'No class selected')}</span>
-                <span className="flex items-center gap-1 text-[12px] text-ink-3 shrink-0">
+              <div className={`${staffUi.field} flex items-center justify-between gap-2 font-bold`}>
+                <span className="min-w-0 truncate">{selectedClassName || (isKo ? '선택된 학급 없음' : 'No class selected')}</span>
+                <span className="flex shrink-0 items-center gap-1 text-[13px] font-semibold text-ink-3">
                   <Lock size={12} weight="bold" />
                   {isRealClassSynced ? (isKo ? '동기화됨' : 'Synced') : (isKo ? '미리보기' : 'Preview')}
                 </span>
@@ -641,15 +642,13 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="log-date" className="text-xs font-bold text-ink-3 block">{isKo ? '날짜 *' : 'Date *'}</label>
+            <label htmlFor="log-date" className={staffUi.label}>{isKo ? '날짜 *' : 'Date *'}</label>
             <input
               id="log-date"
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className={`w-full p-3 rounded-md border text-base md:text-xs font-bold focus:outline-none focus:border-line ${
-                'bg-surface border-rule text-ink'
-              }`}
+              className={staffUi.field}
             />
           </div>
         </div>
@@ -657,7 +656,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         {/* Lesson Topic & Textbook */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label htmlFor="log-lesson-topic" className="text-xs font-bold text-ink-3 block">{isKo ? '수업 주제 *' : 'Lesson Topic *'}</label>
+            <label htmlFor="log-lesson-topic" className={staffUi.label}>{isKo ? '수업 주제 *' : 'Lesson topic *'}</label>
             <input
               id="log-lesson-topic"
               type="text"
@@ -665,14 +664,12 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               value={lessonTopic}
               onChange={(e) => setLessonTopic(e.target.value)}
               placeholder={isKo ? '예: Unit 4: 광합성' : 'e.g. Unit 4: Photosynthesis'}
-              className={`w-full p-3 rounded-md border text-base md:text-xs focus:outline-none focus:border-line ${
-                'bg-surface border-rule text-ink'
-              }`}
+              className={staffUi.field}
             />
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="log-textbook" className="text-xs font-bold text-ink-3 block">{isKo ? '교재 *' : 'Textbook *'}</label>
+            <label htmlFor="log-textbook" className={staffUi.label}>{isKo ? '교재 *' : 'Textbook *'}</label>
             <input
               id="log-textbook"
               type="text"
@@ -680,16 +677,14 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               value={textbook}
               onChange={(e) => setTextbook(e.target.value)}
               placeholder={isKo ? '예: Bricks Reading 150' : 'e.g. Bricks Reading 150'}
-              className={`w-full p-3 rounded-md border text-base md:text-xs focus:outline-none focus:border-line ${
-                'bg-surface border-rule text-ink'
-              }`}
+              className={staffUi.field}
             />
           </div>
         </div>
 
         {/* Class Energy Level */}
         <div className="space-y-2">
-          <span id="log-energy-label" className="text-xs font-bold text-ink-3 block">{isKo ? '수업 분위기 (선택)' : 'Class energy (optional)'}</span>
+          <span id="log-energy-label" className={staffUi.label}>{isKo ? '수업 분위기 (선택)' : 'Class energy (optional)'}</span>
           <div role="group" aria-labelledby="log-energy-label" className="flex flex-wrap gap-2">
             {energyOptions.map((opt) => (
               <button
@@ -697,13 +692,13 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                 type="button"
                 onClick={() => setEnergyLevel((prev) => (prev === opt ? '' : opt))}
                 aria-pressed={energyLevel === opt}
-                className={`px-3.5 min-h-11 rounded-md border text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                className={`px-3.5 min-h-11 rounded-md border text-[14px] font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
                   energyLevel === opt
                     ? 'bg-line-soft border-line text-line-ink'
                     : 'bg-surface border-rule text-ink-2 hover:text-ink'
                 }`}
               >
-                <span>{isKo ? energyOptionLabelsKo[opt] : opt}</span>
+                <span>{isKo ? energyOptionLabelsKo[opt] : energyOptionLabelsEn[opt]}</span>
                 {energyLevel === opt && <Check size={16} weight="bold" className="text-line-ink shrink-0" />}
               </button>
             ))}
@@ -712,7 +707,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
         {/* Daily Activities Multi-Select */}
         <div className="space-y-2">
-          <span id="log-activities-label" className="text-xs font-bold text-ink-3 block">{isKo ? '오늘의 활동 (선택)' : 'Activities (optional)'}</span>
+          <span id="log-activities-label" className={staffUi.label}>{isKo ? '오늘의 활동 (선택)' : 'Activities (optional)'}</span>
           <div role="group" aria-labelledby="log-activities-label" className="flex flex-wrap gap-2">
             {activityOptions.map((act) => {
               const active = activities.includes(act);
@@ -721,14 +716,15 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                   key={act}
                   type="button"
                   onClick={() => toggleActivity(act)}
-                  className={`px-3.5 py-2 rounded-md text-xs font-bold transition-colors cursor-pointer border flex items-center gap-1.5 ${
+                  aria-pressed={active}
+                  className={`px-3.5 min-h-11 rounded-md border text-[14px] font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
                     active
-                      ? 'bg-line border-line text-on-line'
-                      : 'bg-sunken border-rule text-ink-2 hover:text-ink'
+                      ? 'bg-line-soft border-line text-line-ink'
+                      : 'bg-surface border-rule text-ink-2 hover:text-ink'
                   }`}
                 >
-                  {active && <Check size={14} weight="bold" />}
                   <span>{isKo ? activityOptionLabelsKo[act] : act}</span>
+                  {active && <Check size={16} weight="bold" className="text-line-ink shrink-0" />}
                 </button>
               );
             })}
@@ -738,16 +734,14 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         {/* General Class Comments */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label htmlFor="log-general-comments" className="text-xs font-bold text-ink-3 block">{isKo ? '수업 코멘트' : 'Class comments'}</label>
+            <label htmlFor="log-general-comments" className={staffUi.label}>{isKo ? '수업 코멘트' : 'Class comments'}</label>
           </div>
           <textarea
             id="log-general-comments"
             value={generalComments}
             onChange={(e) => setGeneralComments(e.target.value)}
             rows={3}
-            className={`w-full p-3.5 rounded-md border text-base md:text-xs leading-relaxed focus:outline-none focus:border-line ${
-              'bg-surface border-rule text-ink'
-            }`}
+            className={`${staffUi.field} py-3 leading-relaxed`}
             placeholder={isKo ? '전체 수업 코멘트를 입력하세요...' : 'Type general class notes here...'}
           />
         </div>
@@ -756,16 +750,16 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         <div className="space-y-3 pt-2 border-t border-rule">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <label className="text-sm font-bold block">
+              <label className="block text-[15px] font-extrabold">
                 {isKo ? '학생별 노트' : 'Student notes'}
               </label>
-              <span className="text-xs text-ink-3">{isKo ? '학부모에게 따로 전할 내용이 있는 학생' : 'Students with something to tell their parents'}</span>
+              <span className={staffUi.sub}>{isKo ? '학부모에게 따로 전할 내용이 있는 학생' : 'Students with something to tell their parents'}</span>
             </div>
 
             <button
               type="button"
               onClick={handleOpenAddModal}
-              className="px-3.5 min-h-11 shrink-0 whitespace-nowrap border border-rule text-line-ink hover:bg-line-soft rounded-md text-xs font-bold transition-[background-color,transform] cursor-pointer flex items-center gap-1 active:scale-95"
+              className={staffUi.quietBtn}
             >
               <Plus size={14} weight="bold" />
               <span>{isKo ? '학생 추가' : 'Add student'}</span>
@@ -774,20 +768,20 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
           {/* List of Flagged Exceptions */}
           {exceptions.length === 0 ? (
-            <p className="text-xs text-ink-3 py-2">{isKo ? '아직 추가된 학생이 없습니다.' : 'No students added yet.'}</p>
+            <p className={`${staffUi.sub} py-2`}>{isKo ? '아직 추가된 학생이 없습니다.' : 'No students added yet.'}</p>
           ) : (
             <div className="space-y-2">
               {exceptions.map((ex, idx) => (
                 <div
                   key={idx}
-                  className={`rounded-md border text-xs overflow-hidden ${
+                  className={`rounded-md border text-[14px] overflow-hidden ${
                     'bg-line-soft border-rule text-line-ink'
                   }`}
                 >
                   <div className="p-3 flex items-start justify-between gap-3">
                     <div>
                       <span className="font-extrabold text-line-ink block">{ex.studentName}</span>
-                      <p className="text-xs leading-relaxed mt-0.5 opacity-90">{ex.details}</p>
+                      <p className="mt-0.5 leading-relaxed text-ink">{ex.details}</p>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <button
@@ -809,7 +803,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     </div>
                   </div>
                   {ex.suggestedMatch && (
-                    <div className={`px-3 py-2 flex items-center justify-between gap-2 border-t text-[12px] font-bold ${
+                    <div className={`px-3 py-2 flex items-center justify-between gap-2 border-t text-[13px] font-bold ${
                       'bg-line-soft border-rule text-line-ink'
                     }`}>
                       <span>
@@ -854,8 +848,8 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                 <UserPlus size={20} className="text-line-ink" weight="bold" />
                 <h3 id="exception-modal-title" className="font-extrabold text-base">
                   {editingExceptionIndex !== null
-                    ? (isKo ? '학생 노트 수정' : 'Edit Student Note')
-                    : (isKo ? '학생 특이사항 표시' : 'Flag Student Exception')}
+                    ? (isKo ? '학생 노트 수정' : 'Edit student note')
+                    : (isKo ? '학생 노트 추가' : 'Add student note')}
                 </h3>
               </div>
               <button
@@ -874,46 +868,46 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
             <div className="space-y-3">
               {/* Praise vs Attention Category Toggle */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-ink-3 block">{isKo ? '분류 선택 *' : 'Update Category *'}</label>
+                <label className={staffUi.label}>{isKo ? '분류 선택 *' : 'Note type *'}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setModalCategory('praise')}
-                    className={`py-2 px-3 rounded-md text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
+                    className={`min-h-11 px-3 rounded-md text-[14px] font-bold border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                       modalCategory === 'praise'
                         ? 'bg-right-soft border-rule text-correct font-extrabold'
                         : 'bg-sunken border-rule text-ink-3'
                     }`}
                   >
-                    <span>{isKo ? '칭찬' : 'Positive Praise'}</span>
+                    <span>{isKo ? '칭찬' : 'Praise'}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setModalCategory('attention')}
-                    className={`py-2 px-3 rounded-md text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
+                    className={`min-h-11 px-3 rounded-md text-[14px] font-bold border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                       modalCategory === 'attention'
                         ? 'bg-line-soft border-line text-line-ink font-extrabold'
                         : 'bg-sunken border-rule text-ink-3'
                     }`}
                   >
-                    <span>{isKo ? '주의 필요' : 'Attention Needed'}</span>
+                    <span>{isKo ? '주의 필요' : 'Needs attention'}</span>
                   </button>
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <div className="flex justify-between items-center text-xs font-bold text-ink-3">
+                <div className="mb-1 flex items-center justify-between text-[13px] font-bold text-ink-3">
                   <label htmlFor="exception-student-field">{isKo ? '학생 *' : 'Student *'}</label>
                   {effectiveRoster.length > 0 && (
                     <button
                       type="button"
                       onClick={() => setIsCustomStudentName(!isCustomStudentName)}
-                      className="text-line-ink text-[12px] underline hover:text-line-ink"
+                      className="min-h-11 text-[13px] font-bold text-line-ink hover:underline"
                     >
                       {isCustomStudentName
-                        ? (isKo ? '명단에서 선택' : 'Select from Roster')
-                        : (isKo ? '+ 직접 입력' : '+ Type Custom Name')}
+                        ? (isKo ? '명단에서 선택' : 'Pick from roster')
+                        : (isKo ? '직접 입력' : 'Type a name')}
                     </button>
                   )}
                 </div>
@@ -927,18 +921,14 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     // Inline inside the log <form> now — Enter here must not submit the whole log.
                     onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                     placeholder={isKo ? '학생 이름 입력 (예: David / 김다윗)...' : 'Enter student name (e.g. David / 김다윗)...'}
-                    className={`w-full p-3 rounded-md border text-base md:text-xs font-bold focus:outline-none ${
-                      'bg-surface border-rule text-ink'
-                    }`}
+                    className={staffUi.field}
                   />
                 ) : (
                   <select
                     id="exception-student-field"
                     value={modalStudentUid}
                     onChange={(e) => setModalStudentUid(e.target.value)}
-                    className={`w-full p-3 rounded-md border text-base md:text-xs font-bold focus:outline-none ${
-                      'bg-surface border-rule text-ink'
-                    }`}
+                    className={staffUi.field}
                   >
                     {effectiveRoster.map((s) => (
                       <option key={s.uid} value={s.uid}>
@@ -950,7 +940,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="exception-details-field" className="text-xs font-bold text-ink-3 block">{isKo ? '세부 내용 *' : 'Details *'}</label>
+                <label htmlFor="exception-details-field" className={staffUi.label}>{isKo ? '세부 내용 *' : 'Details *'}</label>
                 <textarea
                   id="exception-details-field"
                   value={modalDetails}
@@ -966,9 +956,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                           ? 'Describe positive milestone (e.g. 100% quiz score, excellent pronunciation, helped classmates)...'
                           : 'Explain focus issue (e.g. missing homework, tardy, hesitant during speaking drill)...')
                   }
-                  className={`w-full p-3 rounded-md border text-base md:text-xs font-medium focus:outline-none ${
-                    'bg-surface border-rule text-ink'
-                  }`}
+                  className={`${staffUi.field} py-3 leading-relaxed`}
                 />
               </div>
 
@@ -979,7 +967,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     setEditingExceptionIndex(null);
                     setShowExceptionModal(false);
                   }}
-                  className="w-1/2 py-2.5 rounded-md text-xs font-bold border border-rule hover:bg-sunken text-ink-3"
+                  className={`${staffUi.quietBtn} flex-1 min-h-11`}
                 >
                   {isKo ? '취소' : 'Cancel'}
                 </button>
@@ -1004,11 +992,11 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     setEditingExceptionIndex(null);
                     setShowExceptionModal(false);
                   }}
-                  className="w-1/2 py-2.5 bg-line hover:bg-line text-on-line font-bold rounded-md text-xs transition-colors cursor-pointer"
+                  className={`${staffUi.primaryBtn} flex-1`}
                 >
                   {editingExceptionIndex !== null
-                    ? (isKo ? '변경사항 저장' : 'Save Changes')
-                    : (isKo ? '저장' : 'Save Highlight')}
+                    ? (isKo ? '변경사항 저장' : 'Save changes')
+                    : (isKo ? '저장' : 'Save note')}
                 </button>
               </div>
             </div>
@@ -1022,18 +1010,18 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
         <button
           type="submit"
           disabled={isRealLogIncomplete}
-          className="w-full py-4 bg-line hover:bg-line disabled:opacity-40 disabled:cursor-not-allowed text-on-line font-extrabold text-sm rounded-lg transition-[background-color,transform,opacity] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+          className={`${staffUi.primaryBtn} min-h-12 w-full`}
         >
           <Sparkle size={18} weight="fill" />
           <span>
             {userProfile?.educatorRole === 'kt'
               ? (isKo ? '일지 저장' : 'Save log')
-              : (isKo ? '한국인 교사에게 검토 요청' : 'Send to KT for Review')}
+              : (isKo ? '한국인 교사에게 검토 요청' : 'Send to KT for review')}
           </span>
         </button>
         {missingFieldLabels.length > 0 && (
           <p className="text-center">
-            <span className={`inline-block px-3 py-1 rounded-md text-xs font-bold text-line-ink bg-surface`}>
+            <span className="inline-block rounded-md bg-surface px-3 py-1 text-[13px] font-bold text-line-ink">
               {isKo ? '누락된 항목: ' : 'Missing: '}{missingFieldLabels.join(', ')}
             </span>
           </p>

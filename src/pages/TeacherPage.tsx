@@ -1888,7 +1888,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     onChange={(e) => setName(e.target.value)}
                     placeholder={loginRole === 'director' ? (isKo ? "예: 김지원" : "e.g. Kim Ji-won") : (isKo ? "예: 김지원" : "e.g. Sarah Lee")}
                     className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3/60"
-                  />
+                 />
                 </div>
               )}
 
@@ -1904,7 +1904,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     onChange={(e) => setAcademyNameInput(e.target.value)}
                     placeholder={isKo ? '예: 첵키 잉글리시 아카데미' : 'e.g. Chekki English Academy'}
                     className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3/60"
-                  />
+                 />
                 </div>
               )}
 
@@ -1919,7 +1919,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={loginRole === 'director' ? "director@school.com" : "teacher@school.com"}
                   className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3/60"
-                />
+               />
               </div>
 
               <div className="space-y-1.5 text-left">
@@ -1933,7 +1933,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3/60"
-                />
+               />
                 {authMode === 'login' && (
                   <button
                     type="button"
@@ -1963,7 +1963,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
                     className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3"
-                  />
+                 />
                 </div>
               )}
 
@@ -2135,7 +2135,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           setShowActivationWizard(false);
           setActiveTab('director_hq');
         }}
-      />
+     />
     );
   }
 
@@ -2184,7 +2184,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     onChange={(e) => setWelcomeName(e.target.value)}
                     placeholder={isKo ? '예: 김지원' : 'e.g. Sarah Lee'}
                     className={`w-full p-4 rounded-lg border text-sm font-bold outline-none focus:border-line transition-[color,background-color,border-color,box-shadow,transform] bg-surface border-rule text-ink`}
-                  />
+                 />
                 </div>
 
                 {welcomeSchool && (
@@ -2327,7 +2327,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     <div
                       key={i}
                       className={`h-1.5 rounded-full transition-[color,background-color,border-color,box-shadow,transform] duration-300 ${i === teacherObStep ? 'w-8 bg-line' : 'w-1.5 bg-sunken'}`}
-                    />
+                   />
                   ))}
                 </div>
 
@@ -2363,7 +2363,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         <div
           className="fixed inset-0 z-[350] bg-[#2b211a]/55 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
-        />
+       />
       )}
 
       {/* Sidebar Navigation — static column on md+, off-canvas drawer below md */}
@@ -2373,8 +2373,8 @@ export default function TeacherPage({ isNight = true }: Props) {
         aria-modal="true"
         aria-label={isKo ? '탐색 메뉴' : 'Navigation menu'}
         tabIndex={-1}
-        className={`fixed inset-y-0 left-0 z-[360] w-[85vw] max-w-sm transform transition-transform duration-300 ease-out md:static md:z-auto md:w-72 md:h-dvh md:sticky md:top-0 md:translate-x-0 md:transform-none border-b md:border-b-0 md:border-r flex flex-col shrink-0 transition-colors ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-y-0 left-0 z-[360] w-[85vw] max-w-sm transform transition-[transform,visibility,background-color] duration-300 ease-out md:static md:z-auto md:w-72 md:h-dvh md:sticky md:top-0 md:translate-x-0 md:transform-none border-b md:border-b-0 md:border-r flex flex-col shrink-0 ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full max-md:invisible'
         } bg-surface border-rule`}
       >
 
@@ -2388,7 +2388,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 src={academyLogo}
                 alt="Academy Logo"
                 className="w-10 h-10 rounded-lg object-cover border border-rule bg-sunken"
-              />
+             />
             ) : (
               <div className="w-10 h-10 bg-line-soft border border-rule rounded-lg flex items-center justify-center text-line-ink shrink-0">
                 <ChalkboardTeacher size={20} weight="bold" />
@@ -2436,7 +2436,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               setActiveTab={setActiveTab}
               showReportCardModal={showReportCardModal}
               setShowReportCardModal={setShowReportCardModal}
-            />
+           />
           )}
 
           {loginRole !== 'director' && educatorRole === 'ft' && (
@@ -2510,7 +2510,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         setActiveTab={setActiveTab}
         pendingCount={ktPendingLogs.length}
         onMore={() => setIsSidebarOpen(true)}
-      />
+     />
 
       {/* Main Content Area */}
       <main className={`flex-1 flex flex-col min-w-0 relative overflow-y-auto transition-colors ${
@@ -2568,7 +2568,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     size={14}
                     weight="bold"
                     className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-3`}
-                  />
+                 />
                 </>
               ) : isLoadingClasses ? (
                 <div className="text-ink-3 text-sm font-semibold p-2 animate-pulse">
@@ -2592,9 +2592,7 @@ export default function TeacherPage({ isNight = true }: Props) {
             {/* The active week is class-wide (every teacher and parent sees
                 it), so only directors can change it. Teachers get a label. */}
             {showClassControls && selectedClass && !selectedClass.isDemo && !isDirectorUser && (
-              <span className={`hidden sm:inline-flex items-center min-h-11 px-3.5 rounded-md border text-xs font-extrabold whitespace-nowrap ${
-                'border-rule text-ink-2'
-              }`}>
+              <span className="hidden min-h-11 items-center whitespace-nowrap rounded-md px-3.5 text-[14px] font-extrabold text-ink ring-1 ring-inset ring-rule sm:inline-flex">
                 {isKo ? `학기 ${selectedClass?.activeWeekNumber || 1}주차` : <><span className="hidden sm:inline">Term w</span><span className="sm:hidden">W</span>eek {selectedClass?.activeWeekNumber || 1}</>}
               </span>
             )}
@@ -2645,7 +2643,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 unreadCount={unreadCount}
                 onMarkRead={markRead}
                 onMarkAllRead={markAllRead}
-              />
+             />
             )}
 
             {/* Language Switcher */}
@@ -2821,7 +2819,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   const found = realClasses.find((c: any) => c.id === classId);
                   if (found) setSelectedClass(found);
                 }}
-              />
+             />
             ) : educatorRole === 'kt' ? (
               <KtTabContent
                 isNight={isThemeNight}
@@ -2853,7 +2851,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 handleDeclineStudent={handleDeclineStudent}
                 fetchRosterAndMistakes={fetchRosterAndMistakes}
                 setSelectedStudentDetails={setSelectedStudentDetails}
-              />
+             />
             ) : (
               <FtTabContent
                 isNight={isThemeNight}
@@ -2874,7 +2872,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 selectedClass={selectedClass}
                 setSelectedClass={setSelectedClass}
                 curriculumEditor={curriculumEditor}
-              />
+             />
             )}
 
             </div>
@@ -2887,7 +2885,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           <div 
             className="absolute inset-0 bg-[#2b211a]/55" 
             onClick={() => setSelectedStudentDetails(null)} 
-          />
+         />
           <div
             ref={studentDrawerDialogRef}
             role="dialog"
@@ -2957,7 +2955,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     className={`w-full h-20 p-3 rounded-md border text-xs outline-none resize-none ${
                       'bg-surface border-rule text-ink placeholder:text-ink-3'
                     }`}
-                  />
+                 />
                   <div className="flex gap-2">
                     <button
                       type="button"
@@ -3090,7 +3088,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           <div 
             className="absolute inset-0 bg-[#2b211a]/55" 
             onClick={() => setShowCreateClassModal(false)} 
-          />
+         />
           <div
             ref={createClassDialogRef}
             role="dialog"
@@ -3133,7 +3131,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     className={`w-full border outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] ${
                       'bg-surface border-rule focus:border-line text-ink placeholder:text-ink-3'
                     }`}
-                  />
+                 />
                 </div>
 
                 <div className="space-y-2 text-left">
@@ -3189,7 +3187,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           <div 
             className="absolute inset-0 bg-[#2b211a]/55" 
             onClick={() => setShowSettingsModal(false)} 
-          />
+         />
           <div
             ref={settingsDialogRef}
             role="dialog"
@@ -3383,7 +3381,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           curriculumPhonics={curriculumPhonics}
           onSelectWeek={handleSelectWeek}
           onClose={() => setShowWeekCalendarModal(false)}
-        />
+       />
       )}
 
       {/* --- ACADEMY BRANDED STUDENT GROWTH REPORT CARD MODAL --- */}
@@ -3397,7 +3395,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           academyLogo={academyLogo}
           schoolName={user?.schoolName}
           onClose={() => setShowReportCardModal(false)}
-        />
+       />
       )}
 
       {/* --- SCANNED AI WORKSHEET & PICK-AND-CHOOSE MODAL --- */}
@@ -3421,7 +3419,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           onClose={() => setShowScannedModal(false)}
           onViewScannedDocument={() => setShowDocPreviewModal(true)}
           onApplyToCurriculum={applyScannedSelectionToCurriculum}
-        />
+       />
       )}
 
       {/* --- SCANNED DOCUMENT IMAGE / PDF PREVIEW MODAL --- */}
@@ -3432,7 +3430,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           uploadedFileName={uploadedFileName}
           textbookPreviewUrl={textbookPreviewUrl}
           onClose={() => setShowDocPreviewModal(false)}
-        />
+       />
       )}
 
       {confirmDialog && (
@@ -3444,7 +3442,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           isNight={isThemeNight}
           onConfirm={confirmDialog.onConfirm}
           onCancel={() => setConfirmDialog(null)}
-        />
+       />
       )}
     </div>
   );

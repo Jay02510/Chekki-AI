@@ -13,6 +13,7 @@ import {
   Trash,
 } from '@phosphor-icons/react';
 import { UserProfile } from '../../types';
+import { staffUi } from './staffUi';
 interface Props {
   isNight: boolean;
   isKo: boolean;
@@ -341,7 +342,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                               setDocPreviewUrl(syllabusPreviewUrl);
                               setShowDocPreviewModal(true);
                             }}
-                            className="px-3 py-2 bg-sunken hover:bg-sunken border border-rule text-ink-2 font-bold text-xs rounded-md transition-[color,background-color,border-color,opacity,transform] flex items-center gap-1.5 cursor-pointer"
+                            className={staffUi.quietBtn}
                           >
                             <Eye size={14} weight="bold" />
                             <span>{isKo ? '시라버스 원본 보기' : 'View Syllabus'}</span>
@@ -355,7 +356,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                               setScannedData(syllabusScannedData);
                               setShowScannedModal(true);
                             }}
-                            className="px-3 py-2 bg-line-soft hover:bg-line-soft border border-rule text-line-ink font-bold text-xs rounded-md transition-[color,background-color,border-color,opacity,transform] flex items-center gap-1.5 cursor-pointer"
+                            className={staffUi.quietBtn}
                           >
                             <Sparkle size={14} weight="bold" />
                             <span>{isKo ? '어휘 범위 확인' : 'View Scope'}</span>
@@ -565,10 +566,10 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                               setDocPreviewUrl(worksheetPreviewUrl);
                               setShowDocPreviewModal(true);
                             }}
-                            className="px-3 py-2 bg-sunken hover:bg-sunken border border-rule text-ink-2 font-bold text-xs rounded-md transition-[color,background-color,border-color,opacity,transform] flex items-center gap-1.5 cursor-pointer"
+                            className={staffUi.quietBtn}
                           >
                             <Eye size={14} weight="bold" />
-                            <span>{isKo ? '워크시트 원본 보기' : 'View Worksheet'}</span>
+                            <span>{isKo ? '워크시트 원본 보기' : 'View worksheet'}</span>
                           </button>
                         )}
                         {worksheetScannedData && (
@@ -579,10 +580,10 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                               setScannedData(worksheetScannedData);
                               setShowScannedModal(true);
                             }}
-                            className="px-3 py-2 bg-line-soft hover:bg-line-soft border border-rule text-line-ink font-bold text-xs rounded-md transition-[color,background-color,border-color,opacity,transform] flex items-center gap-1.5 cursor-pointer"
+                            className={staffUi.quietBtn}
                           >
                             <Sparkle size={14} weight="bold" />
-                            <span>{isKo ? '정답지 확인' : 'View Answers'}</span>
+                            <span>{isKo ? '정답지 확인' : 'View answers'}</span>
                           </button>
                         )}
 
@@ -590,7 +591,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                         {(worksheetPreviewUrl || worksheetScannedData) && <div className="w-px h-6 bg-sunken mx-0.5" />}
 
                         {/* Rescan actions — replace the current worksheet with a new photo */}
-                        <label className="px-3.5 py-2 bg-line hover:bg-line text-on-line font-bold text-xs rounded-md transition-[color,background-color,border-color,opacity,transform] flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 z-30">
+                        <label className={`${staffUi.primaryBtn} z-30`}>
                           <span>{isKo ? '사진 올리기' : 'Add photo'}</span>
                           <input
                             type="file"
@@ -1048,7 +1049,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
 
             <div className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between pt-4 border-t border-rule`}>
               {curriculumLastEditedByName ? (
-                <p className="text-[12px] text-ink-3">
+                <p className="text-[13px] text-ink-3">
                   {isKo ? '마지막 수정: ' : 'Last edited by '}
                   <span className="font-bold text-ink-3">{curriculumLastEditedByName}</span>
                   {curriculumLastEditedAt && (
@@ -1061,9 +1062,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 type="button"
                 onClick={loadCurriculum}
                 disabled={isSavingCurriculum}
-                className={`px-5 min-h-12 whitespace-nowrap shrink-0 rounded-lg text-sm font-bold border transition-[color,background-color,border-color,opacity,transform] active:scale-[0.98] cursor-pointer ${
-                  'bg-sunken hover:bg-sunken text-ink-2 border-rule'
-                }`}
+                className={`${staffUi.quietBtn} min-h-12 px-5`}
               >
                 {isKo ? '초기화' : 'Reset'}
               </button>
@@ -1071,16 +1070,14 @@ export const CurriculumEditorForm: React.FC<Props> = ({
               <button
                 type="submit"
                 disabled={isSavingCurriculum}
-                className="group flex-1 sm:flex-none px-6 min-h-12 whitespace-nowrap bg-line hover:bg-line disabled:opacity-50 text-on-line font-bold text-sm rounded-lg transition-[color,background-color,border-color,opacity,transform] duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
+                className={`${staffUi.primaryBtn} min-h-12 flex-1 px-6 sm:flex-none`}
               >
                 {isSavingCurriculum ? (
-                  <div className="w-4 h-4 border-2 border-rule border-t-white rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-[#2b211a]/30 border-t-[#2b211a] rounded-full animate-spin" />
                 ) : (
                   <>
+                    <CheckCircle size={18} weight="bold" />
                     <span>{isKo ? '저장' : 'Save'}</span>
-                    <div className="w-6 h-6 rounded-full bg-sunken flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <CheckCircle size={14} weight="bold" />
-                    </div>
                   </>
                 )}
               </button>

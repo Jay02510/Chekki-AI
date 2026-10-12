@@ -212,7 +212,7 @@ export function DirectorTabContent(props: Props) {
                         type="button"
                         aria-expanded={isSelected}
                         onClick={() => props.onSelectClass(c.id)}
-                        className="relative flex min-h-[64px] w-full cursor-pointer items-center justify-between gap-3 py-3 text-left before:absolute before:-left-3 before:bottom-3 before:top-3 before:w-[3px] before:rounded-full before:bg-line before:opacity-0 aria-expanded:before:opacity-100"
+                        className="relative flex min-h-[64px] w-full cursor-pointer items-center justify-between gap-3 py-3 text-left"
                       >
                         <div className="min-w-0">
                           <p className="truncate text-[16px] font-bold">{c.name}</p>
@@ -248,9 +248,9 @@ export function DirectorTabContent(props: Props) {
                                   <span
                                     key={d.date}
                                     title={d.date}
-                                    aria-label={`${d.date}: ${d.submitted ? (isKo ? '제출' : 'submitted') : d.isToday ? (isKo ? '오늘' : 'today') : (isKo ? '미제출' : 'missed')}`}
+                                    aria-label={`${d.date}: ${d.submitted ? (isKo ? '제출' : 'submitted') : d.isToday ? (isKo ? '오늘' : 'today') : d.isDayOff ? (isKo ? '휴일' : 'day off') : (isKo ? '미제출' : 'missed')}`}
                                     className={`h-6 w-6 shrink-0 rounded ${
-                                      d.submitted ? 'bg-correct' : d.isToday ? 'bg-sunken ring-1 ring-inset ring-ink-3' : 'bg-wrong-soft'
+                                      d.submitted ? 'bg-correct' : d.isToday ? 'bg-sunken ring-1 ring-inset ring-ink-3' : d.isDayOff ? 'bg-sunken' : 'bg-wrong-soft'
                                     }`}
                                   />
                                 ))}

@@ -163,7 +163,7 @@ export const VoiceFillAssistant: React.FC<Props> = ({ isNight = true, currentFie
 
       <p
         key={prompt}
-        className="animate-fade-in border-l-[3px] border-line pl-3 text-[15px] leading-relaxed text-ink"
+        className="animate-fade-in rounded-md bg-line-soft px-4 py-3 text-[15px] leading-relaxed text-ink"
       >
         {prompt}
       </p>

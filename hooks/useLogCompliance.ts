@@ -22,7 +22,7 @@ export interface ComplianceRow {
   classId: string;
   className: string;
   teacherName: string;
-  days: { date: string; submitted: boolean; isToday: boolean }[];
+  days: { date: string; submitted: boolean; isToday: boolean; isDayOff: boolean }[];
   missStreak: number;
   /** Today's log(s): none yet, any still waiting for KT review, or all sent. */
   todayStatus: 'none' | 'pending' | 'sent';
@@ -100,6 +100,7 @@ export function useLogCompliance(classes: any[]) {
               date,
               submitted: submittedDates.has(date),
               isToday: date === todayIso,
+              isDayOff: isWeekend(date),
             }));
 
             // Today isn't missed until the day is actually over — without
@@ -109,7 +110,7 @@ export function useLogCompliance(classes: any[]) {
             let missStreak = 0;
             for (let i = dayResults.length - 1; i >= 0; i--) {
               const day = dayResults[i];
-              if ((day.isToday || isWeekend(day.date)) && !day.submitted) continue;
+              if ((day.isToday || day.isDayOff) && !day.submitted) continue;
               if (day.submitted) break;
               missStreak++;
             }

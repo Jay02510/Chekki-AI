@@ -443,7 +443,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                     <span className="shrink-0 rounded-md bg-sunken px-2 py-1 text-[13px] font-bold text-ink-2">{st.flaggedException?.date}</span>
                   </div>
 
-                  <div className="border-l-[3px] border-line pl-3 text-[14px] leading-relaxed">
+                  <div className="rounded-md bg-line-soft px-4 py-3 text-[14px] leading-relaxed">
                     <p className="mb-0.5 text-[13px] font-bold text-ink-3">
                       {isKo ? `${st.flaggedException?.teacherName} 선생님 메모` : `Note from ${st.flaggedException?.teacherName}`}
                     </p>
