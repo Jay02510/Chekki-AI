@@ -125,19 +125,17 @@ export const VoiceFillAssistant: React.FC<Props> = ({ isNight = true, currentFie
 
   return (
     <div
-      className={`mb-6 p-4 sm:p-5 rounded-2xl border space-y-3 ${
-        isNight ? 'bg-orange-500/5 border-orange-500/30' : 'bg-orange-50 border-orange-200'
-      }`}
+      className="mb-6 space-y-3 rounded-lg bg-surface p-5 ring-1 ring-inset ring-rule"
     >
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-black uppercase tracking-widest text-orange-500 flex items-center gap-1.5">
-          <Sparkle size={14} weight="fill" />
+        <span className="flex items-center gap-2 text-[16px] font-extrabold">
+          <Sparkle size={18} weight="fill" className="text-line-ink" aria-hidden="true" />
           {isKo ? '음성으로 입력하기' : 'Fill by voice'}
         </span>
         <button
           type="button"
           onClick={onClose}
-          className={`min-h-9 px-2 flex items-center gap-1 rounded-lg text-xs font-bold hover:bg-black/10 transition-colors cursor-pointer ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}
+          className="flex min-h-10 cursor-pointer items-center gap-1 rounded-md px-2 text-[14px] font-bold text-ink-2 hover:bg-sunken hover:text-ink"
         >
           {isKo ? '직접 입력' : 'Type instead'}
           <X size={14} />
@@ -146,11 +144,9 @@ export const VoiceFillAssistant: React.FC<Props> = ({ isNight = true, currentFie
 
       {showPrivacyBanner && (
         <div
-          className={`p-2.5 rounded-xl border flex items-center gap-2 text-[11px] ${
-            isNight ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
-          }`}
+          className="flex items-center gap-2 text-[13px] text-ink-3"
         >
-          <ShieldCheck size={16} weight="fill" className="shrink-0" />
+          <ShieldCheck size={16} weight="fill" className="shrink-0 text-correct" aria-hidden="true" />
           <span className="flex-1">
             {isKo ? '음성은 저장되지 않습니다 — 처리 후 즉시 삭제됩니다.' : "Your voice is never saved — it's discarded right after processing."}
           </span>
@@ -158,7 +154,7 @@ export const VoiceFillAssistant: React.FC<Props> = ({ isNight = true, currentFie
             type="button"
             onClick={dismissPrivacyBanner}
             aria-label={isKo ? '배너 닫기' : 'Dismiss'}
-            className="shrink-0 min-w-9 min-h-9 flex items-center justify-center rounded-lg hover:bg-black/10 transition-colors cursor-pointer"
+            className="flex min-h-9 min-w-9 shrink-0 cursor-pointer items-center justify-center rounded-md hover:bg-sunken"
           >
             <X size={12} />
           </button>
@@ -167,15 +163,13 @@ export const VoiceFillAssistant: React.FC<Props> = ({ isNight = true, currentFie
 
       <p
         key={prompt}
-        className={`animate-fade-in-up text-sm leading-relaxed rounded-2xl p-3 ${
-          isNight ? 'bg-white/5 text-zinc-200' : 'bg-white text-zinc-800'
-        }`}
+        className="animate-fade-in border-l-[3px] border-line pl-3 text-[15px] leading-relaxed text-ink"
       >
         {prompt}
       </p>
 
       {error && (
-        <p role="status" aria-live="assertive" className="text-xs text-red-400 font-medium">
+        <p role="status" aria-live="assertive" className="text-xs text-wrong font-medium">
           {error}
         </p>
       )}
@@ -190,7 +184,7 @@ export const VoiceFillAssistant: React.FC<Props> = ({ isNight = true, currentFie
         />
       </div>
 
-      <p role="status" aria-live="polite" className="text-[11px] text-center font-mono text-zinc-400">
+      <p role="status" aria-live="polite" className="text-center text-[13px] text-ink-3">
         {state === 'recording'
           ? isKo ? '녹음 중... 다시 눌러 종료' : 'Recording... tap again to stop'
           : state === 'processing'
@@ -199,14 +193,14 @@ export const VoiceFillAssistant: React.FC<Props> = ({ isNight = true, currentFie
       </p>
 
       {lastResult && state === 'idle' && (
-        <div className={`p-3 rounded-xl border text-xs space-y-1.5 ${isNight ? 'bg-black/20 border-white/10' : 'bg-white border-orange-200'}`}>
-          <p className={`italic ${isNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+        <div className="space-y-1.5 border-t border-rule pt-3 text-[14px]">
+          <p className={`italic text-ink-2`}>
             {isKo ? '들은 내용: ' : 'Heard: '}&ldquo;{lastResult.transcript || (isKo ? '(내용 없음)' : '(nothing heard)')}&rdquo;
           </p>
           {filledKeys.length === 0 && addedStudents.length === 0 ? (
-            <p className="text-amber-500 font-bold">{isKo ? '인식된 항목이 없습니다. 다시 말씀해 주세요.' : "Didn't catch anything from that — try again."}</p>
+            <p className="text-line-ink font-bold">{isKo ? '인식된 항목이 없습니다. 다시 말씀해 주세요.' : "Didn't catch anything from that — try again."}</p>
           ) : (
-            <p className="text-emerald-500 font-bold">
+            <p className="text-correct font-bold">
               {[
                 filledKeys.length > 0 &&
                   (isKo ? '입력됨: ' : 'Filled in ') + filledKeys.map((k) => FIELD_LABELS[k]?.[isKo ? 'ko' : 'en'] || k).join(', '),
@@ -220,7 +214,7 @@ export const VoiceFillAssistant: React.FC<Props> = ({ isNight = true, currentFie
           <button
             type="button"
             onClick={undoLast}
-            className={`min-h-9 flex items-center gap-1.5 font-bold cursor-pointer ${isNight ? 'text-zinc-300 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'}`}
+            className={`min-h-9 flex items-center gap-1.5 font-bold cursor-pointer text-ink-2 hover:text-ink`}
           >
             <ArrowCounterClockwise size={14} weight="bold" />
             {isKo ? '되돌리기' : 'Undo'}

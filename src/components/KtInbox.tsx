@@ -103,7 +103,7 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
     else close();
   };
 
-  const muted = isNight ? 'text-zinc-400' : 'text-zinc-500';
+  const muted = 'text-ink-3';
 
   const review = current && (
     <KtClassReview
@@ -133,7 +133,7 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
     <div className="max-w-6xl mx-auto w-full space-y-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight break-keep">
+          <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight break-keep">
             {isKo ? '학부모 리포트' : 'Parent reports'}
           </h2>
           <p className={`text-sm mt-1 ${muted}`}>
@@ -146,7 +146,7 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
       </div>
 
       {loadError && (
-        <p role="alert" className="p-3.5 rounded-2xl border text-sm bg-red-500/10 border-red-500/30 text-red-500">
+        <p role="alert" className="p-3.5 rounded-lg border text-sm bg-wrong-soft border-rule text-wrong">
           {isKo
             ? '리포트 대기열을 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.'
             : "Couldn't load the review queue. Refresh the page and try again."}
@@ -154,9 +154,9 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
       )}
 
       {logs.length === 0 && !openLog ? (
-        <div className={`p-8 sm:p-12 rounded-3xl border text-center space-y-3 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-white border-zinc-200'}`}>
-          <CheckCircle size={32} weight="bold" className="mx-auto text-emerald-500" />
-          <h3 className="text-lg font-black">{isKo ? '모두 확인했습니다' : "You're all caught up"}</h3>
+        <div className={`p-8 sm:p-12 rounded-lg border text-center space-y-3 bg-surface border-rule`}>
+          <CheckCircle size={32} weight="bold" className="mx-auto text-correct" />
+          <h3 className="text-lg font-extrabold">{isKo ? '모두 확인했습니다' : "You're all caught up"}</h3>
           <p className={`text-sm max-w-sm mx-auto break-keep ${muted}`}>
             {isKo
               ? '선생님이 수업 일지를 제출하면 여기에 수업별로 표시됩니다. 한 번 검토하고 승인하면 반 전체 학부모님께 전달됩니다.'
@@ -175,12 +175,10 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
                     type="button"
                     onClick={() => select(log)}
                     aria-current={active ? 'true' : undefined}
-                    className={`w-full text-left px-4 py-3 min-h-16 rounded-2xl border flex items-center gap-3 cursor-pointer transition-colors active:scale-[0.99] ${
+                    className={`w-full text-left px-4 py-3 min-h-16 rounded-lg border flex items-center gap-3 cursor-pointer transition-colors active:scale-[0.99] ${
                       active
-                        ? 'border-orange-500 bg-orange-500/10'
-                        : isNight
-                          ? 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06]'
-                          : 'border-zinc-200 bg-white hover:bg-zinc-50'
+                        ? 'border-line bg-line-soft'
+                        : 'border-rule bg-surface hover:bg-sunken'
                     }`}
                   >
                     <span className="min-w-0 flex-1">
@@ -190,7 +188,7 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
                       </span>
                     </span>
                     {notes > 0 && (
-                      <span className={`shrink-0 px-2 py-0.5 rounded-full text-[11px] font-bold ${isNight ? 'bg-amber-500/15 text-amber-400' : 'bg-amber-100 text-amber-800'}`}>
+                      <span className={`shrink-0 px-2 py-0.5 rounded-md text-[12px] font-bold bg-line-soft text-line-ink`}>
                         {isKo ? `노트 ${notes}` : `${notes} ${notes === 1 ? 'note' : 'notes'}`}
                       </span>
                     )}
@@ -210,15 +208,15 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
           role="dialog"
           aria-modal="true"
           aria-label={openLog.className || (isKo ? '수업 리포트' : 'Class report')}
-          className={`fixed inset-0 z-[380] overflow-y-auto ${isNight ? 'bg-brand-dark text-white' : 'bg-slate-50 text-zinc-900'}`}
+          className={`fixed inset-0 z-[380] overflow-y-auto bg-ground text-ink`}
         >
-          <div className={`sticky top-0 z-20 flex items-center px-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] pb-2 border-b backdrop-blur-md ${
-            isNight ? 'bg-brand-dark/90 border-white/10' : 'bg-white/90 border-zinc-200'
+          <div className={`sticky top-0 z-20 flex items-center px-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] pb-2 border-b ${
+            'bg-surface border-rule'
           }`}>
             <button
               type="button"
               onClick={close}
-              className={`min-h-11 px-2 flex items-center gap-1 text-sm font-bold cursor-pointer ${isNight ? 'text-zinc-300' : 'text-zinc-700'}`}
+              className={`min-h-11 px-2 flex items-center gap-1 text-sm font-bold cursor-pointer text-ink-2`}
             >
               <CaretLeft size={18} weight="bold" />
               {isKo ? '검토함' : 'Inbox'}
@@ -302,19 +300,19 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
     }
   };
 
-  const panel = isNight ? 'bg-brand-dark border-white/10' : 'bg-white border-zinc-200';
-  const muted = isNight ? 'text-zinc-400' : 'text-zinc-500';
-  const field = `w-full p-3.5 rounded-2xl border resize-none overflow-hidden text-base md:text-sm leading-relaxed outline-none transition-colors focus:border-orange-500 ${
-    isNight ? 'bg-black/30 border-white/10 text-white' : 'bg-zinc-50 border-zinc-200 text-zinc-900'
+  const panel = 'bg-surface border-rule';
+  const muted = 'text-ink-3';
+  const field = `w-full p-3.5 rounded-lg border resize-none overflow-hidden text-base md:text-sm leading-relaxed outline-none transition-colors focus:border-line ${
+    'bg-surface border-rule text-ink'
   }`;
   const copyButton = (key: string, text: string, label: string) => (
     <button
       type="button"
       onClick={() => copy(key, text)}
-      className={`min-h-11 px-3.5 rounded-xl border text-sm font-bold flex items-center gap-2 cursor-pointer transition-colors active:scale-[0.97] ${
+      className={`min-h-11 px-3.5 rounded-md border text-sm font-bold flex items-center gap-2 cursor-pointer transition-colors active:scale-[0.97] ${
         copiedKey === key
-          ? (isNight ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400' : 'border-emerald-300 bg-emerald-50 text-emerald-800')
-          : isNight ? 'border-white/10 bg-white/5 hover:bg-white/10' : 'border-zinc-200 bg-white hover:bg-zinc-50'
+          ? ('border-rule bg-right-soft text-correct')
+          : 'border-rule bg-surface hover:bg-sunken'
       }`}
     >
       {copiedKey === key ? <CheckCircle size={16} weight="bold" /> : <Copy size={16} weight="bold" />}
@@ -323,18 +321,18 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
   );
 
   return (
-    <article className={`rounded-3xl border ${panel}`}>
-      <header className={`p-5 sm:p-6 border-b ${isNight ? 'border-white/10' : 'border-zinc-200'}`}>
-        <h3 className="text-lg sm:text-xl font-black tracking-tight break-keep">{className || (isKo ? '수업' : 'Class')}</h3>
+    <article className={`rounded-lg border ${panel}`}>
+      <header className={`p-5 sm:p-6 border-b border-rule`}>
+        <h3 className="text-lg sm:text-xl font-extrabold tracking-tight break-keep">{className || (isKo ? '수업' : 'Class')}</h3>
         <p className={`text-sm mt-1 ${muted}`}>{[date, log.lessonTopic, log.teacherName].filter(Boolean).join(' · ')}</p>
       </header>
 
       {status === 'done' ? (
         <div className="p-5 sm:p-6 space-y-6">
           <div className="flex items-start gap-3">
-            <CheckCircle size={28} weight="fill" className="shrink-0 text-emerald-500" />
+            <CheckCircle size={28} weight="fill" className="shrink-0 text-correct" />
             <div>
-              <p className="font-black">{isKo ? `${families}가정에 전달되었습니다` : `Sent to ${families} ${families === 1 ? 'family' : 'families'}`}</p>
+              <p className="font-extrabold">{isKo ? `${families}가정에 전달되었습니다` : `Sent to ${families} ${families === 1 ? 'family' : 'families'}`}</p>
               <p className={`text-sm mt-0.5 ${muted}`}>
                 {isKo ? '학부모님은 채키 앱에서 확인할 수 있습니다.' : 'Parents can read it in the Chekki app.'}
               </p>
@@ -354,7 +352,7 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
               )}
             </div>
             {copyFailed && (
-              <p role="alert" className="text-sm text-red-500">
+              <p role="alert" className="text-sm text-wrong">
                 {isKo ? '복사하지 못했습니다. 브라우저의 클립보드 권한을 확인해 주세요.' : "Couldn't copy. Check your browser's clipboard permission."}
               </p>
             )}
@@ -363,7 +361,7 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
           <button
             type="button"
             onClick={onNext}
-            className="w-full sm:w-auto min-h-12 px-6 rounded-full bg-orange-500 hover:bg-orange-600 text-black text-sm font-black flex items-center justify-center gap-2 cursor-pointer transition-colors active:scale-[0.97]"
+            className="w-full sm:w-auto min-h-12 px-6 rounded-md bg-line hover:bg-line text-on-line text-sm font-extrabold flex items-center justify-center gap-2 cursor-pointer transition-colors active:scale-[0.97]"
           >
             {remaining > 0 ? (isKo ? '다음 수업' : 'Next class') : (isKo ? '검토함으로' : 'Back to inbox')}
             {remaining > 0 && <CaretRight size={16} weight="bold" />}
@@ -419,10 +417,10 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
                   <div key={`${r.studentName}-${i}`} className="space-y-2">
                     <div className="flex items-center gap-2">
                       <label htmlFor={`kt-note-${log.id}-${i}`} className="text-sm font-bold">{r.studentName}</label>
-                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                      <span className={`px-2 py-0.5 rounded-md text-[12px] font-bold ${
                         r.category === 'praise'
-                          ? (isNight ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-100 text-emerald-800')
-                          : (isNight ? 'bg-amber-500/15 text-amber-400' : 'bg-amber-100 text-amber-800')
+                          ? ('bg-right-soft text-correct')
+                          : ('bg-line-soft text-line-ink')
                       }`}>
                         {r.category === 'praise' ? (isKo ? '칭찬' : 'Praise') : (isKo ? '관심 필요' : 'Needs attention')}
                       </span>
@@ -441,17 +439,17 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
             )}
           </div>
 
-          <footer className={`sticky bottom-0 p-4 sm:px-6 border-t rounded-b-3xl backdrop-blur-md max-md:pb-[calc(env(safe-area-inset-bottom)+1rem)] ${
-            isNight ? 'bg-brand-dark/90 border-white/10' : 'bg-white/90 border-zinc-200'
+          <footer className={`sticky bottom-0 p-4 sm:px-6 border-t rounded-b-3xl max-md:pb-[calc(env(safe-area-inset-bottom)+1rem)] ${
+            'bg-surface border-rule'
           }`}>
             <button
               type="button"
               onClick={handleApprove}
               disabled={!canApprove}
-              className={`w-full min-h-12 px-6 rounded-full text-sm font-black flex items-center justify-center gap-2 transition-colors active:scale-[0.97] ${
+              className={`w-full min-h-12 px-6 rounded-md text-sm font-extrabold flex items-center justify-center gap-2 transition-colors active:scale-[0.97] ${
                 canApprove
-                  ? 'bg-orange-500 hover:bg-orange-600 text-black cursor-pointer shadow-[0_12px_30px_rgba(249,115,22,0.25)]'
-                  : 'bg-zinc-500/30 text-zinc-400 cursor-not-allowed'
+                  ? 'bg-line hover:bg-line text-on-line cursor-pointer'
+                  : 'bg-sunken text-ink-3 cursor-not-allowed'
               }`}
             >
               {status === 'saving' ? (
@@ -469,7 +467,7 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
               type="button"
               onClick={onDiscard}
               disabled={status === 'saving'}
-              className={`mt-2 w-full min-h-11 text-sm font-bold cursor-pointer transition-colors disabled:opacity-40 ${isNight ? 'text-zinc-400 hover:text-red-400' : 'text-zinc-500 hover:text-red-600'}`}
+              className={`mt-2 w-full min-h-11 text-sm font-bold cursor-pointer transition-colors disabled:opacity-40 text-ink-3 hover:text-wrong`}
             >
               {isKo ? '보내지 않고 삭제 (중복·실수)' : "Discard, don't send (duplicate or mistake)"}
             </button>
@@ -508,15 +506,15 @@ function DigestSettings({ isNight, isKo, user }: { isNight: boolean; isKo: boole
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label={isKo ? '알림 이메일 설정' : 'Email reminder settings'}
-        className={`w-11 h-11 rounded-2xl border flex items-center justify-center cursor-pointer transition-colors ${
-          isNight ? 'border-white/10 bg-white/5 hover:bg-white/10' : 'border-zinc-200 bg-white hover:bg-zinc-50'
-        } ${enabled ? '' : 'text-zinc-400'}`}
+        className={`w-11 h-11 rounded-lg border flex items-center justify-center cursor-pointer transition-colors ${
+          'border-rule bg-surface hover:bg-sunken'
+        } ${enabled ? '' : 'text-ink-3'}`}
       >
         {enabled ? <Bell size={18} weight="bold" /> : <BellSlash size={18} weight="bold" />}
       </button>
       {open && (
-        <div className={`absolute top-full right-0 mt-2 z-30 w-72 p-4 rounded-2xl border shadow-[0_20px_50px_rgba(0,0,0,0.35)] space-y-3 text-sm ${
-          isNight ? 'bg-brand-dark border-white/10' : 'bg-white border-zinc-200'
+        <div className={`absolute top-full right-0 mt-2 z-30 w-72 p-4 rounded-lg border space-y-3 text-sm ${
+          'bg-surface border-rule'
         }`}>
           <label className="flex items-center justify-between gap-3 cursor-pointer">
             <span className="font-bold">{isKo ? '검토 대기 알림 이메일' : 'Daily reminder email'}</span>
@@ -524,13 +522,13 @@ function DigestSettings({ isNight, isKo, user }: { isNight: boolean; isKo: boole
               type="checkbox"
               checked={enabled}
               onChange={(e) => save(e.target.checked)}
-              className="w-5 h-5 accent-orange-500 cursor-pointer"
+              className="w-5 h-5 accent-[var(--m-line)] cursor-pointer"
             />
           </label>
-          <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+          <p className={`text-xs text-ink-3`}>
             {isKo ? '매일 오전 9시(한국 시간)에 검토 대기 일지를 이메일로 알려드립니다.' : 'Sent every morning at 9:00 KST when logs are waiting.'}
           </p>
-          {saving && <p className="text-xs text-zinc-400">{isKo ? '저장 중...' : 'Saving...'}</p>}
+          {saving && <p className="text-xs text-ink-3">{isKo ? '저장 중...' : 'Saving...'}</p>}
         </div>
       )}
     </div>

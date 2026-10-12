@@ -41,9 +41,9 @@ export const VoiceOrb: React.FC<VoiceOrbProps> = ({
     >
       {isListening && (
         <>
-          <span className="absolute inset-0 rounded-full bg-orange-500/40 motion-safe:animate-ring-pulse motion-reduce:opacity-40" />
+          <span className="absolute inset-0 rounded-full bg-line-soft motion-safe:animate-ring-pulse motion-reduce:opacity-40" />
           <span
-            className="absolute inset-0 rounded-full bg-orange-500/40 motion-safe:animate-ring-pulse motion-reduce:opacity-20"
+            className="absolute inset-0 rounded-full bg-line-soft motion-safe:animate-ring-pulse motion-reduce:opacity-20"
             style={{ animationDelay: '0.4s' }}
           />
         </>
@@ -70,15 +70,15 @@ export const VoiceOrb: React.FC<VoiceOrbProps> = ({
       )}
 
       <span
-        className={`relative flex items-center justify-center rounded-full transition-colors duration-300 shadow-[0_20px_50px_rgba(249,115,22,0.25)] ${
-          isError ? 'bg-orange-700/70' : 'bg-orange-500'
+        className={`relative flex items-center justify-center rounded-full transition-colors duration-300 ${
+          isError ? 'bg-line-soft' : 'bg-line'
         }`}
         style={{ width: size * 0.75, height: size * 0.75 }}
       >
         {isListening ? (
-          <MicrophoneSlash size={size * 0.34} weight="bold" className="text-white" />
+          <MicrophoneSlash size={size * 0.34} weight="bold" className="text-ink" />
         ) : (
-          <Microphone size={size * 0.34} weight="bold" className="text-white" />
+          <Microphone size={size * 0.34} weight="bold" className="text-ink" />
         )}
       </span>
     </button>

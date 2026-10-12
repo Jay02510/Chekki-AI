@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Printer, Sparkle, PhoneCall, ShareNetwork } from '@phosphor-icons/react';
+import { X, Printer, Sparkle, Buildings, ShareNetwork } from '@phosphor-icons/react';
+import { staffUi } from './staffUi';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
@@ -130,48 +131,46 @@ export const ReportCardModal: React.FC<Props> = ({
           }
         }
       `}</style>
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-md no-print" onClick={onClose} />
+      <div className="absolute inset-0 bg-[#2b211a]/55 no-print" onClick={onClose} />
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={isKo ? '학부모 상담 요약' : 'Parent consultation summary'}
         tabIndex={-1}
-        className="relative p-1 bg-white border border-zinc-200 rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-2xl mx-4 animate-fade-in text-left max-h-[90vh]"
+        className="modal-enter relative mx-4 flex max-h-[90vh] w-full max-w-2xl flex-col rounded-lg bg-surface text-left shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)]"
       >
-        <div className="printable-report-card relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 bg-white text-zinc-900 overflow-y-auto custom-scrollbar">
+        <div className="printable-report-card custom-scrollbar relative h-full w-full overflow-y-auto rounded-lg bg-surface p-6 text-ink sm:p-8">
           <button
             type="button"
             onClick={onClose}
             aria-label={isKo ? '닫기' : 'Close'}
-            className="absolute top-6 right-6 min-w-11 min-h-11 flex items-center justify-center rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-all cursor-pointer no-print"
+            className={`${staffUi.iconBtn} no-print absolute right-5 top-5 h-11 w-11`}
           >
             <X size={18} weight="bold" />
           </button>
 
           {/* Official Academy Header */}
-          <div className="border-b-2 border-zinc-900 pb-6 mb-6 flex items-center justify-between">
+          <div className="mb-6 flex items-center justify-between border-b border-rule pb-5 pr-12">
             <div className="flex items-center gap-3">
               {academyLogo ? (
-                <img src={academyLogo} alt="Logo" className="w-14 h-14 object-contain rounded-xl border border-zinc-200" />
+                <img src={academyLogo} alt="" width={48} height={48} className="h-12 w-12 rounded-md object-contain" />
               ) : (
-                <div className="w-14 h-14 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-md">
-                  🏫
-                </div>
+                <Buildings size={40} weight="duotone" className="text-line-ink" aria-hidden="true" />
               )}
               <div>
-                <h2 className="text-xl font-black text-zinc-900 tracking-tight">{schoolName || 'B2B Academy'}</h2>
-                <p className="text-xs text-orange-600 font-bold uppercase tracking-widest">
-                  {isKo ? '학부모 상담 요약' : 'PARENT CONSULTATION SUMMARY'}
+                <h2 className="text-[22px] font-extrabold tracking-[-0.01em]">{schoolName || 'B2B Academy'}</h2>
+                <p className="text-[14px] text-ink-3">
+                  {isKo ? '학부모 상담 노트' : 'Parent call notes'}
                 </p>
               </div>
             </div>
           </div>
 
           {/* Student + Date Range Picker */}
-          <div className="mb-6 p-3 bg-orange-50/50 border border-orange-200 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-3 no-print">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <label htmlFor="report-card-student-select" className="text-xs font-bold text-orange-700 shrink-0">{isKo ? '원생:' : 'Student:'}</label>
+          <div className="no-print mb-6 grid gap-3 sm:grid-cols-[1fr_auto]">
+            <div className="min-w-0">
+              <label htmlFor="report-card-student-select" className={staffUi.label}>{isKo ? '원생' : 'Student'}</label>
               <select
                 id="report-card-student-select"
                 value={selectedStudentDetails?.uid || ''}
@@ -179,9 +178,9 @@ export const ReportCardModal: React.FC<Props> = ({
                   const target = activeRoster.find((s) => s.uid === e.target.value);
                   if (target) setSelectedStudentDetails(target);
                 }}
-                className="min-w-0 flex-1 px-3 py-1.5 bg-white border border-orange-300 rounded-xl text-xs font-bold text-zinc-900 outline-none cursor-pointer shadow-xs"
+                className={`${staffUi.field} cursor-pointer font-semibold`}
               >
-                <option value="">-- {isKo ? '원생 선택' : 'Select Student'} --</option>
+                <option value="">{isKo ? '원생 선택' : 'Choose a student'}</option>
                 {activeRoster.map((s) => (
                   <option key={s.uid} value={s.uid}>
                     {s.studentName || s.name} ({s.email})
@@ -189,16 +188,18 @@ export const ReportCardModal: React.FC<Props> = ({
                 ))}
               </select>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div>
+              <span className={staffUi.label}>{isKo ? '기간' : 'Dates'}</span>
+              <div className="flex items-center gap-1.5">
               <input
                 type="date"
                 aria-label={isKo ? '시작일' : 'From date'}
                 value={fromDate}
                 onChange={(e) => setFromDate(e.target.value)}
                 max={toDate}
-                className="px-2.5 py-1.5 bg-white border border-orange-300 rounded-xl text-xs font-bold text-zinc-900 outline-none cursor-pointer shadow-xs"
+                className={`${staffUi.field} w-auto cursor-pointer`}
               />
-              <span className="text-xs text-orange-700 font-bold">–</span>
+              <span className="text-ink-3">–</span>
               <input
                 type="date"
                 aria-label={isKo ? '종료일' : 'To date'}
@@ -206,26 +207,24 @@ export const ReportCardModal: React.FC<Props> = ({
                 onChange={(e) => setToDate(e.target.value)}
                 min={fromDate}
                 max={toDateInputValue(new Date())}
-                className="px-2.5 py-1.5 bg-white border border-orange-300 rounded-xl text-xs font-bold text-zinc-900 outline-none cursor-pointer shadow-xs"
+                className={`${staffUi.field} w-auto cursor-pointer`}
               />
+              </div>
             </div>
           </div>
 
           {/* Weekly Consultation Talking Points — real AI, generated on demand
               from this student's actual logs in the selected range. */}
-          <div className="mb-2 p-4 border border-orange-200 rounded-2xl bg-orange-50/50 space-y-3">
+          <section className="space-y-3">
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <h4 className="font-black text-zinc-900 uppercase tracking-widest text-[11px] flex items-center gap-1.5">
-                <PhoneCall size={14} weight="bold" className="text-orange-600 shrink-0" />
-                <span>{isKo ? '학부모 상담 요점' : 'Parent Consultation Talking Points'}</span>
-              </h4>
+              <h3 className={staffUi.h3}>{isKo ? '상담 요점' : 'Talking points'}</h3>
               <button
                 type="button"
                 onClick={handleGenerateTalkingPoints}
                 disabled={!selectedStudentDetails?.uid || isGeneratingTalkingPoints}
-                className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5 no-print"
+                className={`${staffUi.primaryBtn} no-print`}
               >
-                <Sparkle size={13} weight="bold" className={isGeneratingTalkingPoints ? 'animate-spin' : ''} />
+                <Sparkle size={18} weight="bold" className={isGeneratingTalkingPoints ? 'animate-spin' : ''} />
                 <span>
                   {isGeneratingTalkingPoints
                     ? (isKo ? '생성 중...' : 'Generating...')
@@ -234,33 +233,33 @@ export const ReportCardModal: React.FC<Props> = ({
               </button>
             </div>
             {!selectedStudentDetails?.uid ? (
-              <p className="text-xs text-zinc-400">{isKo ? '먼저 원생을 선택하세요.' : 'Select a student first.'}</p>
+              <p className="text-[14px] text-ink-3">{isKo ? '먼저 원생을 선택하세요.' : 'Select a student first.'}</p>
             ) : talkingPointsError ? (
-              <p className="text-xs text-rose-600">{isKo ? '생성에 실패했습니다. 다시 시도해주세요.' : 'Generation failed — please try again.'}</p>
+              <p className="text-[14px] text-wrong">{isKo ? '생성에 실패했습니다. 다시 시도해주세요.' : 'Generation failed — please try again.'}</p>
             ) : talkingPoints === null ? (
-              <p className="text-xs text-zinc-400">
+              <p className="text-[14px] text-ink-3">
                 {isKo
                   ? '선택한 기간의 일일 기록(수업 코멘트 + 특이사항)을 바탕으로 실제 AI가 상담 포인트를 생성합니다.'
                   : "Pulls this student's real daily logs (class comments + exceptions) from the selected range and generates real AI talking points."}
               </p>
             ) : talkingPoints.length === 0 ? (
-              <p className="text-xs text-zinc-400">{isKo ? '선택한 기간에 기록된 일지가 없습니다.' : 'No logs recorded for this student in the selected range.'}</p>
+              <p className="text-[14px] text-ink-3">{isKo ? '선택한 기간에 기록된 일지가 없습니다.' : 'No logs recorded for this student in the selected range.'}</p>
             ) : (
               <ul className="space-y-1.5">
                 {talkingPoints.map((point, i) => (
-                  <li key={i} className="text-xs text-zinc-800 flex items-start gap-2">
-                    <span className="text-orange-500 font-bold shrink-0">{i + 1}.</span>
+                  <li key={i} className="flex items-start gap-2 text-[15px] leading-relaxed">
+                    <span className="text-line-ink font-bold shrink-0">{i + 1}.</span>
                     <span>{point}</span>
                   </li>
                 ))}
               </ul>
             )}
-          </div>
+          </section>
 
           {/* Print Action Bar — window.print() is a no-op inside the iOS/
               Android WebView, so native shares the talking points as text.
               Close lives in the header (X). */}
-          <div className="mt-6 pt-4 border-t border-zinc-200">
+          <div className="mt-6 flex border-t border-rule pt-4">
             <button
               type="button"
               onClick={async () => {
@@ -276,7 +275,7 @@ export const ReportCardModal: React.FC<Props> = ({
                 }
               }}
               disabled={talkingPoints === null || talkingPoints.length === 0}
-              className="w-full sm:w-auto sm:ml-auto px-6 min-h-12 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              className={`${staffUi.quietBtn} min-h-11 w-full sm:ml-auto sm:w-auto`}
             >
               {Capacitor.isNativePlatform() ? <ShareNetwork size={16} weight="bold" /> : <Printer size={16} weight="bold" />}
               <span>

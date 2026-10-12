@@ -32,15 +32,15 @@ export function TeacherMobileTabBar({ isNight, isKo, educatorRole, activeTab, se
 
   const itemClass = (active: boolean) =>
     `flex-1 min-h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold cursor-pointer transition-colors ${
-      active ? 'text-orange-500' : isNight ? 'text-zinc-400' : 'text-zinc-500'
+      active ? 'text-line-ink' : 'text-ink-3'
     }`;
 
   return (
     <nav
       aria-label={isKo ? '주요 메뉴' : 'Main navigation'}
       className={`md:hidden fixed inset-x-0 bottom-0 z-[340] flex border-t pb-[env(safe-area-inset-bottom)] ${
-        isNight ? 'bg-brand-card/95 border-white/10' : 'bg-white/95 border-zinc-200'
-      } backdrop-blur-md`}
+        'bg-surface border-rule'
+      } `}
     >
       {items.map(({ id, label, Icon, badge }) => {
         const active = activeTab === id;
@@ -55,7 +55,7 @@ export function TeacherMobileTabBar({ isNight, isKo, educatorRole, activeTab, se
             <span className="relative">
               <Icon size={22} weight={active ? 'fill' : 'regular'} />
               {!!badge && (
-                <span className="absolute -top-1.5 -right-2.5 min-w-4 h-4 px-1 rounded-full bg-orange-500 text-black text-[10px] font-black leading-4 text-center tabular-nums">
+                <span className="absolute -top-1.5 -right-2.5 min-w-4 h-4 px-1 rounded-md bg-line text-on-line text-[12px] font-extrabold leading-4 text-center tabular-nums">
                   {badge > 99 ? '99+' : badge}
                 </span>
               )}

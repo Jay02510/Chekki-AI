@@ -32,6 +32,7 @@ import {
   Eye,
   CheckCircle,
   Plus,
+  Minus,
   Calendar,
   Printer,
   SignOut,
@@ -248,8 +249,8 @@ export default function TeacherPage({ isNight = true }: Props) {
       showToast({
         type: 'success',
         message: authorRole === 'kt'
-          ? (isKo ? '✅ 일지가 저장되었습니다. 학부모 리포트에서 검토 후 보내세요.' : '✅ Log saved. Review and send it from Parent reports.')
-          : (isKo ? '✅ 한국인 교사에게 검토 요청을 보냈습니다!' : '✅ Sent to your KT for review!'),
+          ? (isKo ? '일지가 저장되었습니다. 학부모 리포트에서 검토 후 보내세요.' : 'Log saved. Review and send it from Parent reports.')
+          : (isKo ? '한국인 교사에게 검토 요청을 보냈습니다!' : 'Sent to your KT for review!'),
       });
 
       // No per-submission email to the KT here — a daily digest cron
@@ -269,8 +270,8 @@ export default function TeacherPage({ isNight = true }: Props) {
         showToast({
           type: 'success',
           message: isKo
-            ? '📡 오프라인 상태예요. 인터넷이 연결되면 자동으로 전송됩니다.'
-            : "📡 You're offline — this will send automatically once you're back online.",
+            ? '오프라인 상태예요. 인터넷이 연결되면 자동으로 전송됩니다.'
+            : "You're offline — this will send automatically once you're back online.",
         });
         return true;
       }
@@ -341,8 +342,8 @@ export default function TeacherPage({ isNight = true }: Props) {
       showToast({
         type: 'success',
         message: isKo
-          ? '📡 오프라인 상태예요. 인터넷이 연결되면 자동으로 전송됩니다.'
-          : "📡 You're offline — this will send automatically once you're back online.",
+          ? '오프라인 상태예요. 인터넷이 연결되면 자동으로 전송됩니다.'
+          : "You're offline — this will send automatically once you're back online.",
       });
       return true;
     }
@@ -999,8 +1000,8 @@ export default function TeacherPage({ isNight = true }: Props) {
       });
       setSyncWarning(
         isKo
-          ? '⚠️ 클라우드에서 학급 목록을 불러오지 못해 이 기기에 저장된 정보를 표시하고 있습니다. 최신 정보가 아닐 수 있습니다.'
-          : "⚠️ Couldn't load classes from the cloud — showing what's saved on this device, which may be out of date."
+          ? '클라우드에서 학급 목록을 불러오지 못해 이 기기에 저장된 정보를 표시하고 있습니다. 최신 정보가 아닐 수 있습니다.'
+          : "Couldn't load classes from the cloud — showing what's saved on this device, which may be out of date."
       );
     }
 
@@ -1284,8 +1285,8 @@ export default function TeacherPage({ isNight = true }: Props) {
         // only saved locally and needs to retry when connection is restored.
         setSyncWarning(
           isKo
-            ? '⚠️ 학급 정보가 로컬에만 저장되었습니다. 인터넷 연결을 확인하고 페이지를 새로고침하여 클라우드에 동기화하세요.'
-            : '⚠️ Class saved locally but not yet synced to cloud. Check your connection and refresh to re-sync.'
+            ? '학급 정보가 로컬에만 저장되었습니다. 인터넷 연결을 확인하고 페이지를 새로고침하여 클라우드에 동기화하세요.'
+            : 'Class saved locally but not yet synced to cloud. Check your connection and refresh to re-sync.'
         );
       }
     } catch (err: any) {
@@ -1347,8 +1348,8 @@ export default function TeacherPage({ isNight = true }: Props) {
           console.warn('Class delete warning:', fsErr);
           setSyncWarning(
             isKo
-              ? '⚠️ 학급이 이 기기에서만 삭제되었습니다. 클라우드에서 삭제되지 않아 다른 기기나 학부모 화면에는 계속 표시될 수 있습니다.'
-              : '⚠️ Class removed on this device only — the cloud delete failed, so it may still appear elsewhere until you retry with a connection.'
+              ? '학급이 이 기기에서만 삭제되었습니다. 클라우드에서 삭제되지 않아 다른 기기나 학부모 화면에는 계속 표시될 수 있습니다.'
+              : 'Class removed on this device only — the cloud delete failed, so it may still appear elsewhere until you retry with a connection.'
           );
         }
       }
@@ -1422,8 +1423,8 @@ export default function TeacherPage({ isNight = true }: Props) {
       console.warn('Firestore active week update warning (updated locally):', err);
       setSyncWarning(
         isKo
-          ? '⚠️ 주차 변경이 이 기기에만 저장되었습니다. 다른 기기에는 반영되지 않을 수 있습니다.'
-          : '⚠️ Week change saved on this device only — it may not appear on other devices until this syncs.'
+          ? '주차 변경이 이 기기에만 저장되었습니다. 다른 기기에는 반영되지 않을 수 있습니다.'
+          : 'Week change saved on this device only — it may not appear on other devices until this syncs.'
       );
     }
   };
@@ -1456,8 +1457,8 @@ export default function TeacherPage({ isNight = true }: Props) {
       console.warn('Firestore target week update warning (updated locally):', err);
       setSyncWarning(
         isKo
-          ? '⚠️ 주차 변경이 이 기기에만 저장되었습니다. 다른 기기에는 반영되지 않을 수 있습니다.'
-          : '⚠️ Week change saved on this device only — it may not appear on other devices until this syncs.'
+          ? '주차 변경이 이 기기에만 저장되었습니다. 다른 기기에는 반영되지 않을 수 있습니다.'
+          : 'Week change saved on this device only — it may not appear on other devices until this syncs.'
       );
     }
   };
@@ -1492,8 +1493,8 @@ export default function TeacherPage({ isNight = true }: Props) {
           console.warn('Firestore class scans fetch failed:', sErr);
           setSyncWarning(
             isKo
-              ? '⚠️ 클라우드에서 채점 기록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.'
-              : "⚠️ Couldn't load scan history from the cloud. Please try again shortly."
+              ? '클라우드에서 채점 기록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.'
+              : "Couldn't load scan history from the cloud. Please try again shortly."
           );
         }
 
@@ -1701,15 +1702,14 @@ export default function TeacherPage({ isNight = true }: Props) {
     const planSeats = seatsForPlan(activationPlanId);
     const planLabel = labelsForPlan(activationPlanId);
     return (
-      <div className="fixed inset-0 z-[500] overflow-y-auto bg-brand-dark text-zinc-200 flex items-start sm:items-center justify-center px-4 py-8 sm:py-4 selection:bg-orange-500 selection:text-white">
-        <div className="fixed inset-0 bg-gradient-to-tr from-orange-500/10 via-amber-500/5 to-transparent blur-[140px] pointer-events-none" />
-        <div className="relative w-full max-w-md p-1.5 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col">
-          <div className="bg-brand-dark rounded-[calc(2.5rem-0.375rem)] p-8 sm:p-10 flex flex-col items-center">
+      <div className="fixed inset-0 z-[500] overflow-y-auto bg-ground text-ink-2 flex items-start sm:items-center justify-center px-4 py-8 sm:py-4 selection:bg-line selection:text-on-line">
+        <div className="relative w-full max-w-md flex flex-col">
+          <div className="bg-surface rounded-lg p-8 sm:p-10 flex flex-col items-center ring-1 ring-inset ring-rule">
             <div className="w-full flex justify-between items-center mb-2">
               <button
                 type="button"
                 onClick={() => { window.location.href = '/'; }}
-                className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs text-ink-3 hover:text-ink transition-colors cursor-pointer"
               >
                 <ArrowLeft size={14} weight="bold" />
                 <span>{isKo ? '메인 서비스로 돌아가기' : 'Return to Main Service'}</span>
@@ -1723,10 +1723,10 @@ export default function TeacherPage({ isNight = true }: Props) {
               <button
                 type="button"
                 onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-                className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0"
+                className="inline-flex items-center gap-1 text-xs text-ink-3 hover:text-ink transition-colors cursor-pointer shrink-0"
                 title="Switch Language / 언어 변경"
               >
-                <span>🌐</span>
+                
                 <span>{language === 'ko' ? '한국어' : 'EN'}</span>
               </button>
             </div>
@@ -1740,14 +1740,14 @@ export default function TeacherPage({ isNight = true }: Props) {
                 decides which dashboard opens. The toggle only matters for
                 creating an account. */}
             {authMode === 'signup' && !inviteSlug && !isPlanSignup && (
-              <div className="w-full flex p-1 bg-brand-dark border border-white/10 rounded-2xl mb-4">
+              <div className="w-full flex p-1 bg-surface border border-rule rounded-lg mb-4">
                 <button
                   type="button"
                   onClick={() => { setLoginRole('teacher'); setAuthError(''); if (!inviteSlug) setAuthMode('login'); }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer flex items-center justify-center gap-1.5 ${
+                  className={`flex-1 py-2 text-xs font-bold rounded-md transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer flex items-center justify-center gap-1.5 ${
                     loginRole === 'teacher'
-                      ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20'
-                      : 'text-zinc-400 hover:text-white'
+                      ? 'bg-line text-on-line'
+                      : 'text-ink-3 hover:text-ink'
                   }`}
                 >
                   <ChalkboardTeacher size={14} weight="bold" />
@@ -1756,10 +1756,10 @@ export default function TeacherPage({ isNight = true }: Props) {
                 <button
                   type="button"
                   onClick={() => { setLoginRole('director'); setAuthError(''); }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer flex items-center justify-center gap-1.5 ${
+                  className={`flex-1 py-2 text-xs font-bold rounded-md transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer flex items-center justify-center gap-1.5 ${
                     loginRole === 'director'
-                      ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
-                      : 'text-zinc-400 hover:text-white'
+                      ? 'bg-line text-on-line'
+                      : 'text-ink-3 hover:text-ink'
                   }`}
                 >
                   <Buildings size={14} weight="bold" />
@@ -1772,11 +1772,11 @@ export default function TeacherPage({ isNight = true }: Props) {
                 "Joining via invite link" card + "creating account from an
                 invite" banner all rendered together, looking cluttered). */}
             {inviteSlug && authMode === 'signup' ? (
-              <div className="w-full mb-4 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2.5">
-                <Buildings size={16} className="text-emerald-400 shrink-0" />
+              <div className="w-full mb-4 p-3.5 rounded-lg bg-right-soft border border-rule flex items-center gap-2.5">
+                <Buildings size={16} className="text-correct shrink-0" />
                 <div className="text-left">
-                  <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{isKo ? '초대받은 선생님 계정 생성' : "You're creating a teacher account from an invite"}</p>
-                  <p className="text-xs font-bold text-white">{isKo ? '가입 후 학원명이 표시됩니다' : "You'll see your academy's name once you sign up."}</p>
+                  <p className="text-[12px] text-correct font-bold">{isKo ? '초대받은 선생님 계정 생성' : "You're creating a teacher account from an invite"}</p>
+                  <p className="text-xs font-bold text-ink">{isKo ? '가입 후 학원명이 표시됩니다' : "You'll see your academy's name once you sign up."}</p>
                 </div>
               </div>
             ) : null /* role toggle + heading already name the role */}
@@ -1793,14 +1793,14 @@ export default function TeacherPage({ isNight = true }: Props) {
                 accounts are only ever created via a director's invite link
                 now (audit §21); direct teacher signup below is disabled. */}
             {!isPlanSignup && !(loginRole === 'teacher' && !inviteSlug) && !inviteSlug && (
-              <div className="w-full flex bg-brand-dark p-1 rounded-2xl border border-white/10 mb-6">
+              <div className="w-full flex bg-surface p-1 rounded-lg border border-rule mb-6">
                 <button
                   type="button"
                   onClick={() => { setAuthMode('login'); setAuthError(''); }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
+                  className={`flex-1 py-2 text-xs font-bold rounded-md transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
                     authMode === 'login'
-                      ? (loginRole === 'director' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'bg-orange-500 text-black shadow-lg shadow-orange-500/20')
-                      : 'text-zinc-400 hover:text-white'
+                      ? (loginRole === 'director' ? 'bg-line text-on-line' : 'bg-line text-on-line')
+                      : 'text-ink-3 hover:text-ink'
                   }`}
                 >
                   {isKo ? '로그인' : 'Log In'}
@@ -1808,10 +1808,10 @@ export default function TeacherPage({ isNight = true }: Props) {
                 <button
                   type="button"
                   onClick={() => { setAuthMode('signup'); setAuthError(''); }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
+                  className={`flex-1 py-2 text-xs font-bold rounded-md transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
                     authMode === 'signup'
-                      ? (loginRole === 'director' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'bg-orange-500 text-black shadow-lg shadow-orange-500/20')
-                      : 'text-zinc-400 hover:text-white'
+                      ? (loginRole === 'director' ? 'bg-line text-on-line' : 'bg-line text-on-line')
+                      : 'text-ink-3 hover:text-ink'
                   }`}
                 >
                   {isKo ? '회원가입' : 'Sign Up'}
@@ -1819,7 +1819,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               </div>
             )}
 
-            <h2 className="text-2xl font-black tracking-tight text-white mb-2 font-display">
+            <h2 className="text-2xl font-extrabold tracking-tight text-ink mb-2 font-display">
               {isPlanSignup
                 ? (isKo
                     ? `${planLabel.nameKo} 원장님 계정 생성 — FT ${planSeats.ft}석, KT ${planSeats.kt}석`
@@ -1828,7 +1828,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 ? (isKo ? '로그인' : 'Sign in')
                 : (loginRole === 'director' ? (isKo ? '원장님 계정 생성' : 'Create Director Account') : (isKo ? '교사 계정 생성' : 'Create Teacher Account'))}
             </h2>
-            <p className={`text-zinc-400 text-xs text-center leading-relaxed max-w-xs ${isPlanSignup ? 'mb-2' : 'mb-6'}`}>
+            <p className={`text-ink-3 text-xs text-center leading-relaxed max-w-xs ${isPlanSignup ? 'mb-2' : 'mb-6'}`}>
               {isPlanSignup
                 ? (activationPlanId === 'trial'
                     ? (isKo ? '신용카드 등록 없이 7일 무료 체험이 바로 시작됩니다.' : 'Free for 7 days, no payment required now.')
@@ -1842,7 +1842,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     : (isKo ? '가입 후 전달받으신 교사 인증 코드를 등록하여 즉시 시작하세요.' : 'Sign up to register your school authorization code.'))}
             </p>
             {!isPlanSignup && loginRole === 'teacher' && !inviteSlug && (
-              <p className="text-[10px] text-zinc-400 text-center max-w-xs -mt-4 mb-6 leading-relaxed">
+              <p className="text-[12px] text-ink-3 text-center max-w-xs -mt-4 mb-6 leading-relaxed">
                 {isKo
                   ? '교사 계정은 원장님의 초대 링크로만 생성됩니다. 초대 링크가 없다면 원장님께 요청해 주세요.'
                   : "Teacher accounts are only created via your director's invite link. Ask them to send you one."}
@@ -1852,7 +1852,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               <button
                 type="button"
                 onClick={() => { setAuthMode('login'); setAuthError(''); }}
-                className="text-[11px] text-zinc-400 hover:text-zinc-300 transition-colors cursor-pointer mb-6 underline underline-offset-2"
+                className="text-[12px] text-ink-3 hover:text-ink-3 transition-colors cursor-pointer mb-6 underline underline-offset-2"
               >
                 {isKo ? '이미 계정이 있으신가요? 로그인' : 'Already have an account? Log in'}
               </button>
@@ -1861,7 +1861,7 @@ export default function TeacherPage({ isNight = true }: Props) {
             <form onSubmit={handleSignIn} className="w-full space-y-4">
               {authMode === 'signup' && (
                 <div className="space-y-1.5 text-left">
-                  <label className="text-xs font-bold text-zinc-400 pl-1">
+                  <label className="text-xs font-bold text-ink-3 pl-1">
                     {loginRole === 'director' ? (isKo ? '원장님 성함' : 'Director Name') : (isKo ? '선생님 성함' : 'Teacher Full Name')}
                   </label>
                   <input
@@ -1869,15 +1869,15 @@ export default function TeacherPage({ isNight = true }: Props) {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder={loginRole === 'director' ? (isKo ? "김원장 원장님" : "Director Jane Smith") : (isKo ? "김철수 선생님" : "Jane Doe")}
-                    className="w-full bg-brand-dark border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-[color,background-color,border-color,box-shadow,transform] text-white placeholder:text-zinc-600"
+                    placeholder={loginRole === 'director' ? (isKo ? "예: 김지원" : "e.g. Kim Ji-won") : (isKo ? "예: 김지원" : "e.g. Sarah Lee")}
+                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-2"
                   />
                 </div>
               )}
 
               {authMode === 'signup' && loginRole === 'director' && (
                 <div className="space-y-1.5 text-left">
-                  <label className="text-xs font-bold text-zinc-400 pl-1">
+                  <label className="text-xs font-bold text-ink-3 pl-1">
                     {isKo ? '학원명' : 'Academy Name'}
                   </label>
                   <input
@@ -1886,13 +1886,13 @@ export default function TeacherPage({ isNight = true }: Props) {
                     value={academyNameInput}
                     onChange={(e) => setAcademyNameInput(e.target.value)}
                     placeholder={isKo ? '예: 첵키 잉글리시 아카데미' : 'e.g. Chekki English Academy'}
-                    className="w-full bg-brand-dark border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-[color,background-color,border-color,box-shadow,transform] text-white placeholder:text-zinc-600"
+                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-2"
                   />
                 </div>
               )}
 
               <div className="space-y-1.5 text-left">
-                <label className="text-xs font-bold text-zinc-400 pl-1">
+                <label className="text-xs font-bold text-ink-3 pl-1">
                   {inviteSlug && authMode === 'signup' ? (isKo ? '이메일 확인' : 'Confirm your email') : (isKo ? '이메일' : 'Email')}
                 </label>
                 <input
@@ -1901,12 +1901,12 @@ export default function TeacherPage({ isNight = true }: Props) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={loginRole === 'director' ? "director@school.com" : "teacher@school.com"}
-                  className="w-full bg-brand-dark border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-[color,background-color,border-color,box-shadow,transform] text-white placeholder:text-zinc-600"
+                  className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-2"
                 />
               </div>
 
               <div className="space-y-1.5 text-left">
-                <label className="text-xs font-bold text-zinc-400 pl-1">
+                <label className="text-xs font-bold text-ink-3 pl-1">
                   {isKo ? '비밀번호' : 'Password'}
                 </label>
                 <input
@@ -1915,13 +1915,13 @@ export default function TeacherPage({ isNight = true }: Props) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-brand-dark border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-[color,background-color,border-color,box-shadow,transform] text-white placeholder:text-zinc-600"
+                  className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-2"
                 />
               </div>
 
               {authMode === 'signup' && (
                 <div className="space-y-1.5 text-left">
-                  <label className="text-xs font-bold text-zinc-400 pl-1">
+                  <label className="text-xs font-bold text-ink-3 pl-1">
                     {isKo ? '비밀번호 확인' : 'Confirm Password'}
                   </label>
                   <input
@@ -1930,14 +1930,14 @@ export default function TeacherPage({ isNight = true }: Props) {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-brand-dark border border-white/10 focus:border-orange-500 outline-none text-sm p-4 rounded-2xl transition-[color,background-color,border-color,box-shadow,transform] text-white placeholder:text-zinc-600"
+                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-2"
                   />
                 </div>
               )}
 
 
               {authError && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold rounded-2xl text-center flex items-center justify-center gap-2">
+                <div className="p-4 bg-wrong-soft border border-rule text-wrong text-xs font-semibold rounded-lg text-center flex items-center justify-center gap-2">
                   <Warning size={16} weight="bold" />
                   <span>{authError}</span>
                 </div>
@@ -1946,10 +1946,10 @@ export default function TeacherPage({ isNight = true }: Props) {
               <button
                 type="submit"
                 disabled={isSigningIn}
-                className="group w-full py-4 mt-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-[color,background-color,border-color,box-shadow,transform] duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
+                className="group w-full py-4 mt-2 bg-line hover:bg-line disabled:opacity-50 text-on-line font-bold text-sm rounded-lg transition-[color,background-color,border-color,box-shadow,transform] duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
               >
                 {isSigningIn ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-rule border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
                     <span>
@@ -1957,7 +1957,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                         ? (isKo ? '로그인' : 'Log In')
                         : (isKo ? '1-Click 교사 가입 및 시작' : '1-Click Sign Up & Start')}
                     </span>
-                    <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                    <div className="w-7 h-7 rounded-full bg-sunken flex items-center justify-center group-hover:translate-x-1 transition-transform">
                       <ArrowRight size={14} weight="bold" />
                     </div>
                   </>
@@ -1968,7 +1968,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               <button
                 type="button"
                 onClick={() => { setLoginRole('director'); setAuthMode('signup'); setAuthError(''); }}
-                className="mt-5 min-h-11 text-xs text-zinc-400 hover:text-zinc-200 underline underline-offset-2 cursor-pointer transition-colors"
+                className="mt-5 min-h-11 text-xs text-ink-3 hover:text-ink-2 underline underline-offset-2 cursor-pointer transition-colors"
               >
                 {isKo ? '새 학원이신가요? 원장님 계정 만들기' : 'New academy? Create a director account'}
               </button>
@@ -2078,19 +2078,19 @@ export default function TeacherPage({ isNight = true }: Props) {
       setActiveTab(welcomeRole === 'kt' ? 'kt_script' : 'overview');
     };
     return (
-      <div className={`min-h-dvh flex items-center justify-center p-4 font-sans ${isThemeNight ? 'bg-brand-dark text-zinc-100' : 'bg-zinc-50 text-zinc-900'}`}>
-        <div className="fixed inset-0 bg-gradient-to-tr from-orange-500/8 via-transparent to-transparent blur-[100px] pointer-events-none" />
-        <div className={`relative w-full max-w-md rounded-[2rem] border shadow-2xl p-1.5 ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
-          <div className={`rounded-[calc(2rem-0.375rem)] p-8 sm:p-10 flex flex-col items-center ${isThemeNight ? 'bg-brand-dark' : 'bg-white'}`}>
+      <div className={`min-h-dvh flex items-center justify-center p-4 font-sans bg-surface text-ink`}>
+        <div className="fixed inset-0 blur-[100px] pointer-events-none" />
+        <div className={`relative w-full max-w-md rounded-lg border p-1.5 bg-surface border-rule`}>
+          <div className={`rounded-lg p-8 sm:p-10 flex flex-col items-center bg-surface`}>
 
             {/* Mascot + Badge */}
             <div className="w-16 h-16 mb-5 drop-shadow-[0_8px_20px_rgba(249,115,22,0.25)]">
               <ChekkiMascot className="w-full h-full" mood="happy" />
             </div>
-            <div className={`mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[10px] uppercase tracking-[0.2em] font-bold ${
+            <div className={`mb-4 inline-flex items-center gap-2 rounded-md px-3.5 py-1 text-[12px] font-bold ${
               welcomeRole === 'kt'
-                ? 'bg-blue-500/10 border border-blue-500/20 text-blue-400'
-                : 'bg-orange-500/10 border border-orange-500/20 text-orange-400'
+                ? 'bg-sunken border border-rule text-ink-2'
+                : 'bg-line-soft border border-rule text-line-ink'
             }`}>
               <ChalkboardTeacher size={12} weight="bold" />
               <span>{welcomeRole === 'kt' ? (isKo ? 'KT 한국인 선생님 환영' : 'Korean Teacher (KT) Access') : (isKo ? 'FT 원어민 선생님 환영' : 'Foreign Teacher (FT) Access')}</span>
@@ -2100,29 +2100,29 @@ export default function TeacherPage({ isNight = true }: Props) {
             {teacherWelcomeStep === 1 && (
               <div className="w-full space-y-5">
                 <div className="text-center mb-2">
-                  <h2 className="text-2xl font-black tracking-tight text-white mb-1">{isKo ? '선생님, 환영합니다! 👋' : 'Welcome, Teacher! 👋'}</h2>
-                  <p className="text-zinc-400 text-xs leading-relaxed">{isKo ? '아래 정보를 확인하고 시작해 주세요.' : 'Confirm your details to get started.'}</p>
+                  <h2 className="text-2xl font-extrabold tracking-tight text-ink mb-1">{isKo ? '선생님, 환영합니다!' : 'Welcome, Teacher!'}</h2>
+                  <p className="text-ink-3 text-xs leading-relaxed">{isKo ? '아래 정보를 확인하고 시작해 주세요.' : 'Confirm your details to get started.'}</p>
                 </div>
 
                 <div className="space-y-1.5 text-left">
-                  <label className="text-xs font-bold text-zinc-400 pl-1">{isKo ? '선생님 성함' : 'Your Name'}</label>
+                  <label className="text-xs font-bold text-ink-3 pl-1">{isKo ? '선생님 성함' : 'Your Name'}</label>
                   <input
                     type="text"
                     value={welcomeName}
                     onChange={(e) => setWelcomeName(e.target.value)}
-                    placeholder={isKo ? '홍길동 선생님' : 'Jane Doe'}
-                    className={`w-full p-4 rounded-2xl border text-sm font-bold outline-none focus:border-orange-500 transition-[color,background-color,border-color,box-shadow,transform] ${isThemeNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
+                    placeholder={isKo ? '예: 김지원' : 'e.g. Sarah Lee'}
+                    className={`w-full p-4 rounded-lg border text-sm font-bold outline-none focus:border-line transition-[color,background-color,border-color,box-shadow,transform] bg-surface border-rule text-ink`}
                   />
                 </div>
 
                 {welcomeSchool && (
-                  <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2.5">
-                    <Buildings size={16} className="text-emerald-400 shrink-0" />
+                  <div className="p-3.5 rounded-lg bg-right-soft border border-rule flex items-center gap-2.5">
+                    <Buildings size={16} className="text-correct shrink-0" />
                     <div>
-                      <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{isKo ? '초대받은 학원' : 'Invited Academy'}</p>
-                      <p className="text-sm font-black text-white">{welcomeSchool}</p>
+                      <p className="text-[12px] text-correct font-bold">{isKo ? '초대받은 학원' : 'Invited Academy'}</p>
+                      <p className="text-sm font-extrabold text-ink">{welcomeSchool}</p>
                       {welcomeInviterName && (
-                        <p className="text-[11px] text-emerald-300/80 mt-0.5">
+                        <p className="text-[12px] text-correct mt-0.5">
                           {isKo ? `${welcomeInviterName} 원장님이 초대함` : `Invited by ${welcomeInviterName}`}
                         </p>
                       )}
@@ -2131,14 +2131,14 @@ export default function TeacherPage({ isNight = true }: Props) {
                 )}
 
                 <div className="space-y-1.5 text-left">
-                  <label className="text-xs font-bold text-zinc-400 pl-1">{isKo ? '선생님 역할' : 'Your Role'}</label>
+                  <label className="text-xs font-bold text-ink-3 pl-1">{isKo ? '선생님 역할' : 'Your Role'}</label>
                   {user?.educatorRole ? (
                     // Role was already decided by the director's invite (audit
                     // §21d) — this is a read-only confirmation, not a choice.
-                    <div className={`w-full py-3 rounded-xl text-xs font-black border text-center ${
-                      welcomeRole === 'kt' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-orange-500/10 border-orange-500/30 text-orange-400'
+                    <div className={`w-full py-3 rounded-md text-xs font-extrabold border text-center ${
+                      welcomeRole === 'kt' ? 'bg-sunken border-rule text-ink-2' : 'bg-line-soft border-rule text-line-ink'
                     }`}>
-                      {welcomeRole === 'kt' ? (isKo ? '🇰🇷 KT 한국어 선생님 (초대로 지정됨)' : '🇰🇷 Korean Teacher — set by your invite') : (isKo ? '🌍 FT 원어민 선생님 (초대로 지정됨)' : '🌍 Foreign Teacher — set by your invite')}
+                      {welcomeRole === 'kt' ? (isKo ? '🇰🇷 KT 한국어 선생님 (초대로 지정됨)' : '🇰🇷 Korean Teacher — set by your invite') : (isKo ? 'FT 원어민 선생님 (초대로 지정됨)' : 'Foreign Teacher — set by your invite')}
                     </div>
                   ) : (
                     <div className="flex gap-2">
@@ -2147,13 +2147,13 @@ export default function TeacherPage({ isNight = true }: Props) {
                           key={r}
                           type="button"
                           onClick={() => setWelcomeRole(r)}
-                          className={`flex-1 py-3 rounded-xl text-xs font-black border transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
+                          className={`flex-1 py-3 rounded-md text-xs font-extrabold border transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
                             welcomeRole === r
-                              ? 'bg-orange-500 border-orange-500 text-black shadow-lg shadow-orange-500/20'
-                              : isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-600'
+                              ? 'bg-line border-line text-on-line'
+                              : 'bg-sunken border-rule text-ink-2'
                           }`}
                         >
-                          {r === 'ft' ? (isKo ? '🌍 FT 원어민' : '🌍 Foreign Teacher') : (isKo ? '🇰🇷 KT 한국어' : '🇰🇷 Korean Teacher')}
+                          {r === 'ft' ? (isKo ? 'FT 원어민' : 'Foreign Teacher') : (isKo ? '🇰🇷 KT 한국어' : '🇰🇷 Korean Teacher')}
                         </button>
                       ))}
                     </div>
@@ -2163,7 +2163,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 <button
                   type="button"
                   onClick={() => setTeacherWelcomeStep(2)}
-                  className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-black font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                  className="w-full py-4 bg-line hover:bg-line text-on-line font-bold text-sm rounded-lg transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                 >
                   <span>{isKo ? '다음: 학급 확인 →' : 'Next: Class Setup →'}</span>
                 </button>
@@ -2181,8 +2181,8 @@ export default function TeacherPage({ isNight = true }: Props) {
             {teacherWelcomeStep === 2 && (
               <div className="w-full space-y-5">
                 <div className="text-center mb-2">
-                  <h2 className="text-2xl font-black tracking-tight text-white mb-1">{isKo ? '거의 다 됐어요!' : "You're all set!"}</h2>
-                  <p className="text-zinc-400 text-xs leading-relaxed">
+                  <h2 className="text-2xl font-extrabold tracking-tight text-ink mb-1">{isKo ? '거의 다 됐어요!' : "You're all set!"}</h2>
+                  <p className="text-ink-3 text-xs leading-relaxed">
                     {isKo
                       ? '원장님이 담당 학급을 배정하면 대시보드에 표시됩니다.'
                       : 'Your director will assign you to a class — it\'ll show up on your dashboard once they do.'}
@@ -2191,10 +2191,10 @@ export default function TeacherPage({ isNight = true }: Props) {
                 <button
                   type="button"
                   onClick={() => dismissWelcome()}
-                  className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-black font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                  className="w-full py-4 bg-line hover:bg-line text-on-line font-bold text-sm rounded-lg transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                 >
                   <CheckCircle size={18} weight="bold" />
-                  <span>{isKo ? '완료 — 대시보드 입장! 🎉' : 'Done — Enter Dashboard! 🎉'}</span>
+                  <span>{isKo ? '완료 — 대시보드 입장!' : 'Done — Enter Dashboard!'}</span>
                 </button>
               </div>
             )}
@@ -2207,7 +2207,7 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   // --- RENDER CORE DASHBOARD LAYOUT SHELL ---
   return (
-    <div className={`min-h-dvh ${isThemeNight ? 'bg-brand-dark text-zinc-100' : 'bg-slate-50 text-zinc-900'} flex flex-col md:flex-row selection:bg-orange-500 selection:text-white`}>
+    <div className={`min-h-dvh bg-ground text-ink flex flex-col md:flex-row selection:bg-line selection:text-on-line`}>
 
       {/* Teacher Onboarding Modal */}
       {showTeacherOnboarding && (() => {
@@ -2215,38 +2215,38 @@ export default function TeacherPage({ isNight = true }: Props) {
         const isLast = teacherObStep === teacherObSteps.length - 1;
         return (
           <div className="fixed inset-0 z-[400] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/85 backdrop-blur-2xl" onClick={dismissTeacherOnboarding} />
+            <div className="absolute inset-0 bg-[#2b211a]/55" onClick={dismissTeacherOnboarding} />
             <div
               ref={teacherOnboardingDialogRef}
               role="dialog"
               aria-modal="true"
               aria-labelledby="teacher-onboarding-title"
               tabIndex={-1}
-              className={`relative w-full max-w-[420px] p-1 border rounded-[2.5rem] shadow-2xl ${
-              isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
+              className={`relative w-full max-w-[420px] p-1 border rounded-lg ${
+              'bg-surface border-rule'
             }`}>
-              <div className={`rounded-[calc(2.5rem-0.25rem)] p-8 flex flex-col items-center text-center ${
-                isThemeNight ? 'bg-brand-dark text-white' : 'bg-white text-zinc-900'
+              <div className={`rounded-lg p-8 flex flex-col items-center text-center ${
+                'bg-surface text-ink'
               }`}>
                 <button
                   onClick={dismissTeacherOnboarding}
-                  className={`absolute top-5 right-5 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.97] cursor-pointer ${
-                    isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+                  className={`absolute top-5 right-5 text-[12px] font-bold px-3 py-1.5 rounded-md transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.97] cursor-pointer ${
+                    'text-ink-2 hover:text-ink bg-sunken hover:bg-sunken'
                   }`}
                 >
                   {isKo ? '건너뛰기' : 'Skip'}
                 </button>
 
-                <div className={`w-44 h-44 mb-6 rounded-3xl overflow-hidden p-2 flex items-center justify-center shadow-xl ${
-                  isThemeNight ? 'bg-black/40 border border-white/10 shadow-[0_20px_40px_rgba(249,115,22,0.15)]' : 'bg-brand-dark border border-zinc-300/80 shadow-orange-500/10'
+                <div className={`w-44 h-44 mb-6 rounded-lg overflow-hidden p-2 flex items-center justify-center ${
+                  'bg-surface border border-rule'
                 }`}>
                   <img src={step.img} alt="" className="w-full h-full object-contain" />
                 </div>
 
-                <h3 id="teacher-onboarding-title" className={`text-2xl font-black tracking-tight mb-3 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                <h3 id="teacher-onboarding-title" className={`text-2xl font-extrabold tracking-tight mb-3 text-ink`}>
                   {isKo ? step.titleKo : step.titleEn}
                 </h3>
-                <p className={`text-sm leading-relaxed max-w-[300px] mb-8 ${isThemeNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                <p className={`text-sm leading-relaxed max-w-[300px] mb-8 text-ink-2`}>
                   {isKo ? step.descKo : step.descEn}
                 </p>
 
@@ -2254,7 +2254,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   {teacherObSteps.map((_, i) => (
                     <div
                       key={i}
-                      className={`h-1.5 rounded-full transition-[color,background-color,border-color,box-shadow,transform] duration-300 ${i === teacherObStep ? 'w-8 bg-orange-500' : 'w-1.5 bg-white/20'}`}
+                      className={`h-1.5 rounded-full transition-[color,background-color,border-color,box-shadow,transform] duration-300 ${i === teacherObStep ? 'w-8 bg-line' : 'w-1.5 bg-sunken'}`}
                     />
                   ))}
                 </div>
@@ -2270,14 +2270,14 @@ export default function TeacherPage({ isNight = true }: Props) {
                       setTeacherObStep(teacherObStep + 1);
                     }
                   }}
-                  className="group w-full py-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-[color,background-color,border-color,box-shadow,transform] duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
+                  className="group w-full py-4 bg-line hover:bg-line text-on-line font-extrabold text-sm rounded-lg transition-[color,background-color,border-color,box-shadow,transform] duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
                 >
                   <span>
                     {isLast
                       ? (isKo ? '시작하기' : 'Got it')
                       : (isKo ? '다음 단계' : 'Next Step')}
                   </span>
-                  <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                  <div className="w-7 h-7 rounded-full bg-sunken flex items-center justify-center group-hover:translate-x-1 transition-transform">
                     <ArrowRight size={14} weight="bold" />
                   </div>
                 </button>
@@ -2291,7 +2291,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       {/* Mobile-only backdrop for the off-canvas drawer */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 z-[350] bg-black/60 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-[350] bg-[#2b211a]/55 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -2303,32 +2303,32 @@ export default function TeacherPage({ isNight = true }: Props) {
         aria-modal="true"
         aria-label={isKo ? '탐색 메뉴' : 'Navigation menu'}
         tabIndex={-1}
-        className={`fixed inset-y-0 left-0 z-[360] w-[85vw] max-w-sm transform transition-transform duration-300 ease-out md:static md:z-auto md:w-72 md:h-screen md:sticky md:top-0 md:translate-x-0 md:transform-none border-b md:border-b-0 md:border-r flex flex-col shrink-0 transition-colors ${
+        className={`fixed inset-y-0 left-0 z-[360] w-[85vw] max-w-sm transform transition-transform duration-300 ease-out md:static md:z-auto md:w-72 md:h-dvh md:sticky md:top-0 md:translate-x-0 md:transform-none border-b md:border-b-0 md:border-r flex flex-col shrink-0 transition-colors ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } ${isThemeNight ? 'bg-brand-card border-white/5' : 'bg-white border-zinc-200 shadow-xs'}`}
+        } bg-surface border-rule`}
       >
 
         {/* Sidebar Header / Brand */}
         <div className={`p-6 border-b transition-colors flex items-center justify-between gap-3 shrink-0 ${
-          isThemeNight ? 'border-white/5 bg-brand-card' : 'border-zinc-200 bg-white'
+          'border-rule bg-surface'
         }`}>
           <div className="flex items-center gap-3.5 min-w-0">
             {academyLogo ? (
               <img
                 src={academyLogo}
                 alt="Academy Logo"
-                className="w-10 h-10 rounded-2xl object-cover border border-white/10 shadow-md bg-white/5"
+                className="w-10 h-10 rounded-lg object-cover border border-rule bg-sunken"
               />
             ) : (
-              <div className="w-10 h-10 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex items-center justify-center text-orange-500 shadow-lg shrink-0">
+              <div className="w-10 h-10 bg-line-soft border border-rule rounded-lg flex items-center justify-center text-line-ink shrink-0">
                 <ChalkboardTeacher size={20} weight="bold" />
               </div>
             )}
             <div className="min-w-0">
-              <h1 className={`text-sm font-black tracking-tight truncate ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+              <h1 className={`text-sm font-extrabold tracking-tight truncate text-ink`}>
                 {user?.schoolName || 'B2B Academy'}
               </h1>
-              <p className="text-[10px] text-zinc-400 font-medium truncate mt-0.5">
+              <p className="text-[12px] text-ink-3 font-medium truncate mt-0.5">
                 {user?.email}
               </p>
             </div>
@@ -2338,8 +2338,8 @@ export default function TeacherPage({ isNight = true }: Props) {
             type="button"
             onClick={() => setIsSidebarOpen(false)}
             aria-label={isKo ? '메뉴 닫기' : 'Close menu'}
-            className={`md:hidden p-2 rounded-xl transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer shrink-0 ${
-              isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
+            className={`md:hidden p-2 rounded-md transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer shrink-0 ${
+              'text-ink-2 hover:text-ink hover:bg-sunken'
             }`}
           >
             <X size={18} weight="bold" />
@@ -2361,7 +2361,6 @@ export default function TeacherPage({ isNight = true }: Props) {
 
           {loginRole !== 'director' && educatorRole === 'kt' && (
             <KtSidebarNav
-              isNight={isThemeNight}
               isKo={isKo}
               activeTab={activeTab}
               setActiveTab={setActiveTab}
@@ -2371,21 +2370,21 @@ export default function TeacherPage({ isNight = true }: Props) {
           )}
 
           {loginRole !== 'director' && educatorRole === 'ft' && (
-            <FtSidebarNav isNight={isThemeNight} isKo={isKo} activeTab={activeTab} setActiveTab={setActiveTab} />
+            <FtSidebarNav isKo={isKo} activeTab={activeTab} setActiveTab={setActiveTab} />
           )}
         </nav>
 
         {/* Sidebar Footer / User Info */}
         <div className={`p-4 border-t flex items-center justify-between gap-3 shrink-0 transition-colors ${
-          isThemeNight ? 'border-white/5 bg-brand-card/60' : 'border-zinc-200 bg-zinc-50'
+          'border-rule bg-surface'
         }`}>
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-orange-500/20 border border-orange-500/30 text-orange-500 flex items-center justify-center font-bold text-xs shrink-0">
+            <div className="w-9 h-9 rounded-md bg-line-soft border border-rule text-line-ink flex items-center justify-center font-bold text-xs shrink-0">
               {user?.name ? user.name.slice(0, 2).toUpperCase() : 'TC'}
             </div>
             <div className="min-w-0">
-              <p className={`text-xs font-bold truncate ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{user?.name}</p>
-              <p className="text-[10px] text-zinc-400 truncate">{user?.email}</p>
+              <p className={`text-xs font-bold truncate text-ink`}>{user?.name}</p>
+              <p className="text-[12px] text-ink-3 truncate">{user?.email}</p>
             </div>
           </div>
           <div className="flex items-center gap-1 shrink-0">
@@ -2394,8 +2393,8 @@ export default function TeacherPage({ isNight = true }: Props) {
             <button
               type="button"
               onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-              className={`sm:hidden p-2 rounded-xl text-xs font-bold transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
-                isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
+              className={`sm:hidden p-2 rounded-md text-xs font-bold transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
+                'text-ink-2 hover:text-ink hover:bg-sunken'
               }`}
               aria-label={language === 'ko' ? 'Switch to English' : '한국어로 전환'}
             >
@@ -2404,8 +2403,8 @@ export default function TeacherPage({ isNight = true }: Props) {
             <button
               type="button"
               onClick={() => setIsThemeNight(!isThemeNight)}
-              className={`sm:hidden p-2 rounded-xl transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
-                isThemeNight ? 'text-amber-400 hover:bg-white/10' : 'text-indigo-600 hover:bg-zinc-200'
+              className={`sm:hidden p-2 rounded-md transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
+                'text-ink-2 hover:bg-sunken'
               }`}
               aria-label={isThemeNight ? 'Switch to light mode' : 'Switch to dark mode'}
             >
@@ -2413,8 +2412,8 @@ export default function TeacherPage({ isNight = true }: Props) {
             </button>
             <button
               onClick={() => { setResetPwStatus(null); setShowSettingsModal(true); }}
-              className={`p-2 rounded-xl transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
-                isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
+              className={`p-2 rounded-md transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
+                'text-ink-2 hover:text-ink hover:bg-sunken'
               }`}
               title={isKo ? '교사 설정' : 'Teacher Settings'}
             >
@@ -2422,8 +2421,8 @@ export default function TeacherPage({ isNight = true }: Props) {
             </button>
             <button
               onClick={logout}
-              className={`p-2 rounded-xl transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
-                isThemeNight ? 'text-zinc-500 hover:text-red-400 hover:bg-red-500/10' : 'text-zinc-500 hover:text-red-600 hover:bg-red-50'
+              className={`p-2 rounded-md transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
+                'text-ink-3 hover:text-wrong hover:bg-wrong-soft'
               }`}
               title={isKo ? '로그아웃' : 'Log Out'}
             >
@@ -2447,14 +2446,14 @@ export default function TeacherPage({ isNight = true }: Props) {
 
       {/* Main Content Area */}
       <main className={`flex-1 flex flex-col min-w-0 relative overflow-y-auto transition-colors ${
-        isThemeNight ? 'bg-brand-dark text-white' : 'bg-slate-50 text-zinc-900'
+        'bg-ground text-ink'
       }`}>
         
         {/* Top Header Control Bar */}
         {/* The KT inbox spans every class, so the class switcher does nothing
             there; on phones the header would be empty, so it hides too. */}
         <header className={`p-3 sm:p-6 border-b flex flex-wrap items-center justify-between gap-2 sm:gap-4 relative z-20 shrink-0 transition-colors ${isKtInbox ? 'max-md:hidden' : ''} ${
-          isThemeNight ? 'bg-brand-dark/90 border-white/5 text-white' : 'bg-white/90 border-zinc-200 text-zinc-900 shadow-xs'
+          'bg-surface border-rule text-ink'
         }`}>
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <button
@@ -2462,8 +2461,8 @@ export default function TeacherPage({ isNight = true }: Props) {
               onClick={() => setIsSidebarOpen(true)}
               aria-label={isKo ? '메뉴 열기' : 'Open menu'}
               // Teachers get the bottom tab bar's "More" instead on phones.
-              className={`${isDirectorUser ? 'md:hidden' : 'hidden'} p-2.5 rounded-xl transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer shrink-0 border ${
-                isThemeNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-700 hover:text-zinc-900'
+              className={`${isDirectorUser ? 'md:hidden' : 'hidden'} p-2.5 rounded-md transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer shrink-0 border ${
+                'bg-sunken border-rule text-ink-2 hover:text-ink'
               }`}
             >
               <List size={20} weight="bold" />
@@ -2498,8 +2497,8 @@ export default function TeacherPage({ isNight = true }: Props) {
                       const found = realClasses.find(c => c.id === e.target.value);
                       if (found) setSelectedClass(found);
                     }}
-                    className={`w-full min-h-11 truncate font-bold text-sm px-4 py-2.5 rounded-2xl border outline-none cursor-pointer pr-9 appearance-none transition-colors ${
-                      isThemeNight ? 'bg-brand-dark border-white/10 text-white hover:border-white/20 focus:border-orange-500' : 'bg-zinc-50 border-zinc-300 text-zinc-900 hover:border-zinc-400 focus:border-orange-500'
+                    className={`w-full min-h-11 truncate font-bold text-sm px-4 py-2.5 rounded-lg border outline-none cursor-pointer pr-9 appearance-none transition-colors ${
+                      'bg-surface border-rule text-ink hover:border-rule focus:border-line'
                     }`}
                   >
                     {realClasses.map((cls) => (
@@ -2511,15 +2510,15 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <CaretDown
                     size={14}
                     weight="bold"
-                    className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 ${isThemeNight ? 'text-zinc-400' : 'text-zinc-500'}`}
+                    className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-3`}
                   />
                 </>
               ) : isLoadingClasses ? (
-                <div className="text-zinc-400 text-sm font-semibold p-2 animate-pulse">
+                <div className="text-ink-3 text-sm font-semibold p-2 animate-pulse">
                   {isKo ? '학급 불러오는 중…' : 'Loading classes…'}
                 </div>
               ) : (
-                <div className="text-zinc-400 text-sm font-semibold p-2">
+                <div className="text-ink-3 text-sm font-semibold p-2">
                   {isKo ? '학급을 먼저 등록해 주세요.' : 'Create a class to get started.'}
                 </div>
               )}
@@ -2536,34 +2535,29 @@ export default function TeacherPage({ isNight = true }: Props) {
             {/* The active week is class-wide (every teacher and parent sees
                 it), so only directors can change it. Teachers get a label. */}
             {selectedClass && !selectedClass.isDemo && !isDirectorUser && (
-              <span className={`hidden sm:inline-flex items-center min-h-11 px-3.5 rounded-xl border text-xs font-black whitespace-nowrap ${
-                isThemeNight ? 'border-white/10 text-zinc-300' : 'border-zinc-300 text-zinc-700'
+              <span className={`hidden sm:inline-flex items-center min-h-11 px-3.5 rounded-md border text-xs font-extrabold whitespace-nowrap ${
+                'border-rule text-ink-2'
               }`}>
                 {isKo ? `${selectedClass?.activeWeekNumber || 1}주차` : `Week ${selectedClass?.activeWeekNumber || 1}`}
               </span>
             )}
             {selectedClass && !selectedClass.isDemo && isDirectorUser && (
               <div className="flex items-center gap-2">
-                <div className={`border rounded-2xl flex items-center overflow-hidden p-1 shadow-inner ${
-                  isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-100 border-zinc-300'
-                }`}>
+                <div className="flex items-center overflow-hidden rounded-md ring-1 ring-inset ring-rule">
                   <button
                     type="button"
                     onClick={() => handleUpdateWeek(-1)}
                     disabled={(selectedClass?.activeWeekNumber || 1) <= 1}
-                    className={`hidden sm:flex w-11 h-11 items-center justify-center rounded-xl text-sm font-black transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer disabled:opacity-20 active:scale-95 ${
-                      isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
-                    }`}
+                    className="hidden h-11 w-11 cursor-pointer items-center justify-center text-ink-2 hover:bg-sunken hover:text-ink disabled:cursor-not-allowed disabled:opacity-30 sm:flex"
                     title={isKo ? '이전 주차' : 'Previous week'}
+                    aria-label={isKo ? '이전 주차' : 'Previous week'}
                   >
-                    -
+                    <Minus size={16} weight="bold" />
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowWeekCalendarModal(true)}
-                    className={`px-3 py-1 min-h-11 text-xs font-black min-w-[3.4rem] whitespace-nowrap text-center rounded-lg transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
-                      isThemeNight ? 'text-white hover:bg-white/10 hover:text-orange-400' : 'text-zinc-900 hover:bg-zinc-200 hover:text-orange-600'
-                    }`}
+                    className="min-h-11 min-w-[4.5rem] cursor-pointer whitespace-nowrap px-3 text-center text-[14px] font-extrabold text-ink hover:bg-sunken"
                     title={isKo ? '클릭하여 학기 주차별 커리큘럼 업로드 캘린더 열기' : 'Click to view semester calendar'}
                   >
                     {/* Phones drop the −/+ buttons; this opens the calendar to change week. */}
@@ -2572,12 +2566,11 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <button
                     type="button"
                     onClick={() => handleUpdateWeek(1)}
-                    className={`hidden sm:flex w-11 h-11 items-center justify-center rounded-xl text-sm font-black transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer active:scale-95 ${
-                      isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200'
-                    }`}
+                    className="hidden h-11 w-11 cursor-pointer items-center justify-center text-ink-2 hover:bg-sunken hover:text-ink sm:flex"
                     title={isKo ? '다음 주차' : 'Next week'}
+                    aria-label={isKo ? '다음 주차' : 'Next week'}
                   >
-                    +
+                    <Plus size={16} weight="bold" />
                   </button>
                 </div>
               </div>
@@ -2602,9 +2595,7 @@ export default function TeacherPage({ isNight = true }: Props) {
             <button
               type="button"
               onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-              className={`hidden sm:flex px-3.5 py-2 min-h-11 border rounded-xl text-xs font-bold transition-[color,background-color,border-color,box-shadow,transform] items-center gap-1.5 cursor-pointer active:scale-[0.96] ${
-                isThemeNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-200'
-              }`}
+              className="btn-press hidden min-h-11 cursor-pointer items-center rounded-md px-3.5 text-[14px] font-bold text-ink-2 ring-1 ring-inset ring-rule hover:text-ink hover:ring-ink-3 sm:flex"
               title="Switch Language / 언어 변경"
               aria-label={language === 'ko' ? 'Switch to English' : '한국어로 전환'}
             >
@@ -2616,9 +2607,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               type="button"
               onClick={() => setIsThemeNight(!isThemeNight)}
               aria-label={isThemeNight ? 'Switch to light mode' : 'Switch to dark mode'}
-              className={`hidden sm:flex min-w-11 min-h-11 items-center justify-center border rounded-xl transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer active:scale-[0.96] ${
-                isThemeNight ? 'bg-white/5 border-white/10 text-amber-400 hover:bg-white/10' : 'bg-zinc-100 border-zinc-300 text-indigo-600 hover:bg-zinc-200'
-              }`}
+              className="btn-press hidden min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-md text-ink-2 ring-1 ring-inset ring-rule hover:text-ink hover:ring-ink-3 sm:flex"
               title={isThemeNight ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
               {isThemeNight ? <Sun size={16} weight="bold" /> : <Moon size={16} weight="bold" />}
@@ -2642,8 +2631,8 @@ export default function TeacherPage({ isNight = true }: Props) {
               backstop for any link that stuck around from before that
               fix). */}
           {inviteSlug && showInviteSessionNotice && !(user?.uid && localStorage.getItem(`chekki_invite_school_${user.uid}`) === inviteSlug) && (
-            <div className={`p-4 rounded-2xl border mb-6 flex flex-wrap items-center justify-between gap-3 transition-[color,background-color,border-color,box-shadow,transform] ${
-              isThemeNight ? 'bg-amber-500/10 border-amber-500/30 text-amber-200' : 'bg-amber-50 border-amber-200 text-amber-900'
+            <div className={`p-4 rounded-lg border mb-6 flex flex-wrap items-center justify-between gap-3 transition-[color,background-color,border-color,box-shadow,transform] ${
+              'bg-line-soft border-rule text-line-ink'
             }`}>
               <p className="text-xs font-semibold flex-1 min-w-[240px]">
                 {isKo
@@ -2654,14 +2643,14 @@ export default function TeacherPage({ isNight = true }: Props) {
                 <button
                   type="button"
                   onClick={() => logout()}
-                  className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer"
+                  className="px-3 py-1.5 bg-line hover:bg-line text-on-line text-xs font-bold rounded-md transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer"
                 >
                   {isKo ? '로그아웃' : 'Log out'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowInviteSessionNotice(false)}
-                  className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-xs font-bold rounded-xl transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer"
+                  className="px-3 py-1.5 bg-sunken hover:bg-sunken text-xs font-bold rounded-md transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer"
                 >
                   {isKo ? '닫기' : 'Dismiss'}
                 </button>
@@ -2669,20 +2658,18 @@ export default function TeacherPage({ isNight = true }: Props) {
             </div>
           )}
           {classes.length === 0 && (loginRole === 'director' || user?.role === 'director') && (
-            <div className={`p-5 rounded-3xl border mb-6 flex flex-wrap items-center justify-between gap-4 transition-[color,background-color,border-color,box-shadow,transform] shadow-sm ${
-              isThemeNight
-                ? 'bg-orange-500/10 border-orange-500/30 text-orange-200'
-                : 'bg-orange-50/90 border-orange-200 text-orange-950 shadow-orange-500/5'
+            <div className={`p-5 rounded-lg border mb-6 flex flex-wrap items-center justify-between gap-4 transition-[color,background-color,border-color,box-shadow,transform] ${
+              'bg-line-soft border-rule text-line-ink'
             }`}>
               <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-2xl bg-orange-500 text-black flex items-center justify-center font-bold text-base shrink-0 shadow-lg shadow-orange-500/30">
-                  ✨
+                <div className="w-10 h-10 rounded-lg bg-line text-on-line flex items-center justify-center font-bold text-base shrink-0">
+                  
                 </div>
                 <div>
-                  <h4 className="text-sm font-black tracking-tight">
+                  <h4 className="text-sm font-extrabold tracking-tight">
                     {isKo ? '대시보드 미리보기 모드' : 'Dashboard Preview Mode'}
                   </h4>
-                  <p className={`text-xs mt-0.5 ${isThemeNight ? 'text-orange-300/80' : 'text-orange-800'}`}>
+                  <p className={`text-xs mt-0.5 text-line-ink`}>
                     {isKo
                       ? '등록된 학급이 없어도 대시보드, 커리큘럼 관리, 원생 활동 화면을 둘러보실 수 있습니다.'
                       : 'You can explore the dashboard, curriculum manager, and student views before creating a class.'}
@@ -2693,7 +2680,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 <button
                   type="button"
                   onClick={() => setShowCreateClassModal(true)}
-                  className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.97] shrink-0 cursor-pointer"
+                  className="px-5 py-2 bg-line hover:bg-line text-on-line text-xs font-bold rounded-md transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.97] shrink-0 cursor-pointer"
                 >
                   + {isKo ? '새 학급반 만들기' : 'Create Class Now'}
                 </button>
@@ -2701,19 +2688,17 @@ export default function TeacherPage({ isNight = true }: Props) {
             </div>
           )}
           {classes.length === 0 && (!selectedClass || selectedClass.isDemo) && !(loginRole === 'director' || user?.role === 'director') && (
-            <div className={`p-5 rounded-3xl border mb-6 flex items-center gap-3.5 transition-[color,background-color,border-color,box-shadow,transform] shadow-sm ${
-              isThemeNight
-                ? 'bg-orange-500/10 border-orange-500/30 text-orange-200'
-                : 'bg-orange-50/90 border-orange-200 text-orange-950 shadow-orange-500/5'
+            <div className={`p-5 rounded-lg border mb-6 flex items-center gap-3.5 transition-[color,background-color,border-color,box-shadow,transform] ${
+              'bg-line-soft border-rule text-line-ink'
             }`}>
-              <div className="w-10 h-10 rounded-2xl bg-orange-500 text-black flex items-center justify-center font-bold text-base shrink-0 shadow-lg shadow-orange-500/30">
-                ⏳
+              <div className="w-10 h-10 rounded-lg bg-line text-on-line flex items-center justify-center font-bold text-base shrink-0">
+                
               </div>
               <div>
-                <h4 className="text-sm font-black tracking-tight">
+                <h4 className="text-sm font-extrabold tracking-tight">
                   {isKo ? '학급 배정 대기 중' : 'Waiting on a class assignment'}
                 </h4>
-                <p className={`text-xs mt-0.5 ${isThemeNight ? 'text-orange-300/80' : 'text-orange-800'}`}>
+                <p className={`text-xs mt-0.5 text-line-ink`}>
                   {isKo
                     ? '학교에 가입되었지만 아직 학급이 배정되지 않았습니다. 원장님께 대시보드에서 배정을 요청해 주세요 (Teacher Assignments).'
                     : "You've joined the school but haven't been assigned to a class yet — ask your director to assign you one from their dashboard (Teacher Assignments)."}
@@ -2725,16 +2710,16 @@ export default function TeacherPage({ isNight = true }: Props) {
           <div className="animate-fade-in">
             {/* Sync Warning Banner — shown when a Firestore write failed silently (Fix 8) */}
             {syncWarning && (
-              <div className={`mb-4 p-3.5 rounded-2xl border flex items-center justify-between gap-3 ${
-                isThemeNight ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-300'
+              <div className={`mb-4 p-3.5 rounded-lg border flex items-center justify-between gap-3 ${
+                'bg-line-soft border-rule'
               }`}>
-                <p className="text-xs font-bold text-amber-500 flex-1">{syncWarning}</p>
+                <p className="text-xs font-bold text-line-ink flex-1">{syncWarning}</p>
                 <button
                   type="button"
                   onClick={() => setSyncWarning(null)}
-                  className="text-amber-400 hover:text-amber-200 text-xs font-bold cursor-pointer shrink-0"
+                  className="text-line-ink hover:text-line-ink text-xs font-bold cursor-pointer shrink-0"
                 >
-                  ✕
+                  
                 </button>
               </div>
             )}
@@ -2845,7 +2830,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       {selectedStudentDetails && (
         <div className="fixed inset-0 z-[200] flex items-center justify-end">
           <div 
-            className="absolute inset-0 bg-black/80 backdrop-blur-md" 
+            className="absolute inset-0 bg-[#2b211a]/55" 
             onClick={() => setSelectedStudentDetails(null)} 
           />
           <div
@@ -2854,20 +2839,20 @@ export default function TeacherPage({ isNight = true }: Props) {
             aria-modal="true"
             aria-labelledby="student-drawer-title"
             tabIndex={-1}
-            className={`relative w-full max-w-lg h-full border-l p-6 sm:p-8 flex flex-col shadow-2xl animate-slide-in text-left transition-colors ${
-            isThemeNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-white border-zinc-200 text-zinc-900'
+            className={`relative w-full max-w-lg h-full border-l p-6 sm:p-8 flex flex-col animate-slide-in text-left transition-colors ${
+            'bg-surface border-rule text-ink'
           }`}>
 
             {/* Drawer Header */}
             <div className={`pb-6 border-b flex items-center justify-between shrink-0 ${
-              isThemeNight ? 'border-white/10' : 'border-zinc-200'
+              'border-rule'
             }`}>
               <div>
-                <h3 id="student-drawer-title" className={`text-xl font-black flex items-center gap-2 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                  <span>👦 {selectedStudentDetails.studentName || 'Unnamed'}</span>
-                  <span className="text-xs font-normal text-zinc-400">{isKo ? '원생 학습 성장 기록' : "'s Growth & Practice Log"}</span>
+                <h3 id="student-drawer-title" className={`text-xl font-extrabold flex items-center gap-2 text-ink`}>
+                  <span>{selectedStudentDetails.studentName || 'Unnamed'}</span>
+                  <span className="text-xs font-normal text-ink-3">{isKo ? '원생 학습 성장 기록' : "'s Growth & Practice Log"}</span>
                 </h3>
-                <p className="text-xs text-zinc-400 font-mono mt-1">
+                <p className="text-xs text-ink-3 mt-1">
                   {selectedStudentDetails.email}
                 </p>
               </div>
@@ -2875,8 +2860,8 @@ export default function TeacherPage({ isNight = true }: Props) {
                 type="button"
                 onClick={() => setSelectedStudentDetails(null)}
                 aria-label={isKo ? '닫기' : 'Close'}
-                className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-[color,background-color,border-color,box-shadow,transform] text-sm font-bold active:scale-[0.95] cursor-pointer ${
-                  isThemeNight ? 'text-zinc-400 hover:text-white hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                className={`min-w-11 min-h-11 flex items-center justify-center rounded-md transition-[color,background-color,border-color,box-shadow,transform] text-sm font-bold active:scale-[0.95] cursor-pointer ${
+                  'text-ink-3 hover:text-ink hover:bg-sunken'
                 }`}
               >
                 <X size={18} weight="bold" />
@@ -2884,27 +2869,27 @@ export default function TeacherPage({ isNight = true }: Props) {
             </div>
 
             {/* Flag for Director/Counselor */}
-            <div className={`mt-4 p-4 rounded-2xl border shrink-0 ${
+            <div className={`mt-4 p-4 rounded-lg border shrink-0 ${
               selectedStudentDetails.flaggedException
-                ? 'bg-amber-500/10 border-amber-500/30'
-                : isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
+                ? 'bg-line-soft border-rule'
+                : 'bg-surface border-rule'
             }`}>
               {selectedStudentDetails.flaggedException ? (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">
-                      {isKo ? '⚠️ 원장님께 플래그됨' : '⚠️ Flagged for Director'}
+                    <span className="text-[12px] font-bold text-line-ink">
+                      {isKo ? '원장님께 플래그됨' : 'Flagged for Director'}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleToggleFlagStudent(selectedStudentDetails.uid)}
-                      className="text-[10px] font-bold text-zinc-400 hover:text-white cursor-pointer"
+                      className="text-[12px] font-bold text-ink-3 hover:text-ink cursor-pointer"
                     >
                       {isKo ? '플래그 해제' : 'Unflag'}
                     </button>
                   </div>
-                  <p className="text-xs text-zinc-300">{selectedStudentDetails.flaggedException.reason}</p>
-                  <p className="text-[10px] text-zinc-400 font-mono">
+                  <p className="text-xs text-ink-3">{selectedStudentDetails.flaggedException.reason}</p>
+                  <p className="text-[12px] text-ink-3">
                     {selectedStudentDetails.flaggedException.teacherName} · {selectedStudentDetails.flaggedException.date}
                   </p>
                 </div>
@@ -2914,8 +2899,8 @@ export default function TeacherPage({ isNight = true }: Props) {
                     value={flagReasonInput}
                     onChange={(e) => setFlagReasonInput(e.target.value)}
                     placeholder={isKo ? '플래그 사유를 입력하세요 (학습/행동 이슈 등)' : 'Reason for flagging (academic or behavioral issue)...'}
-                    className={`w-full h-20 p-3 rounded-xl border text-xs outline-none resize-none ${
-                      isThemeNight ? 'bg-brand-dark border-white/10 text-white placeholder:text-zinc-600' : 'bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400'
+                    className={`w-full h-20 p-3 rounded-md border text-xs outline-none resize-none ${
+                      'bg-surface border-rule text-ink placeholder:text-ink-3'
                     }`}
                   />
                   <div className="flex gap-2">
@@ -2927,14 +2912,14 @@ export default function TeacherPage({ isNight = true }: Props) {
                         setFlagReasonInput('');
                         setShowFlagReasonInput(false);
                       }}
-                      className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl cursor-pointer"
+                      className="px-4 py-2 bg-line hover:bg-line text-on-line font-bold text-xs rounded-md cursor-pointer"
                     >
                       {isKo ? '플래그 제출' : 'Submit Flag'}
                     </button>
                     <button
                       type="button"
                       onClick={() => { setShowFlagReasonInput(false); setFlagReasonInput(''); }}
-                      className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
+                      className="px-4 py-2 text-xs font-bold text-ink-3 hover:text-ink cursor-pointer"
                     >
                       {isKo ? '취소' : 'Cancel'}
                     </button>
@@ -2944,7 +2929,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 <button
                   type="button"
                   onClick={() => setShowFlagReasonInput(true)}
-                  className={`text-xs font-bold flex items-center gap-1.5 cursor-pointer ${isThemeNight ? 'text-zinc-400 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'}`}
+                  className={`text-xs font-bold flex items-center gap-1.5 cursor-pointer text-ink-3 hover:text-ink`}
                 >
                   <Warning size={14} weight="bold" />
                   <span>{isKo ? '원장님께 플래그하기' : 'Flag for Director'}</span>
@@ -2955,61 +2940,61 @@ export default function TeacherPage({ isNight = true }: Props) {
             {/* Drawer Content */}
             <div className="flex-1 overflow-y-auto py-6 space-y-6 custom-scrollbar pr-1">
               <div>
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4 block">
+                <span className="text-[12px] font-bold text-ink-3 mb-4 block">
                   {isKo ? '이번 주 도전 복습 포인트' : "This week's focus practice items"}
                 </span>
 
                 {selectedStudentDetails.weeklyMistakes.length === 0 ? (
-                  <div className="py-16 text-center text-emerald-500 text-xs flex flex-col items-center gap-2">
+                  <div className="py-16 text-center text-correct text-xs flex flex-col items-center gap-2">
                     <Sparkle size={24} weight="bold" />
                     <span>{isKo ? '모든 항목을 완벽하게 학습했습니다!' : 'Mastered all items this week! Excellent progress.'}</span>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {selectedStudentDetails.weeklyMistakes.map((m: any, idx: number) => (
-                      <div key={m.uniqueId || idx} className={`p-5 border rounded-2xl flex flex-col gap-3 ${
-                        isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200 shadow-xs'
+                      <div key={m.uniqueId || idx} className={`p-5 border rounded-lg flex flex-col gap-3 ${
+                        'bg-surface border-rule'
                       }`}>
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="px-2.5 py-1 bg-orange-500/10 border border-orange-500/20 text-orange-500 font-bold rounded-lg text-[9px] uppercase tracking-wider">
+                            <span className="px-2.5 py-1 bg-line-soft border border-rule text-line-ink font-bold rounded-lg text-[12px]">
                               {m.type || 'Phonics'}
                             </span>
                             {m.isResolved || m.attemptNumber > 1 ? (
-                              <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 font-bold rounded-md text-[9px] uppercase">
-                                ⚡ {isKo ? '2차 재도전 수정 완료' : 'Fixed on Rescan'}
+                              <span className="px-2 py-0.5 bg-right-soft border border-rule text-correct font-bold rounded-md text-[12px]">
+                                {isKo ? '2차 재도전 수정 완료' : 'Fixed on Rescan'}
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-500 font-bold rounded-md text-[9px] uppercase">
-                                📋 {isKo ? '1차 스캔 기록' : '1st Scan Attempt'}
+                              <span className="px-2 py-0.5 bg-line-soft border border-rule text-line-ink font-bold rounded-md text-[12px]">
+                                {isKo ? '1차 스캔 기록' : '1st Scan Attempt'}
                               </span>
                             )}
                           </div>
-                          <span className="text-[9px] text-zinc-400 font-mono">
+                          <span className="text-[12px] text-ink-3">
                             {m.dateAdded ? m.dateAdded.split('T')[0] : ''}
                           </span>
                         </div>
 
                         <div className="space-y-3 text-xs">
                           <div>
-                            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">
+                            <span className="text-[12px] font-bold text-ink-3 block mb-1">
                               Question / Word
                             </span>
-                            <p className={`font-bold font-mono ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{m.question_text}</p>
+                            <p className={`font-bold text-ink`}>{m.question_text}</p>
                           </div>
 
                           <div className="grid grid-cols-2 gap-4 pt-1">
                             <div>
-                              <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">
+                              <span className="text-[12px] font-bold text-ink-3 block mb-1">
                                 Target Answer
                               </span>
-                              <p className="font-bold text-emerald-500 font-mono">{m.correct_answer}</p>
+                              <p className="font-bold text-correct">{m.correct_answer}</p>
                             </div>
                             <div>
-                              <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">
+                              <span className="text-[12px] font-bold text-ink-3 block mb-1">
                                 Student Answer
                               </span>
-                              <p className="font-bold text-red-500 font-mono">{m.student_response || '(Blank)'}</p>
+                              <p className="font-bold text-wrong">{m.student_response || '(Blank)'}</p>
                             </div>
                           </div>
                         </div>
@@ -3021,11 +3006,11 @@ export default function TeacherPage({ isNight = true }: Props) {
             </div>
 
             {/* Drawer Footer */}
-            <div className={`pt-6 border-t shrink-0 flex gap-3 ${isThemeNight ? 'border-white/10' : 'border-zinc-200'}`}>
+            <div className={`pt-6 border-t shrink-0 flex gap-3 border-rule`}>
               <button
                 type="button"
                 onClick={() => setShowReportCardModal(true)}
-                className="w-1/2 py-4 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-2xl transition-[color,background-color,border-color,box-shadow,transform] shadow-lg shadow-orange-500/20 active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-1/2 py-4 bg-line hover:bg-line text-on-line font-bold text-xs rounded-lg transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Printer size={16} weight="bold" />
                 <span>{isKo ? '맞춤 로고 성적표 인쇄' : 'Print Branded Report'}</span>
@@ -3033,8 +3018,8 @@ export default function TeacherPage({ isNight = true }: Props) {
               <button
                 type="button"
                 onClick={() => setSelectedStudentDetails(null)}
-                className={`w-1/2 py-4 font-bold text-xs rounded-2xl transition-[color,background-color,border-color,box-shadow,transform] border active:scale-[0.98] cursor-pointer ${
-                  isThemeNight ? 'bg-brand-dark hover:bg-white/5 text-zinc-300 border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
+                className={`w-1/2 py-4 font-bold text-xs rounded-lg transition-[color,background-color,border-color,box-shadow,transform] border active:scale-[0.98] cursor-pointer ${
+                  'bg-sunken hover:bg-sunken text-ink-2 border-rule'
                 }`}
               >
                 {isKo ? '닫기' : 'Close'}
@@ -3048,7 +3033,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       {showCreateClassModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div 
-            className="absolute inset-0 bg-black/80 backdrop-blur-md" 
+            className="absolute inset-0 bg-[#2b211a]/55" 
             onClick={() => setShowCreateClassModal(false)} 
           />
           <div
@@ -3057,22 +3042,22 @@ export default function TeacherPage({ isNight = true }: Props) {
             aria-modal="true"
             aria-labelledby="create-class-title"
             tabIndex={-1}
-            className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-md mx-4 animate-fade-in ${
-            isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
+            className={`relative p-1 border rounded-lg flex flex-col w-full max-w-md mx-4 animate-fade-in ${
+            'bg-surface border-rule'
           }`}>
-            <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-8 overflow-hidden transition-colors ${
-              isThemeNight ? 'bg-brand-dark text-zinc-200' : 'bg-white text-zinc-900'
+            <div className={`relative w-full h-full rounded-lg p-8 overflow-hidden transition-colors ${
+              'bg-surface text-ink'
             }`}>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-line-soft border border-rule text-line-ink flex items-center justify-center">
                   <Plus size={22} weight="bold" />
                 </div>
-                <h3 id="create-class-title" className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                <h3 id="create-class-title" className={`text-xl font-extrabold text-ink`}>
                   {isKo ? '새 학급반 추가' : 'Add New Class'}
                 </h3>
               </div>
               
-              <p className="text-zinc-400 text-xs mb-6 leading-relaxed">
+              <p className="text-ink-3 text-xs mb-6 leading-relaxed">
                 {isKo 
                   ? '관리할 학급의 이름과 대상 학년을 설정해 학급을 개설하세요.'
                   : 'Specify the class details to expand your school roster.'}
@@ -3080,7 +3065,7 @@ export default function TeacherPage({ isNight = true }: Props) {
 
               <form onSubmit={handleCreateClass} className="space-y-4">
                 <div className="space-y-2 text-left">
-                  <label htmlFor="new-class-name" className="text-xs font-bold text-zinc-400 pl-1">
+                  <label htmlFor="new-class-name" className="text-xs font-bold text-ink-3 pl-1">
                     {isKo ? '반 이름' : 'Class Name'}
                   </label>
                   <input
@@ -3090,22 +3075,22 @@ export default function TeacherPage({ isNight = true }: Props) {
                     value={newClassName}
                     onChange={(e) => setNewClassName(e.target.value)}
                     placeholder="E.g. 7-Mercury"
-                    className={`w-full border outline-none text-sm p-4 rounded-2xl transition-[color,background-color,border-color,box-shadow,transform] ${
-                      isThemeNight ? 'bg-brand-dark border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                    className={`w-full border outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] ${
+                      'bg-surface border-rule focus:border-line text-ink placeholder:text-ink-3'
                     }`}
                   />
                 </div>
 
                 <div className="space-y-2 text-left">
-                  <label htmlFor="new-class-level" className="text-xs font-bold text-zinc-400 pl-1">
+                  <label htmlFor="new-class-level" className="text-xs font-bold text-ink-3 pl-1">
                     {isKo ? '대상 학년' : 'Class Level'}
                   </label>
                   <select
                     id="new-class-level"
                     value={newClassLevel}
                     onChange={(e) => setNewClassLevel(e.target.value)}
-                    className={`w-full border outline-none text-sm p-4 rounded-2xl transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
-                      isThemeNight ? 'bg-brand-dark border-white/10 focus:border-orange-500 text-white' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900'
+                    className={`w-full border outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
+                      'bg-surface border-rule focus:border-line text-ink'
                     }`}
                   >
                     <option value="5-year-old">{isKo ? '5세반' : '5-year-old'}</option>
@@ -3120,8 +3105,8 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <button
                     type="button"
                     onClick={() => setShowCreateClassModal(false)}
-                    className={`flex-1 py-4 font-bold text-xs rounded-2xl border transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] cursor-pointer ${
-                      isThemeNight ? 'bg-brand-dark hover:bg-white/5 text-zinc-400 hover:text-white border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
+                    className={`flex-1 py-4 font-bold text-xs rounded-lg border transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] cursor-pointer ${
+                      'bg-sunken hover:bg-sunken text-ink-2 border-rule'
                     }`}
                   >
                     {isKo ? '취소' : 'Cancel'}
@@ -3129,10 +3114,10 @@ export default function TeacherPage({ isNight = true }: Props) {
                   <button
                     type="submit"
                     disabled={isCreatingClass}
-                    className="flex-1 py-4 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-2xl shadow-xl shadow-orange-500/20 transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="flex-1 py-4 bg-line hover:bg-line text-on-line font-bold text-xs rounded-lg transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     {isCreatingClass ? (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-rule border-t-white rounded-full animate-spin" />
                     ) : (
                       <span>{isKo ? '개설하기' : 'Create Class'}</span>
                     )}
@@ -3147,7 +3132,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       {showSettingsModal && (
         <div className="fixed inset-0 z-[260] flex items-center justify-center p-4">
           <div 
-            className="absolute inset-0 bg-black/80 backdrop-blur-md" 
+            className="absolute inset-0 bg-[#2b211a]/55" 
             onClick={() => setShowSettingsModal(false)} 
           />
           <div
@@ -3156,83 +3141,67 @@ export default function TeacherPage({ isNight = true }: Props) {
             aria-modal="true"
             aria-labelledby="settings-modal-title"
             tabIndex={-1}
-            className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-lg mx-4 animate-fade-in text-left ${
-            isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
+            className={`relative p-1 border rounded-lg flex flex-col w-full max-w-lg mx-4 animate-fade-in text-left ${
+            'bg-surface border-rule'
           }`}>
-            <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-8 transition-colors ${
-              isThemeNight ? 'bg-brand-dark text-zinc-200' : 'bg-white text-zinc-900'
+            <div className={`relative w-full h-full rounded-lg p-8 transition-colors ${
+              'bg-surface text-ink'
             }`}>
               <button
                 type="button"
                 onClick={() => setShowSettingsModal(false)}
                 aria-label={isKo ? '닫기' : 'Close'}
-                className={`absolute top-6 right-6 min-w-11 min-h-11 flex items-center justify-center rounded-full transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
-                  isThemeNight ? 'text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10' : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200'
+                className={`absolute top-6 right-6 min-w-11 min-h-11 flex items-center justify-center rounded-md transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
+                  'text-ink-3 hover:text-ink bg-sunken hover:bg-sunken'
                 }`}
               >
                 <X size={16} weight="bold" />
               </button>
 
-              <div id="settings-modal-title" className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
-                  <Gear size={24} weight="bold" />
-                </div>
-                <div>
-                  <span className={`text-[10px] font-bold uppercase tracking-widest block ${
-                    loginRole === 'director' || user?.role === 'director' ? 'text-amber-400' : 'text-orange-500'
-                  }`}>
-                    {loginRole === 'director' || user?.role === 'director' 
-                      ? (isKo ? '원장님 설정' : 'Director settings')
-                      : (educatorRole === 'kt' 
-                          ? (isKo ? '👩‍🏫 한국인 교사 계정 설정' : '👩‍🏫 KOREAN TEACHER (KT) SETTINGS')
-                          : (isKo ? '👨‍🏫 원어민 교사 계정 설정' : '👨‍🏫 FOREIGN TEACHER (FT) SETTINGS'))}
-                  </span>
-                  <h3 className={`text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {loginRole === 'director' || user?.role === 'director'
-                      ? (isKo ? '원장님 설정' : 'Director settings')
-                      : (educatorRole === 'kt'
-                          ? (isKo ? '한국인 선생님 환경 설정' : 'Korean Teacher Account & Settings')
-                          : (isKo ? '원어민 선생님 환경 설정' : 'Foreign Teacher Account & Settings'))}
-                  </h3>
-                </div>
-              </div>
+              <h3 id="settings-modal-title" className="mb-6 text-[22px] font-extrabold tracking-[-0.01em] text-ink">
+                {loginRole === 'director' || user?.role === 'director'
+                  ? (isKo ? '원장님 설정' : 'Director settings')
+                  : (educatorRole === 'kt'
+                      ? (isKo ? '한국인 선생님 설정' : 'Korean teacher settings')
+                      : (isKo ? '원어민 선생님 설정' : 'Foreign teacher settings'))}
+              </h3>
 
               <div className="space-y-6">
                 {/* Profile Info */}
-                <div className={`p-4 border rounded-2xl space-y-2 ${
-                  isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'
+                <div className={`p-4 border rounded-lg space-y-2 ${
+                  'bg-surface border-rule'
                 }`}>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block">
-                    {isKo ? '계정 프로필 정보' : 'ACCOUNT PROFILE'}
+                  <span className="text-[12px] font-bold text-ink-3 block">
+                    {isKo ? '계정 정보' : 'Account'}
                   </span>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-400">
+                    <span className="text-ink-3">
                       {loginRole === 'director' || user?.role === 'director' 
                         ? (isKo ? '원장님 성함' : 'Director Name') 
                         : (isKo ? '선생님 성함' : 'Teacher Name')}:
                     </span>
-                    <strong className={isThemeNight ? 'text-white' : 'text-zinc-900'}>{user?.name || 'Director Admin'}</strong>
+                    <strong className={'text-ink'}>{user?.name || 'Director Admin'}</strong>
                   </div>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-400">{isKo ? '이메일 주소' : 'Email Address'}:</span>
-                    <strong className={`font-mono ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>{user?.email}</strong>
+                    <span className="text-ink-3">{isKo ? '이메일 주소' : 'Email Address'}:</span>
+                    <strong className={` text-ink`}>{user?.email}</strong>
                   </div>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-400">{isKo ? '소속 학원' : 'Assigned School'}:</span>
-                    <strong className="text-orange-500">{user?.schoolName || 'B2B Academy'}</strong>
+                    <span className="text-ink-3">{isKo ? '소속 학원' : 'Assigned School'}:</span>
+                    <strong className="text-line-ink">{user?.schoolName || 'B2B Academy'}</strong>
                   </div>
                 </div>
 
                 {/* Password Reset */}
-                <div className={`p-4 border rounded-2xl space-y-3 ${
-                  isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
+                <div className={`p-4 border rounded-lg space-y-3 ${
+                  'bg-surface border-rule'
                 }`}>
                   <div className="flex justify-between items-center">
                     <div>
-                      <h4 className={`text-xs font-bold mb-0.5 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                      <h4 className={`text-xs font-bold mb-0.5 text-ink`}>
                         {isKo ? '비밀번호 재설정' : 'Password & Security'}
                       </h4>
-                      <p className="text-[11px] text-zinc-400">
+                      <p className="text-[12px] text-ink-3">
                         {isKo ? '이메일로 비밀번호 재설정 링크를 받습니다.' : 'Receive a password reset link via email.'}
                       </p>
                     </div>
@@ -3240,15 +3209,15 @@ export default function TeacherPage({ isNight = true }: Props) {
                       type="button"
                       disabled={isSendingReset}
                       onClick={handleSendResetPassword}
-                      className={`px-3.5 py-2 disabled:opacity-50 font-bold text-xs rounded-xl border transition-[color,background-color,border-color,box-shadow,transform] whitespace-nowrap cursor-pointer ${
-                        isThemeNight ? 'bg-white/10 hover:bg-white/15 text-white border-white/10' : 'bg-zinc-200 hover:bg-zinc-300 text-zinc-800 border-zinc-300'
+                      className={`px-3.5 py-2 disabled:opacity-50 font-bold text-xs rounded-md border transition-[color,background-color,border-color,box-shadow,transform] whitespace-nowrap cursor-pointer ${
+                        'bg-sunken hover:bg-sunken text-ink border-rule'
                       }`}
                     >
                       {isSendingReset ? (isKo ? '발송 중...' : 'Sending...') : (isKo ? '재설정 이메일 발송' : 'Reset Password')}
                     </button>
                   </div>
                   {resetPwStatus && (
-                    <p className={`text-xs p-2.5 rounded-xl font-medium ${resetPwStatus.isError ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'}`}>
+                    <p className={`text-xs p-2.5 rounded-md font-medium ${resetPwStatus.isError ? 'bg-wrong-soft text-wrong border border-rule' : 'bg-right-soft text-correct border border-rule'}`}>
                       {resetPwStatus.text}
                     </p>
                   )}
@@ -3260,14 +3229,14 @@ export default function TeacherPage({ isNight = true }: Props) {
                     written about a role they don't have (Audit: director's
                     settings surfaced the FT/KT-worded tour). */}
                 {loginRole !== 'director' && user?.role !== 'director' && (
-                  <div className={`flex items-center justify-between p-4 border rounded-2xl ${
-                    isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
+                  <div className={`flex items-center justify-between p-4 border rounded-lg ${
+                    'bg-surface border-rule'
                   }`}>
                     <div>
-                      <h4 className={`text-xs font-bold mb-0.5 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                      <h4 className={`text-xs font-bold mb-0.5 text-ink`}>
                         {isKo ? '교사 온보딩 가이드 다시보기' : 'Onboarding Walkthrough'}
                       </h4>
-                      <p className="text-[11px] text-zinc-400">
+                      <p className="text-[12px] text-ink-3">
                         {isKo ? '학급 개설 및 학부모 6자리 코드 연결 가이드' : 'Review 3-step teacher tutorial guide.'}
                       </p>
                     </div>
@@ -3278,8 +3247,8 @@ export default function TeacherPage({ isNight = true }: Props) {
                         setTeacherObStep(0);
                         setShowTeacherOnboarding(true);
                       }}
-                      className={`px-3.5 py-2 font-bold text-xs rounded-xl border transition-[color,background-color,border-color,box-shadow,transform] whitespace-nowrap cursor-pointer ${
-                        isThemeNight ? 'bg-white/10 hover:bg-white/15 text-white border-white/10' : 'bg-zinc-200 hover:bg-zinc-300 text-zinc-800 border-zinc-300'
+                      className={`px-3.5 py-2 font-bold text-xs rounded-md border transition-[color,background-color,border-color,box-shadow,transform] whitespace-nowrap cursor-pointer ${
+                        'bg-sunken hover:bg-sunken text-ink border-rule'
                       }`}
                     >
                       {isKo ? '가이드 열기' : 'Open Tutorial'}
@@ -3289,14 +3258,14 @@ export default function TeacherPage({ isNight = true }: Props) {
 
                 {/* Report a Bug / Send Feedback — staff dashboard had no path to
                     reach us at all; only the parent-facing app did. */}
-                <div className={`flex items-center justify-between p-4 border rounded-2xl ${
-                  isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
+                <div className={`flex items-center justify-between p-4 border rounded-lg ${
+                  'bg-surface border-rule'
                 }`}>
                   <div>
-                    <h4 className={`text-xs font-bold mb-0.5 ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                    <h4 className={`text-xs font-bold mb-0.5 text-ink`}>
                       {isKo ? '버그 신고 / 의견 보내기' : 'Report a Bug / Send Feedback'}
                     </h4>
-                    <p className="text-[11px] text-zinc-400">
+                    <p className="text-[12px] text-ink-3">
                       {isKo ? '문제를 발견하셨나요? 팀에게 바로 알려주세요.' : 'Found something broken? Let us know directly.'}
                     </p>
                   </div>
@@ -3306,7 +3275,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                       setShowSettingsModal(false);
                       setShowFeedbackModal(true);
                     }}
-                    className="px-3.5 py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 font-bold text-xs rounded-xl border border-orange-500/20 transition-[color,background-color,border-color,box-shadow,transform] whitespace-nowrap cursor-pointer"
+                    className="px-3.5 py-2 bg-line-soft hover:bg-line-soft text-line-ink font-bold text-xs rounded-md border border-rule transition-[color,background-color,border-color,box-shadow,transform] whitespace-nowrap cursor-pointer"
                   >
                     {isKo ? '보내기' : 'Send'}
                   </button>
@@ -3318,7 +3287,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     type="button"
                     onClick={handleDeleteTeacherAccount}
                     disabled={isDeletingAccount}
-                    className="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold text-xs rounded-2xl border border-red-500/20 transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] disabled:opacity-50"
+                    className="w-full py-3 bg-wrong-soft hover:bg-wrong-soft text-wrong font-bold text-xs rounded-lg border border-rule transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] disabled:opacity-50"
                   >
                     <Trash size={16} weight="bold" />
                     <span>{isDeletingAccount ? (isKo ? '계정 삭제 중...' : 'Deleting Account...') : (isKo ? '선생님 계정 영구 삭제' : 'Permanently Delete Account')}</span>
@@ -3330,8 +3299,8 @@ export default function TeacherPage({ isNight = true }: Props) {
                       setShowSettingsModal(false);
                       logout();
                     }}
-                    className={`w-full py-3 font-bold text-xs rounded-2xl border transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] ${
-                      isThemeNight ? 'bg-white/5 hover:bg-white/10 text-zinc-300 border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
+                    className={`w-full py-3 font-bold text-xs rounded-lg border transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] ${
+                      'bg-sunken hover:bg-sunken text-ink-2 border-rule'
                     }`}
                   >
                     <SignOut size={16} weight="bold" />

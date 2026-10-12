@@ -117,21 +117,21 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-4 sm:p-6 font-sans transition-colors ${
-      isNight ? 'bg-brand-dark text-zinc-100' : 'bg-zinc-50 text-zinc-900'
+    <div className={`min-h-dvh flex items-center justify-center p-4 sm:p-6 font-sans transition-colors ${
+      'bg-surface text-ink'
     }`}>
-      <div className={`w-full max-w-2xl rounded-3xl border p-6 sm:p-10 shadow-2xl space-y-8 transition-all ${
-        isNight ? 'bg-brand-dark border-white/10' : 'bg-white border-zinc-200'
+      <div className={`w-full max-w-2xl rounded-lg border p-6 sm:p-10 space-y-8 transition-[color,background-color,border-color,opacity,transform] ${
+        'bg-surface border-rule'
       }`}>
         
         {/* Wizard Header Progress Bar */}
         <div className="space-y-4 text-left">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-500 font-black text-xs flex items-center justify-center border border-orange-500/30 shrink-0">
+              <span className="w-8 h-8 rounded-md bg-line-soft text-line-ink font-extrabold text-xs flex items-center justify-center border border-rule shrink-0">
                 {step}/3
               </span>
-              <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">
                 {isKo ? '원장님 맞춤 캠퍼스 워크스페이스 활성화' : 'Campus Workspace Activation'}
               </h2>
             </div>
@@ -139,33 +139,33 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
               {/* seatsTotal comes from the school doc set-initial-role.ts wrote
                   server-side — the real granted split, not the sessionStorage
                   display-only number this used to read. */}
-              <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">
-                ⚡ {(isKo ? planLabel.nameKo : planLabel.nameEn).toUpperCase()} (FT {seatsTotal.ft} / KT {seatsTotal.kt})
+              <span className="px-3 py-1 rounded-md text-[12px] font-bold bg-line-soft text-line-ink border border-rule">
+                {(isKo ? planLabel.nameKo : planLabel.nameEn).toUpperCase()} (FT {seatsTotal.ft} / KT {seatsTotal.kt})
               </span>
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-1">
-            <div className={`h-1.5 rounded-full transition-all duration-500 ${step >= 1 ? 'bg-orange-500' : isNight ? 'bg-white/10' : 'bg-zinc-200'}`} />
-            <div className={`h-1.5 rounded-full transition-all duration-500 ${step >= 2 ? 'bg-orange-500' : isNight ? 'bg-white/10' : 'bg-zinc-200'}`} />
-            <div className={`h-1.5 rounded-full transition-all duration-500 ${step >= 3 ? 'bg-orange-500' : isNight ? 'bg-white/10' : 'bg-zinc-200'}`} />
+            <div className={`h-1.5 rounded-full transition-[color,background-color,border-color,opacity,transform] duration-500 ${step >= 1 ? 'bg-line' : 'bg-sunken'}`} />
+            <div className={`h-1.5 rounded-full transition-[color,background-color,border-color,opacity,transform] duration-500 ${step >= 2 ? 'bg-line' : 'bg-sunken'}`} />
+            <div className={`h-1.5 rounded-full transition-[color,background-color,border-color,opacity,transform] duration-500 ${step >= 3 ? 'bg-line' : 'bg-sunken'}`} />
           </div>
 
           {/* Trial Countdown — mirrors the dashboard banner (NativeDirectorPortal)
               and the mobile app's RevenueCat trial badge in SettingsModal, so the
               director sees it while actually setting up, not just at signup. */}
           {trialStatus?.onTrial && (
-            <div className={`px-4 py-2.5 rounded-xl border text-xs font-bold flex items-center gap-2 ${
+            <div className={`px-4 py-2.5 rounded-md border text-xs font-bold flex items-center gap-2 ${
               trialStatus.expired
-                ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                ? 'bg-wrong-soft border-rule text-wrong'
                 : trialStatus.daysRemaining <= 2
-                  ? 'bg-orange-500/10 border-orange-500/30 text-orange-400'
-                  : isNight ? 'bg-white/5 border-white/10 text-zinc-300' : 'bg-zinc-100 border-zinc-200 text-zinc-700'
+                  ? 'bg-line-soft border-rule text-line-ink'
+                  : 'bg-sunken border-rule text-ink-2'
             }`}>
               <span>
                 {trialStatus.expired
-                  ? (isKo ? '⏰ 무료 체험이 종료되었습니다 — 대시보드에서 업그레이드하세요.' : '⏰ Your free trial has ended — upgrade from the dashboard.')
-                  : (isKo ? `⏳ 무료 체험 ${trialStatus.daysRemaining}일 남음` : `⏳ ${trialStatus.daysRemaining} day${trialStatus.daysRemaining === 1 ? '' : 's'} left in your trial`)}
+                  ? (isKo ? '무료 체험이 종료되었습니다 — 대시보드에서 업그레이드하세요.' : 'Your free trial has ended — upgrade from the dashboard.')
+                  : (isKo ? `무료 체험 ${trialStatus.daysRemaining}일 남음` : `${trialStatus.daysRemaining} day${trialStatus.daysRemaining === 1 ? '' : 's'} left in your trial`)}
               </span>
             </div>
           )}
@@ -174,17 +174,17 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
         {/* STEP 1: Campus Profile & Logo Upload */}
         {step === 1 && (
           <div className="space-y-6 animate-fade-in text-left">
-            <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-              <Buildings size={24} className="text-orange-500 shrink-0" />
+            <div className="flex items-center gap-3 border-b border-rule pb-4">
+              <Buildings size={24} className="text-line-ink shrink-0" />
               <div>
-                <h3 className="font-black text-base">{isKo ? '1단계: 원 학원명 & 맞춤 브랜딩 설정' : 'Step 1: School Profile & Campus Branding'}</h3>
-                <p className="text-xs text-zinc-400">{isKo ? '학부모 리포트 및 선생님 워크스페이스에 표시될 학원 정보를 입력하세요.' : 'Configure official school name and brand logo for report headers.'}</p>
+                <h3 className="font-extrabold text-base">{isKo ? '1단계: 원 학원명 & 맞춤 브랜딩 설정' : 'Step 1: School Profile & Campus Branding'}</h3>
+                <p className="text-xs text-ink-3">{isKo ? '학부모 리포트 및 선생님 워크스페이스에 표시될 학원 정보를 입력하세요.' : 'Configure official school name and brand logo for report headers.'}</p>
               </div>
             </div>
 
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                <label className="text-xs font-bold text-ink-3">
                   {isKo ? '학원 / 원 이름 (School Name)' : 'Official School / Campus Name'}
                 </label>
                 <input
@@ -192,21 +192,21 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                   value={academyName}
                   onChange={(e) => setAcademyName(e.target.value)}
                   placeholder="E.g. Apex International Academy"
-                  className={`w-full p-3.5 rounded-xl border text-sm font-bold outline-none focus:border-orange-500 transition-all ${
-                    isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                  className={`w-full p-3.5 rounded-md border text-sm font-bold outline-none focus:border-line transition-[color,background-color,border-color,opacity,transform] ${
+                    'bg-surface border-rule text-ink'
                   }`}
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                <label className="text-xs font-bold text-ink-3">
                   {isKo ? '대상 연령 / 과정 (Campus Level)' : 'Campus Level'}
                 </label>
                 <select
                   value={campusLevel}
                   onChange={(e) => setCampusLevel(e.target.value)}
-                  className={`w-full p-3.5 rounded-xl border text-sm font-bold outline-none focus:border-orange-500 cursor-pointer ${
-                    isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                  className={`w-full p-3.5 rounded-md border text-sm font-bold outline-none focus:border-line cursor-pointer ${
+                    'bg-surface border-rule text-ink'
                   }`}
                 >
                   <option value="Kindergarten & Elementary">유치부 &amp; 초등부 (Kindergarten &amp; Elementary)</option>
@@ -217,23 +217,23 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
 
               {/* Logo Upload Box */}
               <div className="space-y-2 pt-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 block">
+                <label className="text-xs font-bold text-ink-3 block">
                   {isKo ? '원장님 맞춤 로고 업로드 (선택)' : 'School Brand Logo (Optional)'}
                 </label>
-                <div className={`p-4 border-2 border-dashed rounded-2xl flex items-center justify-between gap-4 transition-all ${
-                  isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-300'
+                <div className={`p-4 border-2 border-dashed rounded-lg flex items-center justify-between gap-4 transition-[color,background-color,border-color,opacity,transform] ${
+                  'bg-surface border-rule'
                 }`}>
                   <div className="flex items-center gap-3">
                     {logoPreview ? (
-                      <img src={logoPreview} alt="School Logo" className="w-12 h-12 object-contain rounded-xl border border-orange-500/30" />
+                      <img src={logoPreview} alt="School Logo" className="w-12 h-12 object-contain rounded-md border border-rule" />
                     ) : (
-                      <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-md bg-line-soft border border-rule text-line-ink flex items-center justify-center">
                         <UploadSimple size={20} weight="bold" />
                       </div>
                     )}
                     <div>
                       <p className="text-xs font-bold">{logoPreview ? (isKo ? '미리보기 (아직 저장되지 않음)' : 'Preview (not saved yet)') : (isKo ? '원장님 로고 이미지 첨부' : 'Attach School Logo Image')}</p>
-                      <p className="text-[10px] text-zinc-400">
+                      <p className="text-[12px] text-ink-3">
                         {logoPreview
                           ? (isKo ? '다음 버튼을 누르면 저장됩니다.' : 'Saved when you tap Next.')
                           : 'PNG, JPG (Transparent background recommended)'}
@@ -241,7 +241,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                     </div>
                   </div>
 
-                  <label className="px-3.5 py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 font-bold text-xs rounded-xl border border-orange-500/30 cursor-pointer transition-all shrink-0">
+                  <label className="px-3.5 py-2 bg-line-soft hover:bg-line-soft text-line-ink font-bold text-xs rounded-md border border-rule cursor-pointer transition-[color,background-color,border-color,opacity,transform] shrink-0">
                     <span>{isKo ? '파일 선택' : 'Browse'}</span>
                     <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
                   </label>
@@ -255,7 +255,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                 persistAcademyName();
                 setStep(2);
               }}
-              className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-black font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+              className="w-full py-4 bg-line hover:bg-line text-on-line font-bold text-sm rounded-lg transition-[color,background-color,border-color,opacity,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
             >
               <span>{isKo ? '다음: 학급반 설정 →' : 'Next: Setup Classes →'}</span>
             </button>
@@ -265,17 +265,17 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
         {/* STEP 2: Classes & Curriculum Setup */}
         {step === 2 && (
           <div className="space-y-6 animate-fade-in text-left">
-            <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-              <FolderUser size={24} className="text-orange-500 shrink-0" />
+            <div className="flex items-center gap-3 border-b border-rule pb-4">
+              <FolderUser size={24} className="text-line-ink shrink-0" />
               <div>
-                <h3 className="font-black text-base">{isKo ? '2단계: 학급반 구성' : 'Step 2: Class Roster'}</h3>
-                <p className="text-xs text-zinc-400">{isKo ? '운영 중인 학급반 이름을 등록하세요. 교재는 각 학급의 커리큘럼 설정에서 등록합니다.' : "Register active class names. You'll set each class's textbook from its curriculum setup."}</p>
+                <h3 className="font-extrabold text-base">{isKo ? '2단계: 학급반 구성' : 'Step 2: Class Roster'}</h3>
+                <p className="text-xs text-ink-3">{isKo ? '운영 중인 학급반 이름을 등록하세요. 교재는 각 학급의 커리큘럼 설정에서 등록합니다.' : "Register active class names. You'll set each class's textbook from its curriculum setup."}</p>
               </div>
             </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 block">
+                <label className="text-xs font-bold text-ink-3 block">
                   {isKo ? '운영 학급반 목록 (Active Classes)' : 'Active Class Roster'}
                 </label>
                 
@@ -285,14 +285,14 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                     value={newClassName}
                     onChange={(e) => setNewClassName(e.target.value)}
                     placeholder={isKo ? '새 학급반 입력 (예: 7B Sunshine)' : 'Add class (e.g. 7B Sunshine)'}
-                    className={`flex-1 p-3 rounded-xl border text-xs font-bold outline-none focus:border-orange-500 ${
-                      isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                    className={`flex-1 p-3 rounded-md border text-xs font-bold outline-none focus:border-line ${
+                      'bg-surface border-rule text-ink'
                     }`}
                   />
                   <button
                     type="button"
                     onClick={handleAddClass}
-                    className="px-4 py-3 bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold rounded-xl shadow-md transition-all shrink-0 cursor-pointer"
+                    className="px-4 py-3 bg-line hover:bg-line text-on-line text-xs font-bold rounded-md transition-[color,background-color,border-color,opacity,transform] shrink-0 cursor-pointer"
                   >
                     + {isKo ? '추가' : 'Add'}
                   </button>
@@ -302,15 +302,15 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                   {selectedClasses.map((cls) => (
                     <span
                       key={cls}
-                      className="px-3 py-1.5 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/20 text-xs font-mono font-bold flex items-center gap-2"
+                      className="px-3 py-1.5 rounded-md bg-line-soft text-line-ink border border-rule text-xs font-bold flex items-center gap-2"
                     >
-                      <span>🏫 {cls}</span>
+                      <span>{cls}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveClass(cls)}
-                        className="hover:text-rose-400 cursor-pointer font-black"
+                        className="hover:text-wrong cursor-pointer font-extrabold"
                       >
-                        ✕
+                        
                       </button>
                     </span>
                   ))}
@@ -323,8 +323,8 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className={`w-1/3 py-4 rounded-2xl font-bold text-xs border transition-all cursor-pointer ${
-                  isNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700'
+                className={`w-1/3 py-4 rounded-lg font-bold text-xs border transition-[color,background-color,border-color,opacity,transform] cursor-pointer ${
+                  'bg-sunken border-rule text-ink-2'
                 }`}
               >
                 ← {isKo ? '이전' : 'Back'}
@@ -332,7 +332,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setStep(3)}
-                className="w-2/3 py-4 bg-orange-500 hover:bg-orange-600 text-black font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                className="w-2/3 py-4 bg-line hover:bg-line text-on-line font-bold text-sm rounded-lg transition-[color,background-color,border-color,opacity,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
               >
                 <span>{isKo ? '다음: 선생님 초대 설정 →' : 'Next: Invite Staff Teachers →'}</span>
               </button>
@@ -343,11 +343,11 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
         {/* STEP 3: Staff Invites & Workspace Launch */}
         {step === 3 && (
           <div className="space-y-6 animate-fade-in text-left">
-            <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-              <UserGear size={24} className="text-orange-500 shrink-0" />
+            <div className="flex items-center gap-3 border-b border-rule pb-4">
+              <UserGear size={24} className="text-line-ink shrink-0" />
               <div>
-                <h3 className="font-black text-base">{isKo ? '3단계: 담당 선생님 초대 & 워크스페이스 완성' : 'Step 3: Staff Email & Link Invitation'}</h3>
-                <p className="text-xs text-zinc-400">{isKo ? '원어민 선생님(FT)과 한국인 선생님(KT)을 1초 초대 링크로 연결하세요.' : 'Invite Foreign & Korean Teachers via instant invite link.'}</p>
+                <h3 className="font-extrabold text-base">{isKo ? '3단계: 담당 선생님 초대 & 워크스페이스 완성' : 'Step 3: Staff Email & Link Invitation'}</h3>
+                <p className="text-xs text-ink-3">{isKo ? '원어민 선생님(FT)과 한국인 선생님(KT)을 1초 초대 링크로 연결하세요.' : 'Invite Foreign & Korean Teachers via instant invite link.'}</p>
               </div>
             </div>
 
@@ -360,7 +360,7 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                 — so there's nothing yet to assign an invite to. Send
                 director straight to the dashboard's invite panel instead,
                 which has real classes to pick from. */}
-            <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-xs text-orange-400 font-bold text-center">
+            <div className="p-4 rounded-lg bg-line-soft border border-rule text-xs text-line-ink font-bold text-center">
               {isKo
                 ? '설정을 마치면 학급이 개설됩니다. 대시보드에서 선생님을 초대하고 담당 학급을 바로 배정하세요.'
                 : "Your classes will be created once you finish setup. Invite teachers from your dashboard afterward — you'll assign them straight to a class as part of sending the invite."}
@@ -370,8 +370,8 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className={`w-1/3 py-4 rounded-2xl font-bold text-xs border transition-all cursor-pointer ${
-                  isNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700'
+                className={`w-1/3 py-4 rounded-lg font-bold text-xs border transition-[color,background-color,border-color,opacity,transform] cursor-pointer ${
+                  'bg-sunken border-rule text-ink-2'
                 }`}
               >
                 ← {isKo ? '이전' : 'Back'}
@@ -380,10 +380,10 @@ export const UnifiedAccountActivation: React.FC<Props> = ({
                 type="button"
                 onClick={handleFinish}
                 disabled={hasFinished}
-                className="w-2/3 py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-black font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                className="w-2/3 py-4 bg-line hover:bg-line disabled:opacity-60 disabled:cursor-not-allowed text-on-line font-bold text-sm rounded-lg transition-[color,background-color,border-color,opacity,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
               >
                 <CheckCircle size={18} weight="bold" />
-                <span>{isKo ? '설정 완료 & 대시보드 입장! 🎉' : 'Complete & Launch Workspace! 🎉'}</span>
+                <span>{isKo ? '설정 완료 & 대시보드 입장!' : 'Complete & Launch Workspace!'}</span>
               </button>
             </div>
           </div>

@@ -178,26 +178,19 @@ export const CurriculumEditorForm: React.FC<Props> = ({
   const [showScannerTip, setShowScannerTip] = useState(true);
   const [showOtherExample, setShowOtherExample] = useState(true);
   return (
-    <div className={`p-1 rounded-[2.5rem] animate-fade-in text-left transition-colors ${
-      isThemeNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
-    }`}>
-      <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${
-        isThemeNight ? 'bg-brand-dark' : 'bg-white'
-      }`}>
-        <div className={`flex items-center justify-between mb-8 pb-4 border-b ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center">
-              {activeTab === 'syllabus' ? <BookOpen size={22} weight="bold" /> : <FileText size={22} weight="bold" />}
-            </div>
-            <div className="flex-1 min-w-0">
+    <div className="mx-auto max-w-3xl text-left text-ink">
+      <div>
+        <div className="mb-6">
+          <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h4 className={`text-lg sm:text-xl font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                <h2 className="text-[26px] font-extrabold leading-tight tracking-[-0.02em] sm:text-[30px]">
                   {activeTab === 'syllabus'
                     ? (isKo ? `${selectedClass?.activeWeekNumber || 1}주차 수업 범위` : `Week ${selectedClass?.activeWeekNumber || 1} syllabus`)
                     : (isKo ? `${selectedClass?.activeWeekNumber || 1}주차 정답지` : `Week ${selectedClass?.activeWeekNumber || 1} answer key`)}
-                </h4>
+                </h2>
               </div>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="mt-0.5 text-[14px] text-ink-3">
                 {activeTab === 'syllabus'
                   ? (isKo ? '선택된 학급의 교재목차, 주차별 학습 주제, 어휘 및 파닉스 범위를 구성합니다.' : 'Configure course textbook, weekly topics, vocabulary lists, and phonics targets.')
                   : (isKo ? '이번 주 워크시트 정답지를 올리면 학부모 앱이 이 정답으로 채점합니다.' : "Upload this week's worksheet answer key — the parent app grades against it.")}
@@ -208,26 +201,26 @@ export const CurriculumEditorForm: React.FC<Props> = ({
 
         {isLoadingCurriculum ? (
           <div className="flex items-center justify-center min-h-[30vh]">
-            <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-rule border-t-line rounded-full animate-spin" />
           </div>
         ) : (
           <form onSubmit={handleSaveCurriculum} className="space-y-6">
             {/* Scan status feedback banner */}
             {scanStatusMessage && (
-              <div className={`p-4 rounded-2xl border flex items-center justify-between transition-all ${
-                isThemeNight ? 'bg-orange-500/10 border-orange-500/30 text-orange-300' : 'bg-orange-50 border-orange-200 text-orange-900'
+              <div className={`p-4 rounded-lg border flex items-center justify-between transition-[color,background-color,border-color,opacity,transform] ${
+                'bg-line-soft border-rule text-line-ink'
               }`}>
                 <div className="flex items-center gap-3">
-                  <Sparkle size={20} weight="bold" className="text-orange-500 shrink-0" />
+                  <Sparkle size={20} weight="bold" className="text-line-ink shrink-0" />
                   <p className="text-xs font-semibold">{scanStatusMessage}</p>
                 </div>
                 {scannedData && (
                   <button
                     type="button"
                     onClick={() => setShowScannedModal(true)}
-                    className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold rounded-xl shadow-md transition-all shrink-0 cursor-pointer"
+                    className="px-3 py-1.5 bg-line hover:bg-line text-on-line text-xs font-bold rounded-md transition-[color,background-color,border-color,opacity,transform] shrink-0 cursor-pointer"
                   >
-                    🎯 {isKo ? '스캔 결과 & 답안 확인' : 'View Scanned Answers'}
+                    {isKo ? '스캔 결과 & 답안 확인' : 'View Scanned Answers'}
                   </button>
                 )}
               </div>
@@ -238,7 +231,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 the textbook field is specific to this tab. */}
             {activeTab === 'syllabus' && (
               <div className="space-y-1 mb-6">
-                <label className="text-xs font-bold text-zinc-400 block">
+                <label className="text-xs font-bold text-ink-3 block">
                   {isKo ? '교재명' : 'Textbook'}
                 </label>
                 <input
@@ -246,8 +239,8 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                   value={selectedTextbookName}
                   onChange={(e) => setSelectedTextbookName(e.target.value)}
                   placeholder={isKo ? '예: Bricks Reading 150 (Book 1)' : 'e.g. Bricks Reading 150 (Book 1)'}
-                  className={`w-full p-2.5 min-h-11 rounded-xl border text-sm font-bold outline-none focus:border-orange-500 ${
-                    isThemeNight ? 'bg-brand-dark border-white/10 text-white placeholder:text-zinc-600' : 'bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400'
+                  className={`w-full p-2.5 min-h-11 rounded-md border text-sm font-bold outline-none focus:border-line ${
+                    'bg-surface border-rule text-ink placeholder:text-ink-3'
                   }`}
                 />
               </div>
@@ -268,10 +261,10 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       handleStageFiles(e.dataTransfer.files, 'syllabus');
                     }
                   }}
-                  className={`relative border-2 border-dashed rounded-3xl p-6 transition-all text-center flex flex-col items-center justify-center gap-3 ${
+                  className={`relative border-2 border-dashed rounded-lg p-6 transition-[color,background-color,border-color,opacity,transform] text-center flex flex-col items-center justify-center gap-3 ${
                     isDraggingFile
-                      ? 'border-orange-500 bg-orange-500/10 scale-[1.01]'
-                      : isThemeNight ? 'border-white/10 hover:border-orange-500/40 bg-brand-dark' : 'border-zinc-300 hover:border-orange-500/40 bg-zinc-50/70'
+                      ? 'border-line bg-line-soft scale-[1.01]'
+                      : 'border-rule hover:border-rule bg-surface'
                   }`}
                 >
                   <input
@@ -289,11 +282,11 @@ export const CurriculumEditorForm: React.FC<Props> = ({
 
                   {isScanningSyllabus ? (
                     <div className="flex flex-col items-center py-4">
-                      <div className="w-10 h-10 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mb-3" />
-                      <p className="text-xs font-bold text-orange-500">
+                      <div className="w-10 h-10 border-2 border-rule border-t-line rounded-full animate-spin mb-3" />
+                      <p className="text-xs font-bold text-line-ink">
                         {isKo ? 'Chekki AI가 교재 시라버스 목차를 분석하고 있습니다...' : 'Scanning Course Syllabus with Chekki AI...'}
                       </p>
-                      <p className="text-[10px] text-zinc-400 mt-1">
+                      <p className="text-[12px] text-ink-3 mt-1">
                         {isKo ? '전체 주차별 어휘 및 파닉스 범위를 추출합니다 (정답지 불필요)' : 'Extracting multi-week course scope & vocabulary (No answer key needed)'}
                       </p>
                     </div>
@@ -304,7 +297,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                           <img
                             src={syllabusPreviewUrl}
                             alt="Syllabus preview"
-                            className="w-16 h-16 object-cover rounded-2xl border border-orange-500/30 shadow-md shrink-0 cursor-pointer"
+                            className="w-16 h-16 object-cover rounded-lg border border-rule shrink-0 cursor-pointer"
                             onClick={(e) => {
                               e.stopPropagation();
                               setDocPreviewUrl(syllabusPreviewUrl);
@@ -312,28 +305,28 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                             }}
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center shadow-lg shrink-0">
+                          <div className="w-12 h-12 rounded-lg bg-line-soft border border-rule text-line-ink flex items-center justify-center shrink-0">
                             <BookOpen size={22} weight="bold" />
                           </div>
                         )}
                         <div className="text-left min-w-0">
-                          <h5 className={`text-sm font-bold flex items-center gap-2 flex-wrap ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                          <h5 className={`text-sm font-bold flex items-center gap-2 flex-wrap text-ink`}>
                             <span>
                               {syllabusFileName
                                 ? (syllabusFileName.length > 28 ? syllabusFileName.substring(0, 25) + '...' : syllabusFileName)
-                                : (isKo ? '📘 교재 목차/시라버스 파일 업로드 (Photo/PDF)' : '📘 Upload Syllabus / Course Plan (Photo/PDF)')}
+                                : (isKo ? '교재 목차/시라버스 파일 업로드 (Photo/PDF)' : 'Upload Syllabus / Course Plan (Photo/PDF)')}
                             </span>
-                            <span className="px-2 py-0.5 bg-orange-500/20 text-orange-500 text-[9px] font-black uppercase rounded-md border border-orange-500/30">
+                            <span className="px-2 py-0.5 bg-line-soft text-line-ink text-[12px] font-extrabold rounded-md border border-rule">
                               Syllabus Mode
                             </span>
                           </h5>
-                          <p className={`text-xs mt-0.5 ${isThemeNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                          <p className={`text-xs mt-0.5 text-ink-3`}>
                             {syllabusFileName
                               ? (isKo ? '독립 저장됨: 클릭하여 새 시라버스 스캔' : 'Stored independently. Click to rescan syllabus.')
                               : (isKo ? '목차 페이지 사진이나 PDF를 드롭하면 주차별 어휘 및 파닉스 범위를 자동 생성합니다.' : 'Drag & drop syllabus. AI extracts course-wide vocabulary scope.')}
                           </p>
                           {!syllabusFileName && (
-                            <p className={`text-[10px] mt-1 ${isThemeNight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                            <p className={`text-[12px] mt-1 text-ink-3`}>
                               {isKo ? '이미지 또는 PDF · 최대 6MB (여러 페이지 사진 촬영도 가능)' : 'Images or PDF · up to 6MB total (or snap multiple page photos instead)'}
                             </p>
                           )}
@@ -348,7 +341,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                               setDocPreviewUrl(syllabusPreviewUrl);
                               setShowDocPreviewModal(true);
                             }}
-                            className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                            className="px-3 py-2 bg-sunken hover:bg-sunken border border-rule text-ink-2 font-bold text-xs rounded-md transition-[color,background-color,border-color,opacity,transform] flex items-center gap-1.5 cursor-pointer"
                           >
                             <Eye size={14} weight="bold" />
                             <span>{isKo ? '시라버스 원본 보기' : 'View Syllabus'}</span>
@@ -362,7 +355,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                               setScannedData(syllabusScannedData);
                               setShowScannedModal(true);
                             }}
-                            className="px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-500 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                            className="px-3 py-2 bg-line-soft hover:bg-line-soft border border-rule text-line-ink font-bold text-xs rounded-md transition-[color,background-color,border-color,opacity,transform] flex items-center gap-1.5 cursor-pointer"
                           >
                             <Sparkle size={14} weight="bold" />
                             <span>{isKo ? '어휘 범위 확인' : 'View Scope'}</span>
@@ -376,16 +369,16 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 {/* Staged pages — picked but not yet scanned. Add/remove
                     individual pages before committing to a scan. */}
                 {uploadMode === 'syllabus' && pendingScanFiles.length > 0 && (
-                  <div className={`p-4 rounded-2xl border space-y-3 ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+                  <div className={`p-4 rounded-lg border space-y-3 bg-surface border-rule`}>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                      <span className="text-[12px] font-bold text-ink-3">
                         {isKo ? `대기 중인 페이지 (${pendingScanFiles.length}/5)` : `Staged Pages (${pendingScanFiles.length}/5)`}
                       </span>
                       <button
                         type="button"
                         onClick={() => handleScanStagedFiles('syllabus')}
                         disabled={isScanningSyllabus}
-                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer"
+                        className="px-4 py-2 bg-line hover:bg-line disabled:opacity-50 text-on-line text-xs font-bold rounded-md transition-[color,background-color,border-color,opacity,transform] cursor-pointer"
                       >
                         {isKo ? `${pendingScanFiles.length}페이지 스캔 →` : `Scan ${pendingScanFiles.length} Page${pendingScanFiles.length > 1 ? 's' : ''} →`}
                       </button>
@@ -394,17 +387,17 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       {pendingScanFiles.map((p, idx) => (
                         <div key={idx} className="relative group">
                           {p.file.type === 'application/pdf' ? (
-                            <div className={`w-16 h-16 rounded-xl border flex items-center justify-center ${isThemeNight ? 'bg-brand-dark border-white/10 text-zinc-400' : 'bg-white border-zinc-300 text-zinc-500'}`}>
+                            <div className={`w-16 h-16 rounded-md border flex items-center justify-center bg-surface border-rule text-ink-3`}>
                               <FileText size={20} weight="bold" />
                             </div>
                           ) : (
-                            <img src={p.previewUrl} alt={`Page ${idx + 1}`} className="w-16 h-16 object-cover rounded-xl border border-white/10" />
+                            <img src={p.previewUrl} alt={`Page ${idx + 1}`} className="w-16 h-16 object-cover rounded-md border border-rule" />
                           )}
                           <button
                             type="button"
                             onClick={() => handleRemoveStagedFile(idx)}
                             title={isKo ? '페이지 삭제' : 'Remove page'}
-                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center shadow-md cursor-pointer"
+                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-wrong hover:bg-wrong text-white flex items-center justify-center cursor-pointer"
                           >
                             <X size={11} weight="bold" />
                           </button>
@@ -415,13 +408,13 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 )}
 
                 {/* ② Course Duration Selector */}
-                <div className={`p-4 rounded-2xl border space-y-3 ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+                <div className={`p-4 rounded-lg border space-y-3 bg-surface border-rule`}>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div>
-                      <label className="text-xs font-bold text-orange-500 uppercase tracking-widest block">
-                        🗓️ {isKo ? '교재 커리큘럼 진행 기간 (Course Duration in Weeks)' : 'Course Duration (Weeks)'}
+                      <label className="text-xs font-bold text-line-ink block">
+                        {isKo ? '교재 커리큘럼 진행 기간 (Course Duration in Weeks)' : 'Course Duration (Weeks)'}
                       </label>
-                      <p className="text-[11px] text-zinc-400 mt-0.5">
+                      <p className="text-[12px] text-ink-3 mt-0.5">
                         {isKo ? '시라버스가 몇 주 동안 진행되는 교재인지 선택하세요 (기본 4주).' : 'Select total duration in weeks for this textbook syllabus (default: 4 weeks).'}
                       </p>
                     </div>
@@ -431,40 +424,40 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                           key={numWeeks}
                           type="button"
                           onClick={() => handleSyllabusWeeksChange(numWeeks)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                          className={`px-3 py-1.5 rounded-md text-xs font-bold transition-[color,background-color,border-color,opacity,transform] border cursor-pointer ${
                             syllabusWeeks === numWeeks
-                              ? 'bg-orange-500 text-black border-orange-500 shadow-md'
-                              : isThemeNight ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-zinc-300 text-zinc-700'
+                              ? 'bg-line text-on-line border-line'
+                              : 'bg-surface border-rule text-ink-2'
                           }`}
                         >
                           {numWeeks} {isKo ? '주' : 'Wks'}
                         </button>
                       ))}
-                      <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl px-2 py-1">
+                      <div className="flex items-center gap-1 bg-sunken border border-rule rounded-md px-2 py-1">
                         <input
                           type="number"
                           min={1}
                           max={52}
                           value={syllabusWeeks}
                           onChange={(e) => handleSyllabusWeeksChange(Number(e.target.value) || 4)}
-                          className="w-12 text-center text-xs font-bold bg-transparent outline-none text-orange-400"
+                          className="w-12 text-center text-xs font-bold bg-transparent outline-none text-line-ink"
                         />
-                        <span className="text-[10px] text-zinc-400">{isKo ? '주간' : 'Weeks'}</span>
+                        <span className="text-[12px] text-ink-3">{isKo ? '주간' : 'Weeks'}</span>
                       </div>
                   </div>
                 </div>
 
                   {/* ③ Pro Scanner Tip Banner */}
                   {showScannerTip && (
-                    <div className={`p-4 rounded-2xl border text-xs flex items-start gap-3 transition-colors ${
-                      isThemeNight ? 'bg-orange-500/10 border-orange-500/30 text-orange-200' : 'bg-orange-50 border-orange-200 text-orange-950'
+                    <div className={`p-4 rounded-lg border text-xs flex items-start gap-3 transition-colors ${
+                      'bg-line-soft border-rule text-line-ink'
                     }`}>
-                      <Sparkle size={20} weight="fill" className="shrink-0 text-orange-500 mt-0.5" />
+                      <Sparkle size={20} weight="fill" className="shrink-0 text-line-ink mt-0.5" />
                       <div className="space-y-1 flex-1">
-                        <span className="font-bold block text-xs text-orange-400">
-                          💡 {isKo ? '교재 목차(Textbook Syllabus / Index) 촬영 & 스캔 팁:' : 'Pro Tips for Textbook Syllabus / Index Photo Scanning:'}
+                        <span className="font-bold block text-xs text-line-ink">
+                          {isKo ? '교재 목차(Textbook Syllabus / Index) 촬영 & 스캔 팁:' : 'Pro Tips for Textbook Syllabus / Index Photo Scanning:'}
                         </span>
-                        <ul className={`text-[11px] space-y-1 list-disc pl-4 leading-relaxed ${isThemeNight ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                        <ul className={`text-[12px] space-y-1 list-disc pl-4 leading-relaxed text-ink-2`}>
                           <li>{isKo ? '교재 맨 앞쪽의 Table of Contents (목차) 및 Scope & Sequence 페이지를 평평하게 촬영하세요.' : 'Take a flat, glare-free photo of the textbook Table of Contents or Scope & Sequence page.'}</li>
                           <li>{isKo ? '주차별/단원별(Unit 1, Unit 2) 제목과 타겟 어휘 목록이 포함되도록 구도를 맞추세요.' : 'Ensure unit headers (Unit 1, Unit 2) and target vocabulary lists are clearly framed.'}</li>
                           <li>{isKo ? 'Chekki AI가 4주~16주 전체 과정의 주차별 어휘 및 파닉스를 자동 추출하여 대시보드에 선제 탑재합니다.' : 'Chekki AI automatically extracts multi-week vocabulary & phonics to pre-seed your entire course!'}</li>
@@ -473,7 +466,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       <button
                         type="button"
                         onClick={() => setShowScannerTip(false)}
-                        className="shrink-0 p-1 rounded-full text-orange-400 hover:bg-orange-500/20 cursor-pointer"
+                        className="shrink-0 p-1 rounded-md text-line-ink hover:bg-line-soft cursor-pointer"
                       >
                         <X size={14} weight="bold" />
                       </button>
@@ -499,10 +492,10 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       handleStageFiles(e.dataTransfer.files, 'worksheet');
                     }
                   }}
-                  className={`relative border-2 border-dashed rounded-3xl p-6 transition-all text-center flex flex-col items-center justify-center gap-3 ${
+                  className={`relative border-2 border-dashed rounded-lg p-6 transition-[color,background-color,border-color,opacity,transform] text-center flex flex-col items-center justify-center gap-3 ${
                     isDraggingFile
-                      ? 'border-orange-500 bg-orange-500/10 scale-[1.01]'
-                      : isThemeNight ? 'border-white/10 hover:border-orange-500/40 bg-brand-dark' : 'border-zinc-300 hover:border-orange-500/40 bg-zinc-50/70'
+                      ? 'border-line bg-line-soft scale-[1.01]'
+                      : 'border-rule hover:border-rule bg-surface'
                   }`}
                 >
                   <input
@@ -520,11 +513,11 @@ export const CurriculumEditorForm: React.FC<Props> = ({
 
                   {isScanningWorksheet ? (
                     <div className="flex flex-col items-center py-4">
-                      <div className="w-10 h-10 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mb-3" />
-                      <p className="text-xs font-bold text-orange-500">
+                      <div className="w-10 h-10 border-2 border-rule border-t-line rounded-full animate-spin mb-3" />
+                      <p className="text-xs font-bold text-line-ink">
                         {isKo ? 'Chekki AI가 워크시트 문제와 학부모 정답지를 분석하고 있습니다...' : 'Scanning Daily Worksheet & Answer Key with Chekki AI...'}
                       </p>
-                      <p className="text-[10px] text-zinc-400 mt-1">
+                      <p className="text-[12px] text-ink-3 mt-1">
                         {isKo ? '문제별 학부모 잉크 정답 오버레이 가이드를 추출합니다' : 'Extracting question-by-question parent answer keys'}
                       </p>
                     </div>
@@ -535,7 +528,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                           <img
                             src={worksheetPreviewUrl}
                             alt="Worksheet preview"
-                            className="w-16 h-16 object-cover rounded-2xl border border-orange-500/30 shadow-md shrink-0 cursor-pointer"
+                            className="w-16 h-16 object-cover rounded-lg border border-rule shrink-0 cursor-pointer"
                             onClick={(e) => {
                               e.stopPropagation();
                               setDocPreviewUrl(worksheetPreviewUrl);
@@ -543,19 +536,19 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                             }}
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center shadow-lg shrink-0">
+                          <div className="w-12 h-12 rounded-lg bg-line-soft border border-rule text-line-ink flex items-center justify-center shrink-0">
                             <FileText size={22} weight="bold" />
                           </div>
                         )}
                         <div className="text-left min-w-0">
-                          <h5 className={`text-sm font-bold flex items-center gap-2 flex-wrap ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                          <h5 className={`text-sm font-bold flex items-center gap-2 flex-wrap text-ink`}>
                             <span>
                               {worksheetFileName
                                 ? (worksheetFileName.length > 28 ? worksheetFileName.substring(0, 25) + '...' : worksheetFileName)
                                 : (isKo ? '정답지 사진 또는 PDF 올리기' : 'Upload answer key (photo or PDF)')}
                             </span>
                           </h5>
-                          <p className="text-xs text-zinc-400 mt-0.5">
+                          <p className="text-xs text-ink-3 mt-0.5">
                             {worksheetFileName
                               ? (isKo ? '다시 올리면 새로 스캔합니다.' : 'Drop or add a new photo to rescan.')
                               : (isKo ? '오늘의 워크시트 사진이나 PDF를 드롭하면 학부모용 정답 가이드를 자동 생성합니다.' : 'Drag & drop worksheet photo. AI creates parent answer key overlays.')}
@@ -572,7 +565,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                               setDocPreviewUrl(worksheetPreviewUrl);
                               setShowDocPreviewModal(true);
                             }}
-                            className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                            className="px-3 py-2 bg-sunken hover:bg-sunken border border-rule text-ink-2 font-bold text-xs rounded-md transition-[color,background-color,border-color,opacity,transform] flex items-center gap-1.5 cursor-pointer"
                           >
                             <Eye size={14} weight="bold" />
                             <span>{isKo ? '워크시트 원본 보기' : 'View Worksheet'}</span>
@@ -586,7 +579,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                               setScannedData(worksheetScannedData);
                               setShowScannedModal(true);
                             }}
-                            className="px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-500 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                            className="px-3 py-2 bg-line-soft hover:bg-line-soft border border-rule text-line-ink font-bold text-xs rounded-md transition-[color,background-color,border-color,opacity,transform] flex items-center gap-1.5 cursor-pointer"
                           >
                             <Sparkle size={14} weight="bold" />
                             <span>{isKo ? '정답지 확인' : 'View Answers'}</span>
@@ -594,10 +587,10 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                         )}
 
                         {/* Divider between "view this one" and "replace/remove it" */}
-                        {(worksheetPreviewUrl || worksheetScannedData) && <div className="w-px h-6 bg-white/10 mx-0.5" />}
+                        {(worksheetPreviewUrl || worksheetScannedData) && <div className="w-px h-6 bg-sunken mx-0.5" />}
 
                         {/* Rescan actions — replace the current worksheet with a new photo */}
-                        <label className="px-3.5 py-2 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 z-30">
+                        <label className="px-3.5 py-2 bg-line hover:bg-line text-on-line font-bold text-xs rounded-md transition-[color,background-color,border-color,opacity,transform] flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 z-30">
                           <span>{isKo ? '사진 올리기' : 'Add photo'}</span>
                           <input
                             type="file"
@@ -626,7 +619,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                             setWorksheetScannedData(null);
                             setWorksheetFileName('');
                           }}
-                          className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                          className="px-3 py-2 bg-wrong-soft hover:bg-wrong-soft border border-rule text-wrong font-bold text-xs rounded-md transition-[color,background-color,border-color,opacity,transform] flex items-center gap-1.5 cursor-pointer active:scale-95"
                         >
                           <Trash size={14} weight="bold" />
                           <span>{isKo ? '삭제' : 'Remove'}</span>
@@ -639,16 +632,16 @@ export const CurriculumEditorForm: React.FC<Props> = ({
 
                 {/* Staged pages — picked but not yet scanned. */}
                 {uploadMode === 'worksheet' && pendingScanFiles.length > 0 && (
-                  <div className={`p-4 rounded-2xl border space-y-3 ${isThemeNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
+                  <div className={`p-4 rounded-lg border space-y-3 bg-surface border-rule`}>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                      <span className="text-[12px] font-bold text-ink-3">
                         {isKo ? `대기 중인 페이지 (${pendingScanFiles.length}/5)` : `Staged Pages (${pendingScanFiles.length}/5)`}
                       </span>
                       <button
                         type="button"
                         onClick={() => handleScanStagedFiles('worksheet')}
                         disabled={isScanningWorksheet}
-                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer"
+                        className="px-4 py-2 bg-line hover:bg-line disabled:opacity-50 text-on-line text-xs font-bold rounded-md transition-[color,background-color,border-color,opacity,transform] cursor-pointer"
                       >
                         {isKo ? `${pendingScanFiles.length}페이지 스캔 →` : `Scan ${pendingScanFiles.length} Page${pendingScanFiles.length > 1 ? 's' : ''} →`}
                       </button>
@@ -657,17 +650,17 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       {pendingScanFiles.map((p, idx) => (
                         <div key={idx} className="relative group">
                           {p.file.type === 'application/pdf' ? (
-                            <div className={`w-16 h-16 rounded-xl border flex items-center justify-center ${isThemeNight ? 'bg-brand-dark border-white/10 text-zinc-400' : 'bg-white border-zinc-300 text-zinc-500'}`}>
+                            <div className={`w-16 h-16 rounded-md border flex items-center justify-center bg-surface border-rule text-ink-3`}>
                               <FileText size={20} weight="bold" />
                             </div>
                           ) : (
-                            <img src={p.previewUrl} alt={`Page ${idx + 1}`} className="w-16 h-16 object-cover rounded-xl border border-white/10" />
+                            <img src={p.previewUrl} alt={`Page ${idx + 1}`} className="w-16 h-16 object-cover rounded-md border border-rule" />
                           )}
                           <button
                             type="button"
                             onClick={() => handleRemoveStagedFile(idx)}
                             title={isKo ? '페이지 삭제' : 'Remove page'}
-                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center shadow-md cursor-pointer"
+                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-wrong hover:bg-wrong text-white flex items-center justify-center cursor-pointer"
                           >
                             <X size={11} weight="bold" />
                           </button>
@@ -682,7 +675,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
             {/* SYLLABUS TAB ONLY: Weekly Topic, Vocabulary, Phonics, Reading Passage, Other */}
             {activeTab === 'syllabus' && (<>
             <div className="space-y-2">
-              <label className={`text-[10px] font-bold uppercase tracking-widest pl-1 ${isThemeNight ? 'text-zinc-400' : 'text-zinc-600'}`}>
+              <label className={`text-[12px] font-bold pl-1 text-ink-2`}>
                 {isKo ? '대주제 / 주간 테마 (Topic)' : 'Weekly Topic / Theme'}
               </label>
               <input
@@ -690,8 +683,8 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 value={curriculumTopic}
                 onChange={(e) => setCurriculumTopic(e.target.value)}
                 placeholder={isKo ? '예: Weather & Nature (날씨와 자연)' : 'E.g. Weather & Nature'}
-                className={`w-full border outline-none text-sm p-4 rounded-2xl transition-all ${
-                  isThemeNight ? 'bg-brand-dark border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                className={`w-full border outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,opacity,transform] ${
+                  'bg-surface border-rule focus:border-line text-ink placeholder:text-ink-3'
                 }`}
               />
             </div>
@@ -701,33 +694,33 @@ export const CurriculumEditorForm: React.FC<Props> = ({
               {/* Target Vocabulary */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between pl-1">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                  <label className="text-[12px] font-bold text-ink-3">
                     {isKo ? '주간 학습 단어 (Target Vocabulary)' : 'Target Vocabulary'}
                   </label>
-                  <span className="text-[10px] font-mono font-bold text-orange-500">
+                  <span className="text-[12px] font-bold text-line-ink">
                     {curriculumVocab.split(/[,\n]/).filter(s => s.trim()).length} {isKo ? '개 단어' : 'words'}
                   </span>
                 </div>
 
                 {/* Chip Badges Container */}
-                <div className={`p-3.5 rounded-2xl border min-h-[90px] flex flex-wrap gap-2 items-center transition-all ${
-                  isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-300'
+                <div className={`p-3.5 rounded-lg border min-h-[90px] flex flex-wrap gap-2 items-center transition-[color,background-color,border-color,opacity,transform] ${
+                  'bg-surface border-rule'
                 }`}>
                   {curriculumVocab.split(/[,\n]/).filter(s => s.trim()).length === 0 ? (
-                    <p className="text-xs text-zinc-400 italic p-1">
+                    <p className="text-xs text-ink-3 italic p-1">
                       {isKo ? '등록된 단어가 없습니다. 아래에서 단어를 추가하거나 워크시트를 스캔하세요.' : 'No vocabulary words yet. Type below or scan a worksheet.'}
                     </p>
                   ) : (
                     curriculumVocab.split(/[,\n]/).map(s => s.trim()).filter(Boolean).map((word, idx) => (
                       <span
                         key={idx}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/15 border border-orange-500/30 text-orange-400 font-mono font-bold text-xs rounded-xl shadow-sm group transition-all"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-line-soft border border-rule text-line-ink font-bold text-xs rounded-md group transition-[color,background-color,border-color,opacity,transform]"
                       >
                         <span>{word}</span>
                         <button
                           type="button"
                           onClick={() => handleRemoveVocabWord(idx)}
-                          className="p-1.5 hover:bg-orange-500/30 rounded-full transition-colors cursor-pointer text-orange-400 hover:text-white"
+                          className="p-1.5 hover:bg-line-soft rounded-md transition-colors cursor-pointer text-line-ink hover:text-ink"
                           title={isKo ? '단어 삭제' : 'Delete word'}
                         >
                           <X size={12} weight="bold" />
@@ -750,14 +743,14 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       }
                     }}
                     placeholder={isKo ? '새 단어 입력 후 Enter...' : 'Type a word & press Enter...'}
-                    className={`flex-1 border outline-none text-xs p-3.5 rounded-xl transition-all ${
-                      isThemeNight ? 'bg-brand-dark border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                    className={`flex-1 border outline-none text-xs p-3.5 rounded-md transition-[color,background-color,border-color,opacity,transform] ${
+                      'bg-surface border-rule focus:border-line text-ink placeholder:text-ink-3'
                     }`}
                   />
                   <button
                     type="button"
                     onClick={() => handleAddVocabWord()}
-                    className="px-4 py-3.5 bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold rounded-xl shadow-md transition-all active:scale-[0.97] cursor-pointer"
+                    className="px-4 py-3.5 bg-line hover:bg-line text-on-line text-xs font-bold rounded-md transition-[color,background-color,border-color,opacity,transform] active:scale-[0.97] cursor-pointer"
                   >
                     + {isKo ? '추가' : 'Add'}
                   </button>
@@ -774,33 +767,33 @@ export const CurriculumEditorForm: React.FC<Props> = ({
               {/* Target Phonics Rules */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between pl-1">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                  <label className="text-[12px] font-bold text-ink-3">
                     {isKo ? '주간 타겟 파닉스 / 음가 (Phonics Sounds)' : 'Target Phonics Rules / Sounds'}
                   </label>
-                  <span className="text-[10px] font-mono font-bold text-indigo-400">
+                  <span className="text-[12px] font-bold text-ink-2">
                     {curriculumPhonics.split(/[,\n]/).filter(s => s.trim()).length} {isKo ? '개 음가' : 'sounds'}
                   </span>
                 </div>
 
                 {/* Chip Badges Container */}
-                <div className={`p-3.5 rounded-2xl border min-h-[90px] flex flex-wrap gap-2 items-center transition-all ${
-                  isThemeNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-300'
+                <div className={`p-3.5 rounded-lg border min-h-[90px] flex flex-wrap gap-2 items-center transition-[color,background-color,border-color,opacity,transform] ${
+                  'bg-surface border-rule'
                 }`}>
                   {curriculumPhonics.split(/[,\n]/).filter(s => s.trim()).length === 0 ? (
-                    <p className="text-xs text-zinc-400 italic p-1">
+                    <p className="text-xs text-ink-3 italic p-1">
                       {isKo ? '등록된 파닉스 규칙이 없습니다. 아래에서 음가를 추가하거나 스캔하세요.' : 'No phonics rules yet. Type below or scan a worksheet.'}
                     </p>
                   ) : (
                     curriculumPhonics.split(/[,\n]/).map(s => s.trim()).filter(Boolean).map((rule, idx) => (
                       <span
                         key={idx}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 font-mono font-bold text-xs rounded-xl shadow-sm group transition-all"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sunken border border-rule text-ink-2 font-bold text-xs rounded-md group transition-[color,background-color,border-color,opacity,transform]"
                       >
                         <span>{rule}</span>
                         <button
                           type="button"
                           onClick={() => handleRemovePhonicsRule(idx)}
-                          className="p-1.5 hover:bg-indigo-500/30 rounded-full transition-colors cursor-pointer text-indigo-400 hover:text-white"
+                          className="p-1.5 hover:bg-sunken rounded-md transition-colors cursor-pointer text-ink-2 hover:text-ink"
                           title={isKo ? '파닉스 규칙 삭제' : 'Delete sound rule'}
                         >
                           <X size={12} weight="bold" />
@@ -823,14 +816,14 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                       }
                     }}
                     placeholder={isKo ? '파닉스 입력 (예: -ai-) 후 Enter...' : 'Type a sound (e.g. -ai-) & press Enter...'}
-                    className={`flex-1 border outline-none text-xs p-3.5 rounded-xl transition-all ${
-                      isThemeNight ? 'bg-brand-dark border-white/10 focus:border-indigo-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-indigo-500 text-zinc-900 placeholder:text-zinc-400'
+                    className={`flex-1 border outline-none text-xs p-3.5 rounded-md transition-[color,background-color,border-color,opacity,transform] ${
+                      'bg-surface border-rule focus:border-rule text-ink placeholder:text-ink-3'
                     }`}
                   />
                   <button
                     type="button"
                     onClick={() => handleAddPhonicsRule()}
-                    className="px-4 py-3.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-[0.97] cursor-pointer"
+                    className="px-4 py-3.5 bg-line hover:bg-line text-on-line text-xs font-bold rounded-md transition-[color,background-color,border-color,opacity,transform] active:scale-[0.97] cursor-pointer"
                   >
                     + {isKo ? '추가' : 'Add'}
                   </button>
@@ -846,15 +839,15 @@ export const CurriculumEditorForm: React.FC<Props> = ({
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
+              <label className="text-[12px] font-bold text-ink-3 pl-1">
                 {isKo ? '주간 본문 지문 / 스토리 (Reading Passage)' : 'Weekly Reading Passage / Target Story'}
               </label>
               <textarea
                 value={curriculumPassage}
                 onChange={(e) => setCurriculumPassage(e.target.value)}
                 placeholder={isKo ? '이번 주 교재에 수록된 본문 이야기를 입력해 주세요.' : 'Paste the reference reading text here.'}
-                className={`w-full h-36 border outline-none text-sm p-4 rounded-2xl transition-all resize-y ${
-                  isThemeNight ? 'bg-brand-dark border-white/10 focus:border-orange-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-orange-500 text-zinc-900 placeholder:text-zinc-400'
+                className={`w-full h-36 border outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,opacity,transform] resize-y ${
+                  'bg-surface border-rule focus:border-line text-ink placeholder:text-ink-3'
                 }`}
               />
             </div>
@@ -862,19 +855,19 @@ export const CurriculumEditorForm: React.FC<Props> = ({
             {/* NEW: Other Field with Guardrails & Educational Tooltip */}
             <div className="space-y-3">
               <div className="flex items-center justify-between pl-1">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
-                  <Notebook size={14} weight="bold" className="text-purple-400" />
+                <label className="text-[12px] font-bold text-ink-3 flex items-center gap-1.5">
+                  <Notebook size={14} weight="bold" className="text-ink-2" />
                   <span>{isKo ? '기타 추가 학습 내용 및 숙제 가이드 (Other)' : 'Other Supplementary Notes & Rules (Other)'}</span>
                 </label>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[9px] text-purple-400 font-bold px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 rounded-full">
-                    ✏️ {isKo ? '자유 작성' : 'Free text'}
+                  <span className="text-[12px] text-ink-2 font-bold px-2 py-0.5 bg-sunken border border-rule rounded-md">
+                    {isKo ? '자유 작성' : 'Free text'}
                   </span>
                   {curriculumOther && (
                     <button
                       type="button"
                       onClick={() => setCurriculumOther('')}
-                      className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-white/10 text-zinc-400 hover:text-white hover:border-white/30 transition-colors cursor-pointer"
+                      className="text-[12px] font-bold px-2 py-0.5 rounded-md border border-rule text-ink-3 hover:text-ink hover:border-rule transition-colors cursor-pointer"
                     >
                       {isKo ? '지우기' : 'Clear'}
                     </button>
@@ -884,27 +877,27 @@ export const CurriculumEditorForm: React.FC<Props> = ({
 
               {/* Recommended Format Tooltip Box */}
               {showOtherExample && (
-                <div className={`p-3.5 rounded-2xl border text-xs flex items-start gap-3 transition-colors ${
-                  isThemeNight ? 'bg-purple-500/10 border-purple-500/20 text-purple-200' : 'bg-purple-50 border-purple-200 text-purple-900'
+                <div className={`p-3.5 rounded-lg border text-xs flex items-start gap-3 transition-colors ${
+                  'bg-sunken border-rule text-ink-2'
                 }`}>
-                  <Info size={18} weight="bold" className="shrink-0 text-purple-400 mt-0.5" />
+                  <Info size={18} weight="bold" className="shrink-0 text-ink-2 mt-0.5" />
                   <div className="space-y-1 flex-1">
                     <span className="font-bold block text-xs">
-                      {isKo ? '💡 예시:' : '💡 Example:'}
+                      {isKo ? '예시:' : 'Example:'}
                     </span>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <code className="px-2.5 py-1 rounded-xl bg-purple-500/20 border border-purple-500/30 text-[11px] font-mono font-bold text-purple-300">
+                      <code className="px-2.5 py-1 rounded-md bg-sunken border border-rule text-[12px] font-bold text-ink-2">
                         &quot;Speaking: Practice reading the word umbrella 3 times.&quot;
                       </code>
                     </div>
-                    <p className="text-[11px] text-purple-400 leading-normal">
+                    <p className="text-[12px] text-ink-2 leading-normal">
                       {isKo ? '자유롭게 작성하는 메모입니다.' : 'Free-form notes — write whatever\'s useful.'}
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowOtherExample(false)}
-                    className="shrink-0 p-1 rounded-full text-purple-400 hover:bg-purple-500/20 cursor-pointer"
+                    className="shrink-0 p-1 rounded-md text-ink-2 hover:bg-sunken cursor-pointer"
                   >
                     <X size={14} weight="bold" />
                   </button>
@@ -915,47 +908,47 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 value={curriculumOther}
                 onChange={(e) => setCurriculumOther(e.target.value)}
                 placeholder={isKo ? '예: Speaking: Practice reading the word umbrella 3 times.' : 'E.g. Speaking: Practice reading the word umbrella 3 times.'}
-                className={`w-full h-32 border outline-none text-sm p-4 rounded-2xl transition-all resize-y ${
-                  isThemeNight ? 'bg-brand-dark border-white/10 focus:border-purple-500 text-white placeholder:text-zinc-600' : 'bg-zinc-50 border-zinc-300 focus:border-purple-500 text-zinc-900 placeholder:text-zinc-400'
+                className={`w-full h-32 border outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,opacity,transform] resize-y ${
+                  'bg-surface border-rule focus:border-rule text-ink placeholder:text-ink-3'
                 }`}
               />
             </div>
 
             {curriculumAnswerKey.length > 0 && (
-              <div className={`p-4 sm:p-5 rounded-2xl border space-y-2 text-left ${
-                isThemeNight ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-emerald-50/70 border-emerald-200'
+              <div className={`p-4 sm:p-5 rounded-lg border space-y-2 text-left ${
+                'bg-right-soft border-rule'
               }`}>
-                <label className="text-xs font-bold text-emerald-500 uppercase tracking-widest block">
-                  ✅ {isKo ? `저장된 정답지 (${curriculumAnswerKey.length}개 문항)` : `Saved Answer Key (${curriculumAnswerKey.length} questions)`}
+                <label className="text-xs font-bold text-correct block">
+                  {isKo ? `저장된 정답지 (${curriculumAnswerKey.length}개 문항)` : `Saved Answer Key (${curriculumAnswerKey.length} questions)`}
                 </label>
-                <p className="text-[11px] text-zinc-400 leading-normal">
+                <p className="text-[12px] text-ink-3 leading-normal">
                   {isKo
                     ? '워크시트 스캔에서 추출된 정답입니다. 채점 시 AI가 이 정답을 우선적으로 참고합니다. 잘못 인식된 항목은 직접 수정하거나 삭제할 수 있습니다.'
                     : "Extracted from your worksheet scans. Grading checks against these directly instead of guessing. Fix a misread entry in place, or remove it."}
                 </p>
                 <ul className="space-y-1 max-h-48 overflow-y-auto text-xs">
                   {curriculumAnswerKey.map((entry, i) => (
-                    <li key={i} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl ${isThemeNight ? 'bg-black/30' : 'bg-white'}`}>
+                    <li key={i} className={`flex items-center gap-2 px-3 py-1.5 rounded-md bg-surface`}>
                       <input
                         type="text"
                         value={entry.questionText}
                         onChange={(e) => handleEditAnswerKeyEntry?.(i, 'questionText', e.target.value)}
                         disabled={!handleEditAnswerKeyEntry}
-                        className={`flex-1 min-w-0 bg-transparent outline-none truncate focus:underline decoration-dotted ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}
+                        className={`flex-1 min-w-0 bg-transparent outline-none truncate focus:underline decoration-dotted text-ink`}
                       />
                       <input
                         type="text"
                         value={entry.answer}
                         onChange={(e) => handleEditAnswerKeyEntry?.(i, 'answer', e.target.value)}
                         disabled={!handleEditAnswerKeyEntry}
-                        className="w-24 shrink-0 bg-transparent outline-none font-mono font-bold text-emerald-500 focus:underline decoration-dotted"
+                        className="w-24 shrink-0 bg-transparent outline-none font-bold text-correct focus:underline decoration-dotted"
                       />
                       {handleRemoveAnswerKeyEntry && (
                         <button
                           type="button"
                           onClick={() => handleRemoveAnswerKeyEntry(i)}
                           title={isKo ? '정답 삭제' : 'Remove entry'}
-                          className="p-1 hover:bg-rose-500/20 rounded-full transition-colors cursor-pointer text-zinc-400 hover:text-rose-400 shrink-0"
+                          className="p-1 hover:bg-wrong-soft rounded-md transition-colors cursor-pointer text-ink-3 hover:text-wrong shrink-0"
                         >
                           <X size={12} weight="bold" />
                         </button>
@@ -972,14 +965,14 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 battle-tested feature, not needed for the class-form +
                 weekly-homework-upload demo loop. Re-enable by uncommenting. */}
             {false && uploadMode === 'worksheet' && (
-              <div className={`p-4 sm:p-5 rounded-2xl border space-y-4 text-left transition-all ${
-                isThemeNight ? 'bg-orange-500/5 border-orange-500/20' : 'bg-orange-50/70 border-orange-200'
+              <div className={`p-4 sm:p-5 rounded-lg border space-y-4 text-left transition-[color,background-color,border-color,opacity,transform] ${
+                'bg-line-soft border-rule'
               }`}>
                 <div>
-                  <label className="text-xs font-bold text-orange-500 uppercase tracking-widest block">
-                    ⚙️ {isKo ? '📄 AI 워크시트 자동 생성 & 정밀 채점 옵션' : '📄 AI Worksheet Generation & Autograding Format'}
+                  <label className="text-xs font-bold text-line-ink block">
+                    {isKo ? 'AI 워크시트 자동 생성 & 정밀 채점 옵션' : 'AI Worksheet Generation & Autograding Format'}
                   </label>
-                  <p className="text-[11px] text-zinc-400 mt-1 leading-normal">
+                  <p className="text-[12px] text-ink-3 mt-1 leading-normal">
                     {isKo
                       ? '생성할 학습지 유형과 정답 채점 문제 형태를 설정하세요. 이 설정값에 맞춰 워크시트 생성 및 학부모 정답지 잉크가 구성됩니다.'
                       : 'Specify the desired target worksheet format and question styles for AI worksheet generation & automated answer key grading.'}
@@ -989,63 +982,63 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                   {/* Worksheet Type Selector */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                    <label className="text-[12px] font-bold text-ink-3 block">
                       {isKo ? '생성할 학습지 형태 (Worksheet Format)' : 'Worksheet Format'}
                     </label>
                     <select
                       value={worksheetType}
                       onChange={(e) => setWorksheetType(e.target.value)}
-                      className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 cursor-pointer ${
-                        isThemeNight ? 'bg-brand-dark border-white/10 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-800'
+                      className={`w-full p-3 rounded-md border text-xs font-bold focus:outline-none focus:border-line cursor-pointer ${
+                        'bg-surface border-rule text-ink'
                       }`}
                     >
-                      <option value="daily_homework">📄 {isKo ? '일간 워크시트 (Daily Homework)' : 'Daily Homework'}</option>
-                      <option value="weekly_quiz">📝 {isKo ? '주간 단원 평가 (Weekly Quiz)' : 'Weekly Quiz'}</option>
-                      <option value="phonics_tracing">✍️ {isKo ? '파닉스/어휘 쓰기 (Phonics & Tracing)' : 'Phonics & Tracing'}</option>
-                      <option value="reading_comp">📖 {isKo ? '독해 이해력 문제지 (Reading Comprehension)' : 'Reading Comprehension'}</option>
+                      <option value="daily_homework">{isKo ? '일간 워크시트 (Daily Homework)' : 'Daily Homework'}</option>
+                      <option value="weekly_quiz">{isKo ? '주간 단원 평가 (Weekly Quiz)' : 'Weekly Quiz'}</option>
+                      <option value="phonics_tracing">{isKo ? '파닉스/어휘 쓰기 (Phonics & Tracing)' : 'Phonics & Tracing'}</option>
+                      <option value="reading_comp">{isKo ? '독해 이해력 문제지 (Reading Comprehension)' : 'Reading Comprehension'}</option>
                     </select>
                   </div>
 
                   {/* Question Style Selector */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                    <label className="text-[12px] font-bold text-ink-3 block">
                       {isKo ? '출제 및 채점 문제 스타일 (Question Style)' : 'Question Format'}
                     </label>
                     <select
                       value={questionStyle}
                       onChange={(e) => setQuestionStyle(e.target.value)}
-                      className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:border-orange-500 cursor-pointer ${
-                        isThemeNight ? 'bg-brand-dark border-white/10 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-800'
+                      className={`w-full p-3 rounded-md border text-xs font-bold focus:outline-none focus:border-line cursor-pointer ${
+                        'bg-surface border-rule text-ink'
                       }`}
                     >
-                      <option value="multiple_choice">☑️ {isKo ? '4지 선다형 (Multiple Choice)' : 'Multiple Choice'}</option>
-                      <option value="fill_in_blanks">✏️ {isKo ? '빈칸 채우기 (Fill-in-the-Blanks)' : 'Fill-in-the-Blanks'}</option>
-                      <option value="unscramble">🔤 {isKo ? '문장 배열 (Unscramble Sentences)' : 'Unscramble Sentences'}</option>
-                      <option value="vocab_matching">🔗 {isKo ? '어휘 뜻 연결 (Matching Definitions)' : 'Matching Definitions'}</option>
-                      <option value="short_answer">📝 {isKo ? '단답형 (Short Answer)' : 'Short Answer'}</option>
+                      <option value="multiple_choice">{isKo ? '4지 선다형 (Multiple Choice)' : 'Multiple Choice'}</option>
+                      <option value="fill_in_blanks">{isKo ? '빈칸 채우기 (Fill-in-the-Blanks)' : 'Fill-in-the-Blanks'}</option>
+                      <option value="unscramble">{isKo ? '문장 배열 (Unscramble Sentences)' : 'Unscramble Sentences'}</option>
+                      <option value="vocab_matching">{isKo ? '어휘 뜻 연결 (Matching Definitions)' : 'Matching Definitions'}</option>
+                      <option value="short_answer">{isKo ? '단답형 (Short Answer)' : 'Short Answer'}</option>
                     </select>
                   </div>
 
                   {/* Explicit AI Worksheet Generation Button */}
-                  <div className="pt-3 border-t border-orange-500/20 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <p className="text-[11px] text-zinc-400 font-medium">
+                  <div className="pt-3 border-t border-rule flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <p className="text-[12px] text-ink-3 font-medium">
                       {isKo ? '선택한 옵션으로 학급 맞춤 오답 복습지 및 정답지 PDF를 생성합니다.' : 'Generates custom review worksheet & answer key PDF based on chosen options.'}
                     </p>
                     <button
                       type="button"
                       disabled={isGeneratingWorksheet}
                       onClick={handleGenerateWorksheet}
-                      className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 disabled:opacity-50 text-white font-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.97] cursor-pointer flex items-center justify-center gap-2 shrink-0"
+                      className="w-full sm:w-auto px-5 py-2.5 disabled:opacity-50 text-ink font-extrabold text-xs rounded-md transition-[color,background-color,border-color,opacity,transform] active:scale-[0.97] cursor-pointer flex items-center justify-center gap-2 shrink-0"
                     >
                       {isGeneratingWorksheet ? (
-                        <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <div className="w-3.5 h-3.5 border-2 border-rule border-t-white rounded-full animate-spin" />
                       ) : (
                         <Printer size={15} weight="bold" />
                       )}
                       <span>
                         {isGeneratingWorksheet
                           ? (isKo ? '생성 중...' : 'Generating...')
-                          : (isKo ? '⚡ AI 워크시트 생성 & 오답 복습지 인쇄 (PDF)' : '⚡ Generate Printable AI Worksheet (PDF)')}
+                          : (isKo ? 'AI 워크시트 생성 & 오답 복습지 인쇄 (PDF)' : 'Generate Printable AI Worksheet (PDF)')}
                       </span>
                     </button>
                   </div>
@@ -1053,11 +1046,11 @@ export const CurriculumEditorForm: React.FC<Props> = ({
               </div>
             )}
 
-            <div className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between pt-4 border-t ${isThemeNight ? 'border-white/5' : 'border-zinc-200'}`}>
+            <div className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between pt-4 border-t border-rule`}>
               {curriculumLastEditedByName ? (
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[12px] text-ink-3">
                   {isKo ? '마지막 수정: ' : 'Last edited by '}
-                  <span className="font-bold text-zinc-400">{curriculumLastEditedByName}</span>
+                  <span className="font-bold text-ink-3">{curriculumLastEditedByName}</span>
                   {curriculumLastEditedAt && (
                     <span> · {new Date(curriculumLastEditedAt).toLocaleString(isKo ? 'ko-KR' : 'en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>
                   )}
@@ -1068,8 +1061,8 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 type="button"
                 onClick={loadCurriculum}
                 disabled={isSavingCurriculum}
-                className={`px-5 min-h-12 whitespace-nowrap shrink-0 rounded-2xl text-sm font-bold border transition-all active:scale-[0.98] cursor-pointer ${
-                  isThemeNight ? 'bg-brand-dark hover:bg-white/5 text-zinc-400 hover:text-white border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300'
+                className={`px-5 min-h-12 whitespace-nowrap shrink-0 rounded-lg text-sm font-bold border transition-[color,background-color,border-color,opacity,transform] active:scale-[0.98] cursor-pointer ${
+                  'bg-sunken hover:bg-sunken text-ink-2 border-rule'
                 }`}
               >
                 {isKo ? '초기화' : 'Reset'}
@@ -1078,14 +1071,14 @@ export const CurriculumEditorForm: React.FC<Props> = ({
               <button
                 type="submit"
                 disabled={isSavingCurriculum}
-                className="group flex-1 sm:flex-none px-6 min-h-12 whitespace-nowrap bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-bold text-sm rounded-2xl shadow-xl shadow-orange-500/20 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
+                className="group flex-1 sm:flex-none px-6 min-h-12 whitespace-nowrap bg-line hover:bg-line disabled:opacity-50 text-on-line font-bold text-sm rounded-lg transition-[color,background-color,border-color,opacity,transform] duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
               >
                 {isSavingCurriculum ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-rule border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
                     <span>{isKo ? '저장' : 'Save'}</span>
-                    <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="w-6 h-6 rounded-full bg-sunken flex items-center justify-center group-hover:scale-110 transition-transform">
                       <CheckCircle size={14} weight="bold" />
                     </div>
                   </>

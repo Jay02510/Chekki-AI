@@ -21,29 +21,29 @@ export const DocPreviewModal: React.FC<Props> = ({
 
   return (
     <div className="fixed inset-0 z-[450] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
+      <div className="absolute inset-0 bg-[#2b211a]/55" onClick={onClose} />
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="doc-preview-title"
         tabIndex={-1}
-        className={`relative p-1 border rounded-[2.5rem] shadow-2xl flex flex-col w-full max-w-4xl mx-4 animate-fade-in text-left max-h-[90vh] ${
-        isThemeNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'
+        className={`relative p-1 border rounded-lg flex flex-col w-full max-w-4xl mx-4 animate-fade-in text-left max-h-[90vh] ${
+        'bg-surface border-rule'
       }`}>
-        <div className={`relative w-full h-full rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 overflow-y-auto custom-scrollbar flex flex-col ${
-          isThemeNight ? 'bg-brand-dark text-zinc-100' : 'bg-white text-zinc-900'
+        <div className={`relative w-full h-full rounded-lg p-6 sm:p-8 overflow-y-auto custom-scrollbar flex flex-col ${
+          'bg-surface text-ink'
         }`}>
-          <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+          <div className="flex items-center justify-between pb-4 mb-4 border-b border-rule">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-sunken border border-rule text-ink-2 flex items-center justify-center">
                 <Eye size={22} weight="bold" />
               </div>
               <div>
-                <h3 id="doc-preview-title" className={`text-lg font-black ${isThemeNight ? 'text-white' : 'text-zinc-900'}`}>
+                <h3 id="doc-preview-title" className={`text-lg font-extrabold text-ink`}>
                   {isKo ? '스캔 원본 교재 / 워크시트 문서 미리보기' : 'Scanned Document Original Preview'}
                 </h3>
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-ink-3">
                   {uploadedFileName || (isKo ? '스캔된 교재 이미지/PDF' : 'Scanned Image / PDF')}
                 </p>
               </div>
@@ -52,23 +52,23 @@ export const DocPreviewModal: React.FC<Props> = ({
               type="button"
               onClick={onClose}
               aria-label={isKo ? '닫기' : 'Close'}
-              className={`min-w-11 min-h-11 flex items-center justify-center rounded-full transition-all cursor-pointer ${
-                isThemeNight ? 'bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600'
+              className={`min-w-11 min-h-11 flex items-center justify-center rounded-md transition-[color,background-color,border-color,opacity,transform] cursor-pointer ${
+                'bg-sunken hover:bg-sunken text-ink-2'
               }`}
             >
               <X size={18} weight="bold" />
             </button>
           </div>
 
-          <div className="flex-1 flex items-center justify-center p-4 bg-black/40 rounded-2xl border border-white/10 overflow-hidden min-h-[50vh]">
+          <div className="flex-1 flex items-center justify-center p-4 bg-[#2b211a]/55 rounded-lg border border-rule overflow-hidden min-h-[50vh]">
             {textbookPreviewUrl ? (
               <img
                 src={textbookPreviewUrl}
                 alt="Scanned original document"
-                className="max-h-[65vh] w-auto object-contain rounded-xl shadow-2xl"
+                className="max-h-[65vh] w-auto object-contain rounded-md"
               />
             ) : (
-              <p className="text-sm text-zinc-400 italic">
+              <p className="text-sm text-ink-3 italic">
                 {isKo ? '문서 미리보기 이미지를 로드할 수 없습니다.' : 'Document image preview unavailable.'}
               </p>
             )}
@@ -78,7 +78,7 @@ export const DocPreviewModal: React.FC<Props> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer"
+              className="px-5 py-2 bg-line hover:bg-line text-on-line font-bold text-xs rounded-md cursor-pointer"
             >
               {isKo ? '미리보기 닫기' : 'Close Preview'}
             </button>
