@@ -65,6 +65,26 @@ const SampleTag: React.FC<{ isKo: boolean }> = ({ isKo }) => (
   <span className="rounded bg-sunken px-2 py-0.5 text-[12px] font-bold text-ink-3">{isKo ? '예시 화면' : 'Sample'}</span>
 );
 
+// A real dashboard capture (test data, class/student names swapped for
+// neutral ones). Images live in public/images/schools as <name>-ko/-en.webp
+// at 2x; w/h are the CSS size.
+const RealShot: React.FC<{ isKo: boolean; name: string; w: number; h: number; alt: string; caption: string; phone?: { w: number; h: number } }> = ({ isKo, name, w, h, alt, caption, phone }) => {
+  const lang = isKo ? 'ko' : 'en';
+  return (
+    // Never wider than the capture, so text isn't blown up past its real size.
+    <figure className="mx-auto w-full overflow-hidden rounded-md bg-surface ring-1 ring-inset ring-rule" style={{ maxWidth: w }}>
+      <picture>
+        {/* A desktop capture shrunk onto a phone is unreadable, so phones get a phone-size capture. */}
+        {phone && <source media="(max-width: 640px)" srcSet={`/images/schools/${name}m-${lang}.webp`} width={phone.w} height={phone.h} />}
+        <img src={`/images/schools/${name}-${lang}.webp`} width={w} height={h} alt={alt} loading="lazy" decoding="async" className="block h-auto w-full" />
+      </picture>
+      <figcaption className="border-t border-rule px-4 py-2.5 text-[13px] leading-snug text-ink-3">
+        {caption} <span className="whitespace-nowrap">· {isKo ? '실제 화면' : 'Real screen'}</span>
+      </figcaption>
+    </figure>
+  );
+};
+
 const Points: React.FC<{ items: string[] }> = ({ items }) => (
   <ul className="mt-4 space-y-2">
     {items.map((x) => (
@@ -401,45 +421,15 @@ const SchoolsLandingPage: React.FC = () => {
                 />
               </div>
 
-              <figure className="rounded-md bg-surface p-4 ring-1 ring-inset ring-rule sm:p-5" aria-label={isKo ? '예시: 수업 기록에서 학부모 리포트까지' : 'Sample: from class note to parent report'}>
-                <figcaption className="flex items-center justify-between gap-3">
-                  <span className="text-[14px] font-bold text-ink">{isKo ? '3반 · 오늘 수업' : "Class 3 · today's lesson"}</span>
-                  <SampleTag isKo={isKo} />
-                </figcaption>
-                <ol className="relative mt-4 space-y-4 before:absolute before:bottom-6 before:left-[15px] before:top-6 before:w-1 before:rounded-full before:bg-line">
-                  <li className="relative flex gap-3">
-                    <Roundel state="done" size={34} className="text-[12px]">
-                      FT
-                    </Roundel>
-                    <div className="min-w-0 flex-1 rounded-md bg-sunken p-3">
-                      <p className="text-[13px] font-bold text-ink-3">{isKo ? '원어민 선생님 기록 (영어)' : 'Foreign teacher note'}</p>
-                      <p className="mt-1 text-[15px] leading-relaxed text-ink">Read “The Big Hat” together. Jiho still mixes up b and d. Please practice at home.</p>
-                    </div>
-                  </li>
-                  <li className="relative flex gap-3">
-                    <Roundel state="done" size={34} className="text-[12px]">
-                      AI
-                    </Roundel>
-                    <div className="min-w-0 flex-1 rounded-md bg-sunken p-3">
-                      <p className="text-[13px] font-bold text-ink-3">{isKo ? '한국어 초안' : 'Korean draft'}</p>
-                      <p lang="ko" className="mt-1 text-[15px] leading-relaxed text-ink">
-                        오늘은 ‘The Big Hat’을 함께 읽었어요. 지호는 아직 b와 d를 헷갈려 해요. 집에서 한 번 더 봐 주세요.
-                      </p>
-                    </div>
-                  </li>
-                  <li className="relative flex items-center gap-3">
-                    <Roundel state="current" size={34} className="text-[12px]">
-                      KT
-                    </Roundel>
-                    <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2 rounded-md bg-line-soft p-3">
-                      <p className="text-[15px] font-bold text-ink">{isKo ? '한국인 선생님 확인 대기' : 'Waiting for the Korean teacher'}</p>
-                      <span className="rounded-md bg-line px-3 py-1.5 text-[14px] font-bold text-on-line" aria-hidden="true">
-                        {isKo ? '확인하고 보내기' : 'Check and send'}
-                      </span>
-                    </div>
-                  </li>
-                </ol>
-              </figure>
+              <RealShot
+                isKo={isKo}
+                name="q1"
+                w={632}
+                h={469}
+                phone={{ w: 390, h: 566 }}
+                alt={isKo ? '한국인 선생님 화면: 원어민 선생님 기록으로 만든 한국어 수업 요약과 승인하고 보내기 버튼' : "Korean teacher's screen: the Korean class summary drafted from the foreign teacher's note, with an approve-and-send button"}
+                caption={isKo ? '한국인 선생님이 확인하고 보내는 화면' : 'The Korean teacher checks and sends it here'}
+              />
             </div>
           </QFold>
 
@@ -515,32 +505,14 @@ const SchoolsLandingPage: React.FC = () => {
                 />
               </div>
 
-              <figure className="rounded-md bg-surface p-4 ring-1 ring-inset ring-rule sm:p-5" aria-label={isKo ? '예시: 반에서 많이 틀린 것' : 'Sample: what the class missed most'}>
-                <figcaption className="flex items-center justify-between gap-3">
-                  <span className="text-[14px] font-bold text-ink">{isKo ? '3반 · 이번 주 집에서 많이 틀린 것' : 'Class 3 · most missed at home this week'}</span>
-                  <SampleTag isKo={isKo} />
-                </figcaption>
-                <ul className="mt-4 space-y-3.5">
-                  {[
-                    { t: isKo ? 'b와 d 구분' : 'b vs d', n: 7 },
-                    { t: isKo ? '-ck로 끝나는 단어' : 'Words ending in -ck', n: 5 },
-                    { t: 'was / were', n: 3 },
-                  ].map(({ t, n }) => (
-                    <li key={t}>
-                      <div className="flex items-baseline justify-between gap-3 text-[15px]">
-                        <span className="font-bold text-ink">{t}</span>
-                        <span className="num font-semibold text-ink-2">{isKo ? `12명 중 ${n}명` : `${n} of 12`}</span>
-                      </div>
-                      <div className="mt-1.5 h-2 rounded-full bg-sunken">
-                        <div className="h-2 rounded-full bg-line" style={{ width: `${(n / 12) * 100}%` }} />
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-4 rounded-md bg-line-soft p-3 text-[14px] font-semibold text-ink">
-                  {isKo ? '금요일 수업 전에 b와 d를 한 번 더 짚어 보세요.' : 'Go over b and d again before Friday’s class.'}
-                </p>
-              </figure>
+              <RealShot
+                isKo={isKo}
+                name="q3"
+                w={403}
+                h={160}
+                alt={isKo ? '원어민 선생님 화면: 이번 주 숙제 스캔 수와 이번 주 단어' : "Foreign teacher's screen: homework scanned this week and this week's words"}
+                caption={isKo ? '원어민 선생님 화면. 숙제가 들어오면 많이 틀린 단어가 여기 떠요.' : "Foreign teacher's screen. Most-missed words show here as homework comes in."}
+              />
             </div>
           </QFold>
 
@@ -555,26 +527,14 @@ const SchoolsLandingPage: React.FC = () => {
                 </a>
               </div>
 
-              <figure className="rounded-md bg-surface p-4 ring-1 ring-inset ring-rule sm:p-5" aria-label={isKo ? '예시: 학부모 앱의 수업 리포트' : 'Sample: a class report in the parent app'}>
-                <figcaption className="flex items-center justify-between gap-3">
-                  <span className="text-[14px] font-bold text-ink">{isKo ? '학부모 앱 · 지호의 수업 리포트' : "Parent app · Jiho's class report"}</span>
-                  <SampleTag isKo={isKo} />
-                </figcaption>
-                <div className="mt-3 rounded-md bg-sunken p-4">
-                  <p className="text-[13px] font-bold text-ink-3">{isKo ? '3반 · 오늘 수업' : 'Class 3 · today'}</p>
-                  <p lang="ko" className="mt-1 text-[15px] leading-relaxed text-ink">
-                    오늘은 ‘The Big Hat’을 함께 읽었어요. 지호는 아직 b와 d를 헷갈려 해요. 집에서 한 번 더 봐 주세요.
-                  </p>
-                  <p className="mt-3 flex items-center gap-1.5 text-[13px] font-bold text-correct">
-                    <Check size={14} weight="bold" aria-hidden="true" />
-                    {isKo ? '한국인 선생님이 확인하고 보냈어요' : 'Checked and sent by the Korean teacher'}
-                  </p>
-                </div>
-                <div className="mt-3 flex items-baseline justify-between gap-3 border-t border-rule pt-3">
-                  <span className="text-[15px] font-semibold text-ink-2">{isKo ? '학부모님 요금' : 'Cost to the parent'}</span>
-                  <span className="num text-[20px] font-extrabold text-ink">₩0</span>
-                </div>
-              </figure>
+              <RealShot
+                isKo={isKo}
+                name="q4"
+                w={342}
+                h={595}
+                alt={isKo ? '학부모 앱: 한국인 선생님이 확인하고 보낸 수업 리포트와 아이에 대한 메모' : 'Parent app: the class report a Korean teacher checked and sent, with a note about the child'}
+                caption={isKo ? '학부모 앱 · 무료' : 'Parent app · free for parents'}
+              />
             </div>
           </QFold>
 
