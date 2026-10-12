@@ -34,6 +34,12 @@ function useIsMobile() {
   return isMobile;
 }
 
+const dupKey = (log: PendingClassLog) => `${log.classId}|${logDate(log)}|${(log.lessonTopic || '').trim().toLowerCase()}`;
+const daysOld = (log: PendingClassLog) => {
+  const d = log.createdAt?.toDate?.() ?? (log.date ? new Date(log.date) : null);
+  return d ? Math.floor((Date.now() - d.getTime()) / 86_400_000) : 0;
+};
+
 const familyCount = (log: PendingClassLog) =>
   (log.enrolledStudentUids || []).filter((uid) => !uid.startsWith('pending:')).length;
 
@@ -68,6 +74,8 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
   const [openLog, setOpenLog] = useState<PendingClassLog | null>(null);
   const current = openLog ?? (isMobile ? null : logs[0] ?? null);
   const isOpen = !!openLog;
+  const dupCounts = new Map<string, number>();
+  logs.forEach((l) => dupCounts.set(dupKey(l), (dupCounts.get(dupKey(l)) || 0) + 1));
 
   const select = (log: PendingClassLog) => {
     if (log.id === current?.id || !confirmDiscard()) return;
@@ -140,7 +148,7 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
           <p className={`text-sm mt-1 ${muted}`}>
             {logs.length === 0
               ? isKo ? '검토할 리포트가 없습니다' : 'Nothing to review'
-              : isKo ? `${logs.length}개 수업 검토 대기` : `${logs.length} ${logs.length === 1 ? 'class' : 'classes'} to review`}
+              : isKo ? `${logs.length}개 리포트 검토 대기` : `${logs.length} ${logs.length === 1 ? 'report' : 'reports'} to review`}
           </p>
         </div>
         <DigestSettings isNight={isNight} isKo={isKo} user={user} />
@@ -169,6 +177,8 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
           <ul className="space-y-2 md:sticky md:top-4" aria-label={isKo ? '검토할 수업' : 'Classes to review'}>
             {logs.map((log) => {
               const notes = log.aiStudentReports?.length || 0;
+              const age = daysOld(log);
+              const dup = (dupCounts.get(dupKey(log)) || 0) > 1;
               const active = !isMobile && log.id === current?.id;
               return (
                 <li key={log.id}>
@@ -182,11 +192,30 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
                         : 'border-rule bg-surface hover:bg-sunken'
                     }`}
                   >
+                    {/* Date + topic lead: every row in one KT's queue is
+                        often the same class, so the class name can't tell
+                        rows apart. */}
                     <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-bold truncate">{log.className || (isKo ? '수업' : 'Class')}</span>
-                      <span className={`block text-xs mt-0.5 truncate ${muted}`}>
-                        {[`${logDate(log)} ${logTime(log)}`.trim(), log.lessonTopic].filter(Boolean).join(' · ')}
+                      <span className="block text-sm font-bold truncate">
+                        {[logDate(log), log.lessonTopic].filter(Boolean).join(' · ') || log.className || (isKo ? '수업' : 'Class')}
                       </span>
+                      <span className={`block text-xs mt-0.5 truncate ${muted}`}>
+                        {[log.className, logTime(log)].filter(Boolean).join(' · ')}
+                      </span>
+                      {(age >= 2 || dup) && (
+                        <span className="mt-1 flex flex-wrap gap-1">
+                          {age >= 2 && (
+                            <span className="px-1.5 py-0.5 rounded-md text-[12px] font-bold bg-sunken text-ink-2 tabular-nums">
+                              {isKo ? `${age}일 대기` : `Waiting ${age}d`}
+                            </span>
+                          )}
+                          {dup && (
+                            <span className="px-1.5 py-0.5 rounded-md text-[12px] font-bold bg-wrong-soft text-wrong">
+                              {isKo ? '중복 가능성' : 'Possible duplicate'}
+                            </span>
+                          )}
+                        </span>
+                      )}
                     </span>
                     {notes > 0 && (
                       <span className={`shrink-0 px-2 py-0.5 rounded-md text-[12px] font-bold bg-line-soft text-line-ink`}>
