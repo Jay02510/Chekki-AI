@@ -12,10 +12,8 @@ interface Props {
   user: any;
   activeClass: any;
   selectedTextbookName: string;
-  ftDashboardRoster: { uid: string; name: string; isPending?: boolean }[];
+  ftDashboardRoster: { uid: string; name: string; isPending?: boolean; scannedThisWeek?: boolean; weeklyMistakes?: number }[];
   handleLogSubmit: (payload: any) => boolean;
-  completedHomeworkCount: number;
-  activeStudentsCount: number;
   activeVocabWords: string[];
   sortedTroubleWords: { word: string; count: number }[];
   curriculumTopic: string;
@@ -50,8 +48,6 @@ export function FtTabContent(props: Props) {
           selectedTextbookName={props.selectedTextbookName}
           roster={props.ftDashboardRoster}
           handleFtLogSubmit={props.handleLogSubmit}
-          completedHomeworkCount={props.completedHomeworkCount}
-          activeStudentsCount={props.activeStudentsCount}
           activeVocabWords={props.activeVocabWords}
           sortedTroubleWords={props.sortedTroubleWords}
           setActiveTab={props.setActiveTab}

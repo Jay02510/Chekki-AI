@@ -163,16 +163,23 @@ export function useRosterAnalytics(
   // log loop isn't gated on parent-app adoption.
   const ftDashboardRoster = useMemo(
     () => [
-      ...(studentsData || [])
+      // scannedThisWeek/weeklyMistakes feed the FT's per-student list.
+      ...rosterWithCompletion
         .filter((s: any) => s?.classStatus === 'active' && s?.name && s?.uid)
-        .map((s: any) => ({ uid: s.uid as string, name: s.name as string, isPending: false })),
+        .map((s: any) => ({
+          uid: s.uid as string,
+          name: s.name as string,
+          isPending: false,
+          scannedThisWeek: !!s.hasScannedThisWeek,
+          weeklyMistakes: s.weeklyMistakesCount as number,
+        })),
       // isPending is a display-only flag — the stored `name` stays clean
       // (no "(pending)" text baked in) since this same name ends up saved
       // onto the exception/log and eventually a parent-facing report; only
       // the picker's rendered label should show the pending marker.
       ...pendingStudentsForRoster.map((s) => ({ uid: s.uid, name: s.name, isPending: true })),
     ],
-    [studentsData, pendingStudentsForRoster]
+    [rosterWithCompletion, pendingStudentsForRoster]
   );
 
   // Director's "Approved Student Roster" (NativeDirectorStudentsTab) used to

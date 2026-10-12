@@ -16,10 +16,8 @@ interface Props {
   user: any;
   activeClass: any;
   selectedTextbookName: string;
-  roster: { uid: string; name: string; isPending?: boolean }[];
+  roster: { uid: string; name: string; isPending?: boolean; scannedThisWeek?: boolean; weeklyMistakes?: number }[];
   handleFtLogSubmit: (payload: ClassLogPayload) => boolean;
-  completedHomeworkCount: number;
-  activeStudentsCount: number;
   activeVocabWords: string[];
   sortedTroubleWords: TroubleWord[];
   setActiveTab: (tab: any) => void;
@@ -56,8 +54,6 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
   selectedTextbookName,
   roster,
   handleFtLogSubmit,
-  completedHomeworkCount,
-  activeStudentsCount,
   activeVocabWords,
   sortedTroubleWords,
   setActiveTab,
@@ -77,8 +73,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
             topic={curriculumTopic}
             vocabWords={activeVocabWords}
             troubleWords={sortedTroubleWords}
-            scannedCount={completedHomeworkCount}
-            studentCount={activeStudentsCount}
+            roster={roster}
           />
 
           {/* 30s Foreign Teacher Mobile Class Log Entry */}
@@ -172,8 +167,7 @@ function WeekFocusCard({
   topic,
   vocabWords,
   troubleWords,
-  scannedCount,
-  studentCount,
+  roster,
 }: {
   isNight: boolean;
   isKo: boolean;
@@ -181,11 +175,14 @@ function WeekFocusCard({
   topic: string;
   vocabWords: string[];
   troubleWords: TroubleWord[];
-  scannedCount: number;
-  studentCount: number;
+  roster: Props['roster'];
 }) {
   const missed = troubleWords.filter((w) => w.count > 0);
-  if (!topic.trim() && vocabWords.length === 0 && studentCount === 0) return null;
+  if (!topic.trim() && vocabWords.length === 0 && roster.length === 0) return null;
+  // Unjoined students count in the denominator: they still owe homework,
+  // the FT just can't see it in the app. Not-scanned first.
+  const scannedCount = roster.filter((s) => s.scannedThisWeek).length;
+  const students = [...roster].sort((a, b) => rank(a) - rank(b));
   const muted = 'text-ink-3';
   return (
     <section className="mx-auto w-full max-w-3xl space-y-3 text-left">
@@ -193,12 +190,30 @@ function WeekFocusCard({
         {isKo ? `${weekNumber}주차` : `Week ${weekNumber}`}
         {topic.trim() && <span className={`font-semibold ${muted}`}> · {topic.trim()}</span>}
       </h2>
-      {studentCount > 0 && (
-        <p className={`text-[14px] ${muted}`}>
-          {isKo
-            ? `숙제 스캔: ${studentCount}명 중 ${scannedCount}명 완료`
-            : `Homework scanned this week: ${scannedCount} of ${studentCount}`}
-        </p>
+      {roster.length > 0 && (
+        <div>
+          <p className={`text-[14px] ${muted}`}>
+            {isKo
+              ? `숙제 스캔: ${roster.length}명 중 ${scannedCount}명 완료`
+              : `Homework scanned this week: ${scannedCount} of ${roster.length}`}
+          </p>
+          <ul className="mt-2 divide-y divide-rule border-y border-rule">
+            {students.map((s) => (
+              <li key={s.uid} className="flex items-center justify-between gap-3 py-2 text-[14px]">
+                <span className="min-w-0 truncate font-bold">{s.name}</span>
+                <span className={`shrink-0 break-keep ${s.isPending ? muted : s.scannedThisWeek && s.weeklyMistakes ? 'font-bold text-line-ink' : 'text-ink-2'}`}>
+                  {s.isPending
+                    ? isKo ? '학부모 앱 미가입' : 'Parent not on the app'
+                    : !s.scannedThisWeek
+                    ? isKo ? '아직 스캔 안 함' : 'Not scanned yet'
+                    : s.weeklyMistakes
+                    ? isKo ? `틀린 문제 ${s.weeklyMistakes}개` : `${s.weeklyMistakes} to review`
+                    : isKo ? '모두 맞음' : 'All correct'}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
       {vocabWords.length > 0 && (
         <div className="space-y-2">
@@ -226,4 +241,12 @@ function WeekFocusCard({
       )}
     </section>
   );
+}
+
+// Who needs the FT's attention first: mistakes, then not scanned, then
+// fine, then students whose parent hasn't joined (nothing to act on yet).
+function rank(s: Props['roster'][number]) {
+  if (s.isPending) return 3;
+  if (!s.scannedThisWeek) return 1;
+  return s.weeklyMistakes ? 0 : 2;
 }
