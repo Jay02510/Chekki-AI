@@ -84,7 +84,8 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
               onSubmitLog={handleFtLogSubmit}
               userProfile={user}
               selectedClassName={activeClass?.name}
-              selectedTextbookName={selectedTextbookName}
+              // Fall back to this class's last log so a new device isn't blank.
+              selectedTextbookName={selectedTextbookName || submittedLogs.find((l: any) => l.textbook)?.textbook || ''}
               selectedLessonTopic={curriculumTopic}
               roster={roster}
               isRealClassSynced={!activeClass?.isDemo}

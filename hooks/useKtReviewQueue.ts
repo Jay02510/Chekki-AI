@@ -137,6 +137,9 @@ export function useKtReviewQueue(
           date: logDate(log),
           lessonTopic: log.lessonTopic || '',
           summary,
+          // AI English draft for parents using the app in English; the KT
+          // reviews the Korean text, so this can trail their edits.
+          summaryEn: log.aiEnglishSummary || '',
           note,
           reviewedByName,
           sentAt: serverTimestamp(),

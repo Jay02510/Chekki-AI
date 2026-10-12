@@ -146,7 +146,7 @@ export const VoiceFillAssistant: React.FC<Props> = ({ isNight = true, currentFie
         <div
           className="flex items-center gap-2 text-[13px] text-ink-3"
         >
-          <ShieldCheck size={16} weight="fill" className="shrink-0 text-correct" aria-hidden="true" />
+          <ShieldCheck size={16} weight="fill" className="shrink-0 text-ink-3" aria-hidden="true" />
           <span className="flex-1">
             {isKo ? '음성은 저장되지 않습니다 — 처리 후 즉시 삭제됩니다.' : "Your voice is never saved — it's discarded right after processing."}
           </span>

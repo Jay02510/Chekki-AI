@@ -133,13 +133,13 @@ const DEMO_EXCEPTIONS: LogException[] = [
   {
     studentName: 'Seo-yeon (서연)',
     studentUid: null,
-    details: '⭐ Outstanding participation! Led the vocabulary team quiz and helped classmates with pronunciation.',
+    details: 'Outstanding participation! Led the vocabulary team quiz and helped classmates with pronunciation.',
     type: 'praise',
   },
   {
     studentName: 'Min-jun (민준)',
     studentUid: 'demo-minjun',
-    details: '⚠️ Struggled with target word "Chloroplast" and needs 5-minute review at home.',
+    details: 'Struggled with target word "Chloroplast" and needs 5-minute review at home.',
     type: 'attention',
   },
 ];
@@ -332,7 +332,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
     if (rosterMatch) setModalStudentUid(rosterMatch.uid);
     else setCustomStudentInput(ex.studentName);
     setModalCategory(ex.type || 'praise');
-    // Strip the ⭐/⚠️ prefix "Save Highlight" auto-adds so editing and
+    // Strip the ⭐/⚠️ prefix older saved highlights carry so editing and
     // re-saving doesn't stack a second prefix onto the same note.
     setModalDetails(ex.details.replace(/^(⭐|⚠️)\s*/, ''));
     setEditingExceptionIndex(idx);
@@ -885,7 +885,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                         : 'bg-sunken border-rule text-ink-3'
                     }`}
                   >
-                    <span>⭐ {isKo ? '칭찬' : 'Positive Praise'}</span>
+                    <span>{isKo ? '칭찬' : 'Positive Praise'}</span>
                   </button>
 
                   <button
@@ -897,7 +897,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                         : 'bg-sunken border-rule text-ink-3'
                     }`}
                   >
-                    <span>⚠️ {isKo ? '주의 필요' : 'Attention Needed'}</span>
+                    <span>{isKo ? '주의 필요' : 'Attention Needed'}</span>
                   </button>
                 </div>
               </div>
@@ -991,8 +991,9 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     const detailText = modalDetails.trim() || (isKo
                       ? (modalCategory === 'praise' ? '집중력이 좋고 열심히 참여했습니다!' : '목표 어휘 복습이 더 필요합니다.')
                       : (modalCategory === 'praise' ? 'Great focus and enthusiastic participation!' : 'Needs extra review on target vocabulary.'));
-                    const prefix = modalCategory === 'praise' ? '⭐ ' : '⚠️ ';
-                    const savedException = { studentName: chosenName, studentUid: rosterMatch?.uid ?? null, details: prefix + detailText, type: modalCategory };
+                    // No emoji prefix: `type` already carries praise/concern, and the
+                    // prefix leaked into FT history and parent notes.
+                    const savedException = { studentName: chosenName, studentUid: rosterMatch?.uid ?? null, details: detailText, type: modalCategory };
                     if (editingExceptionIndex !== null) {
                       setExceptions((prev) => prev.map((ex, i) => (i === editingExceptionIndex ? savedException : ex)));
                     } else {
