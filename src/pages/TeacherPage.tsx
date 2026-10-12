@@ -566,9 +566,7 @@ export default function TeacherPage({ isNight = true }: Props) {
     activeVocabWords,
     activeRoster,
     pendingRoster,
-    activeStudentsCount,
     completionRate,
-    completedHomeworkCount,
     sortedTroubleWords,
     ftDashboardRoster,
     invitedOnlyRosterRows,
@@ -681,6 +679,26 @@ export default function TeacherPage({ isNight = true }: Props) {
   const [resetPwStatus, setResetPwStatus] = useState<{ text: string; isError?: boolean } | null>(null);
   const [isSendingReset, setIsSendingReset] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+
+  // Login screen: no user yet, so reset goes to whatever is typed in the
+  // email field. Same message for unknown emails (no account enumeration).
+  const handleForgotPassword = async () => {
+    const target = email.trim();
+    if (!target) {
+      setResetPwStatus({ text: isKo ? '위에 이메일을 먼저 입력해 주세요.' : 'Enter your email above first.', isError: true });
+      return;
+    }
+    setIsSendingReset(true);
+    try {
+      await sendPasswordResetEmail(auth, target);
+    } catch { /* fall through to the neutral message */ }
+    setResetPwStatus({
+      text: isKo
+        ? `${target}로 가입된 계정이 있다면 재설정 링크를 보냈어요. 메일함을 확인해 주세요.`
+        : `If ${target} has an account, we've sent a reset link. Check your inbox.`,
+    });
+    setIsSendingReset(false);
+  };
 
   const handleSendResetPassword = async () => {
     if (!user?.email) return;
@@ -1870,7 +1888,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={loginRole === 'director' ? (isKo ? "예: 김지원" : "e.g. Kim Ji-won") : (isKo ? "예: 김지원" : "e.g. Sarah Lee")}
-                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-2"
+                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3"
                   />
                 </div>
               )}
@@ -1886,7 +1904,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     value={academyNameInput}
                     onChange={(e) => setAcademyNameInput(e.target.value)}
                     placeholder={isKo ? '예: 첵키 잉글리시 아카데미' : 'e.g. Chekki English Academy'}
-                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-2"
+                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3"
                   />
                 </div>
               )}
@@ -1901,7 +1919,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={loginRole === 'director' ? "director@school.com" : "teacher@school.com"}
-                  className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-2"
+                  className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3"
                 />
               </div>
 
@@ -1915,8 +1933,23 @@ export default function TeacherPage({ isNight = true }: Props) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-2"
+                  className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3"
                 />
+                {authMode === 'login' && (
+                  <button
+                    type="button"
+                    disabled={isSendingReset}
+                    onClick={handleForgotPassword}
+                    className="min-h-11 pl-1 text-xs text-ink-3 hover:text-ink-2 underline underline-offset-2 cursor-pointer transition-colors disabled:opacity-50"
+                  >
+                    {isKo ? '비밀번호를 잊으셨나요?' : 'Forgot password?'}
+                  </button>
+                )}
+                {authMode === 'login' && resetPwStatus && (
+                  <p role="status" className={`pl-1 text-xs break-keep ${resetPwStatus.isError ? 'text-wrong' : 'text-ink-2'}`}>
+                    {resetPwStatus.text}
+                  </p>
+                )}
               </div>
 
               {authMode === 'signup' && (
@@ -1930,7 +1963,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-2"
+                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3"
                   />
                 </div>
               )}
@@ -2847,8 +2880,6 @@ export default function TeacherPage({ isNight = true }: Props) {
                 selectedTextbookName={selectedTextbookName}
                 ftDashboardRoster={ftDashboardRoster}
                 handleLogSubmit={handleLogSubmit}
-                completedHomeworkCount={completedHomeworkCount}
-                activeStudentsCount={activeStudentsCount}
                 activeVocabWords={activeVocabWords}
                 sortedTroubleWords={sortedTroubleWords}
                 curriculumTopic={curriculumTopic}
