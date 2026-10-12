@@ -1,5 +1,4 @@
 @import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 @import "tailwindcss";
 @import "./tokens.css";
 @custom-variant dark (&:is(.dark, .dark *));
@@ -10,7 +9,7 @@
   --font-display: 'Bricolage Grotesque', sans-serif;
   --font-hand: 'Patrick Hand', cursive;
   --font-korean: 'Noto Sans KR', sans-serif;
-  --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --color-brand: #EA580C; /* Vibrant Orange */
   --color-brand-hover: #C2410C;
 
@@ -34,6 +33,11 @@
 
   --color-brand-dark-elevated: #0f0814;
   --color-brand-dark-elevated-alt: #0a0714;
+
+  /* Mirrored from index.css: without these, /schools and /teacher fell back
+     to Tailwind's 6px/8px defaults while the parent app got 14px/20px. */
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
 
   /* Mirrored from index.css — components shared between the app bundle and
      this landing bundle (modals, toasts, staggered card reveals) use these
