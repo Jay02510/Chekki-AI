@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import SchoolsLandingPage from './pages/SchoolsLandingPage';
 import FaqPage from './pages/FaqPage';
 import Landing from './Landing';
+// See index.tsx: must be a JS import or the font files 404.
+import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
 import '../landing.css';
 import { initSentry } from './lib/sentry';
 import { setPageMeta } from './lib/pageMeta';

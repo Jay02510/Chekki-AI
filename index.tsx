@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+// Imported from JS, not via @import in index.css: Tailwind's Vite plugin
+// inlines CSS @imports without rebasing url(), so the font files 404'd.
+import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
 import './index.css';
 import { initSentry } from './src/lib/sentry';
 import { Capacitor } from '@capacitor/core';
