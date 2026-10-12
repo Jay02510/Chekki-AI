@@ -64,7 +64,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
       // childAge/schoolId were never actually persisted. Let them retry.
       setProfileSubmitError(
         language === 'ko'
-          ? '저장하지 못했습니다. 다시 시도해 주세요.'
+          ? '저장하지 못했어요. 다시 시도해 주세요.'
           : "Couldn't save. Please try again."
       );
     } finally {
@@ -89,14 +89,14 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         setClassJoinError(
           result.error ||
           (language === 'ko'
-            ? '올바르지 않은 코드입니다. 다시 확인해 주세요.'
+            ? '코드가 맞지 않아요. 다시 확인해 주세요.'
             : 'Invalid code. Please double-check with your teacher.')
         );
       }
     } catch {
       setClassJoinError(
         language === 'ko'
-          ? '오류가 발생했습니다. 다시 시도해 주세요.'
+          ? '문제가 생겼어요. 다시 시도해 주세요.'
           : 'Something went wrong. Please try again.'
       );
     } finally {
@@ -143,7 +143,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
         </h3>
         <p className="text-[15px] text-on-sign-2 mt-3 leading-relaxed max-w-[280px] mx-auto">
           {language === 'ko'
-            ? '아이의 학습 수준에 맞게 단어와 해설을 조정합니다.'
+            ? '아이 수준에 맞춰 단어와 설명을 맞춰 드려요.'
             : "We'll adjust the vocabulary and explanations to fit your child perfectly."}
         </p>
       </div>
@@ -411,10 +411,10 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
             {step === 0 &&
               renderEducationalStep(
                 '/assets/slide1_welcome_mascot.png',
-                '체키에 오신 것을 환영합니다',
+                '체키에 오신 걸 환영해요',
                 'Welcome to Chekki',
-                '우리 아이의 완벽한 AI 영어 튜터를 만나보세요.',
-                "Meet your child's new personal AI English Tutor.",
+                '숙제 사진 한 장이면, 아이와 같이 볼 설명을 만들어 드려요.',
+                "One photo of the homework, and we'll explain it so you can go over it together.",
                 // Straight to the profile — the 5-slide feature tour (steps
                 // 1–5) repeated HelpView and made first login 8 screens long.
                 () => setStep(6),
@@ -528,7 +528,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                 </h3>
                 <p className="text-base text-on-sign-2 leading-relaxed max-w-[260px] mb-6">
                   {language === 'ko'
-                    ? '원장님/선생님께 초대받은 코드를 입력하면 숙제 채점이 교재에 맞게 자동 조정됩니다.'
+                    ? '원장님이나 선생님께 받은 코드를 넣으면, 교재에 맞춰 채점해 드려요.'
                     : "Enter the invite code your child's teacher sent you to sync homework grading with their class curriculum."}
                 </p>
 
@@ -542,7 +542,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                       ✓
                     </div>
                     <p className="text-on-sign font-bold text-[15px]">
-                      {language === 'ko' ? '학급에 연결되었습니다!' : 'Linked to class!'}
+                      {language === 'ko' ? '학급에 연결됐어요!' : 'Linked to class!'}
                     </p>
                   </motion.div>
                 ) : (

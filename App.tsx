@@ -222,6 +222,10 @@ function AppContent() {
       isAuthenticated &&
       user &&
       !user.childAge &&
+      // A class-linked parent already has their textbook set by the school;
+      // don't put a full-screen setup between them and the camera on every
+      // new device (the skip flag below is per-device).
+      !user.classId &&
       !localStorage.getItem('skipped_child_profile')
     ) {
       setShowChildProfileModal(true);
