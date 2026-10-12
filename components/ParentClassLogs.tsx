@@ -13,6 +13,7 @@ interface ParentReport {
   date?: string;
   lessonTopic?: string;
   summary?: string;
+  summaryEn?: string;
   note?: string | null;
 }
 
@@ -77,7 +78,7 @@ export const ParentClassLogs: React.FC<Props> = ({ classId, studentUid, studentN
               </summary>
               <div className="px-4 pb-4">
                 {log.summary && (
-                  <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink break-keep">{log.summary}</p>
+                  <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink break-keep">{!isKo && log.summaryEn ? log.summaryEn : log.summary}</p>
                 )}
                 {log.note && (
                   <div className="mt-3 rounded-md bg-line-soft px-4 py-3">

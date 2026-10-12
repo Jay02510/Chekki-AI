@@ -427,18 +427,18 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                     <div className="flex bg-white/5 rounded-md p-1 border border-white/10 relative">
                       {/* Active Background for Language */}
                       <div
-                        className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-md bg-zinc-800 transition-transform duration-200 ease-out`}
+                        className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-md bg-line transition-transform duration-200 ease-out`}
                         style={{ transform: `translateX(${language === 'en' ? '0' : '100%'})` }}
                       />
                       <button
                         onClick={() => setLanguage('en')}
-                        className={`relative z-10 w-1/2 py-2 rounded-md text-[14px] font-bold transition-colors ${language === 'en' ? 'text-white' : 'text-on-sign-2 hover:text-on-sign'}`}
+                        className={`relative z-10 w-1/2 py-2 rounded-md text-[14px] font-bold transition-colors ${language === 'en' ? 'text-on-line' : 'text-on-sign-2 hover:text-on-sign'}`}
                       >
                         English
                       </button>
                       <button
                         onClick={() => setLanguage('ko')}
-                        className={`relative z-10 w-1/2 py-2 rounded-md text-[14px] font-bold transition-colors ${language === 'ko' ? 'text-white' : 'text-on-sign-2 hover:text-on-sign'}`}
+                        className={`relative z-10 w-1/2 py-2 rounded-md text-[14px] font-bold transition-colors ${language === 'ko' ? 'text-on-line' : 'text-on-sign-2 hover:text-on-sign'}`}
                       >
                         한국어
                       </button>
@@ -453,12 +453,12 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                       <div className="flex bg-white/5 rounded-md p-1 border border-white/10 relative">
                         {/* Active Background for Theme */}
                         <div
-                          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-md bg-zinc-800 transition-transform duration-200 ease-out`}
+                          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-md bg-line transition-transform duration-200 ease-out`}
                           style={{ transform: `translateX(${!isNight ? '0' : '100%'})` }}
                         />
                         <button
                           onClick={() => setIsNight(false)}
-                          className={`relative z-10 w-1/2 py-2 rounded-md text-[14px] font-bold transition-colors flex items-center justify-center gap-2 ${!isNight ? 'text-white' : 'text-on-sign-2 hover:text-on-sign'}`}
+                          className={`relative z-10 w-1/2 py-2 rounded-md text-[14px] font-bold transition-colors flex items-center justify-center gap-2 ${!isNight ? 'text-on-line' : 'text-on-sign-2 hover:text-on-sign'}`}
                         >
                           <svg
                             className="w-3.5 h-3.5"
@@ -477,7 +477,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
                         </button>
                         <button
                           onClick={() => setIsNight(true)}
-                          className={`relative z-10 w-1/2 py-2 rounded-md text-[14px] font-bold transition-colors flex items-center justify-center gap-2 ${isNight ? 'text-white' : 'text-on-sign-2 hover:text-on-sign'}`}
+                          className={`relative z-10 w-1/2 py-2 rounded-md text-[14px] font-bold transition-colors flex items-center justify-center gap-2 ${isNight ? 'text-on-line' : 'text-on-sign-2 hover:text-on-sign'}`}
                         >
                           <svg
                             className="w-3.5 h-3.5"

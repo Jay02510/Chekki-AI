@@ -342,7 +342,7 @@ const translations = {
     subs_errorMessage:
       "Payment couldn't be processed. Try a different card or check your payment details.",
     subs_cancelledMessage: 'Subscription cancelled',
-    ask_placeholder: 'Need help with homework? Ask Chekki! (e.g., Explain question 5)',
+    ask_placeholder: 'Ask about a question, e.g. "Explain #5"',
 
     // Tooltips
     tt_close: 'Deselect',
@@ -706,7 +706,7 @@ const translations = {
     subs_errorMessage:
       '결제를 처리하지 못했습니다. 다른 카드를 사용하거나 결제 정보를 확인해 주세요.',
     subs_cancelledMessage: '구독이 취소되었습니다.',
-    ask_placeholder: '숙제 중 궁금한 게 있나요? 채키에게 물어보세요! (예: 5번 문제 설명해줘)',
+    ask_placeholder: '예: 5번 문제 설명해 줘',
 
     // Tooltips
     tt_close: '선택 취소',
