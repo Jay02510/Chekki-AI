@@ -90,9 +90,15 @@ export const NativeDirectorPortal: React.FC<Props> = ({
         const results = await Promise.all(
           classes.map(async (cls: any) => {
             if (!cls?.id || cls.isDemo) return { active: 0, pending: 0, flagged: [] as any[] };
-            const usersSnap = await getDocs(query(collection(dbInstance, 'users'), where('classId', '==', cls.id)));
+            // Invited students have no users/{uid} doc until a parent joins;
+            // count them too so this matches the class rosters (same query
+            // as useRosterAnalytics' pendingStudentsForRoster).
+            const [usersSnap, invitedSnap] = await Promise.all([
+              getDocs(query(collection(dbInstance, 'users'), where('classId', '==', cls.id))),
+              getDocs(query(collection(dbInstance, 'pendingStudents'), where('classId', '==', cls.id))).catch(() => null),
+            ]);
             let active = 0;
-            let pending = 0;
+            let pending = invitedSnap?.docs.filter((d) => d.data()?.status === 'invited').length || 0;
             const flagged: any[] = [];
             usersSnap.forEach((d) => {
               const data = d.data();

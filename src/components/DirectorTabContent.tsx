@@ -202,6 +202,7 @@ export function DirectorTabContent(props: Props) {
                   // sees no info about it). Student count is computed
                   // from roster data the parent already fetched — no new
                   // network call — so an expanded row costs nothing extra.
+                  const teacherCount = (c.assignedTeacherUids || []).length;
                   const studentCount =
                     props.activeRoster.filter((r: any) => r.classId === c.id).length +
                     props.pendingRoster.filter((r: any) => r.classId === c.id).length;
@@ -216,7 +217,7 @@ export function DirectorTabContent(props: Props) {
                         <div className="min-w-0">
                           <p className="truncate text-[16px] font-bold">{c.name}</p>
                           <p className="truncate text-[13px] text-ink-3">
-                            {c.level || (isKo ? '일반' : 'General')} · {compliance?.teacherName || `${(c.assignedTeacherUids || []).length} ${isKo ? '명 배정' : 'teacher(s)'}`} · {studentCount} {isKo ? '명 원생' : 'student(s)'}
+                            {c.level || (isKo ? '일반' : 'General')} · {compliance?.teacherName || (isKo ? `교사 ${teacherCount}명` : `${teacherCount} ${teacherCount === 1 ? 'teacher' : 'teachers'}`)} · {isKo ? `원생 ${studentCount}명` : `${studentCount} ${studentCount === 1 ? 'student' : 'students'}`}
                           </p>
                         </div>
                         <div className="flex shrink-0 items-center gap-3">

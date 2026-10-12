@@ -159,14 +159,14 @@ export const StudentInvitePanel: React.FC<Props> = ({
         setMessage({
           text: isKo
             ? `${data.added}명이 학급 명단에 추가되었습니다. 이메일이 없어 초대는 발송되지 않았습니다 — 나중에 이메일을 추가하거나 코드를 직접 전달하세요.`
-            : `${data.added} student(s) added to the class roster. No email on file, so no invite was sent — add one later or share the code directly.`,
+            : `${data.added} ${data.added === 1 ? 'student' : 'students'} added to the class roster. No email on file, so no invite was sent — add one later or share the code directly.`,
           type: 'success',
         });
       } else if (!data.resendConfigured && withEmail > 0) {
         setMessage({
           text: isKo
             ? `${data.added}명 추가됨 — 이메일 발송이 설정되지 않아 코드를 직접 전달해야 합니다.`
-            : `${data.added} student(s) added — email sending isn't configured, so codes weren't sent. Share them manually.`,
+            : `${data.added} ${data.added === 1 ? 'student' : 'students'} added — email sending isn't configured, so codes weren't sent. Share them manually.`,
           type: 'error',
         });
       } else if (data.emailsSent < withEmail) {
@@ -177,7 +177,7 @@ export const StudentInvitePanel: React.FC<Props> = ({
           type: 'error',
         });
       } else {
-        setMessage({ text: isKo ? `${data.added}명 초대 완료!` : `Invited ${data.added} student(s)!`, type: 'success' });
+        setMessage({ text: isKo ? `${data.added}명 초대 완료!` : `Invited ${data.added} ${data.added === 1 ? 'student' : 'students'}!`, type: 'success' });
       }
       setNewName('');
       setNewEmail('');
@@ -334,7 +334,7 @@ export const StudentInvitePanel: React.FC<Props> = ({
         <div className="mb-6 rounded-lg bg-line-soft p-4">
           <div className="mb-3 flex items-center justify-between gap-3">
             <p className="text-[15px] font-bold">
-              {isKo ? `${previewRows.length}명 확인됨 — 검토 후 전송하세요` : `${previewRows.length} student(s) found — review before sending`}
+              {isKo ? `${previewRows.length}명 확인됨 — 검토 후 전송하세요` : `${previewRows.length} ${previewRows.length === 1 ? 'student' : 'students'} found — review before sending`}
             </p>
             <button
               type="button"

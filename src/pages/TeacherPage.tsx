@@ -1990,9 +1990,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                         ? (isKo ? '로그인' : 'Log In')
                         : (isKo ? '1-Click 교사 가입 및 시작' : '1-Click Sign Up & Start')}
                     </span>
-                    <div className="w-7 h-7 rounded-full bg-sunken flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                      <ArrowRight size={14} weight="bold" />
-                    </div>
+                    <ArrowRight size={16} weight="bold" aria-hidden="true" className="group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
               </button>
@@ -2055,6 +2053,9 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   const activeClass = selectedClass || fallbackDemoClass;
   const isKtInbox = !isDirectorUser && educatorRole === 'kt' && activeTab === 'kt_script';
+  // Class picker and week only change what these tabs show; on billing,
+  // teacher seats and the KT inbox (all classes) they were dead controls.
+  const showClassControls = !isKtInbox && activeTab !== 'billing' && activeTab !== 'teacher_assignment';
 
 
   if (showActivationWizard) {
@@ -2349,9 +2350,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                       ? (isKo ? '시작하기' : 'Got it')
                       : (isKo ? '다음 단계' : 'Next Step')}
                   </span>
-                  <div className="w-7 h-7 rounded-full bg-sunken flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                    <ArrowRight size={14} weight="bold" />
-                  </div>
+                  <ArrowRight size={16} weight="bold" aria-hidden="true" className="group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
             </div>
@@ -2504,17 +2503,15 @@ export default function TeacherPage({ isNight = true }: Props) {
         </div>
       </aside>
 
-      {!isDirectorUser && (
-        <TeacherMobileTabBar
-          isNight={isThemeNight}
-          isKo={isKo}
-          educatorRole={educatorRole}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          pendingCount={ktPendingLogs.length}
-          onMore={() => setIsSidebarOpen(true)}
-        />
-      )}
+      <TeacherMobileTabBar
+        isNight={isThemeNight}
+        isKo={isKo}
+        educatorRole={isDirectorUser ? 'director' : educatorRole}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        pendingCount={ktPendingLogs.length}
+        onMore={() => setIsSidebarOpen(true)}
+      />
 
       {/* Main Content Area */}
       <main className={`flex-1 flex flex-col min-w-0 relative overflow-y-auto transition-colors ${
@@ -2548,7 +2545,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 (week nav, roster, overview stats) is showing — with it
                 gone, a director with more than one class had no way to
                 switch between them at all. */}
-            <div className={`relative min-w-0 flex-1 sm:flex-none sm:max-w-xs ${isKtInbox ? 'hidden' : ''}`}>
+            <div className={`relative min-w-0 flex-1 sm:flex-none sm:max-w-xs ${showClassControls ? '' : 'hidden'}`}>
               {/* isDemo is a client-only placeholder so the rest of the page
                   can safely read selectedClass.joinCode etc before real
                   classes load — it should never appear as a switchable
@@ -2606,14 +2603,14 @@ export default function TeacherPage({ isNight = true }: Props) {
           <div className="flex items-center gap-2 sm:gap-3">
             {/* The active week is class-wide (every teacher and parent sees
                 it), so only directors can change it. Teachers get a label. */}
-            {selectedClass && !selectedClass.isDemo && !isDirectorUser && (
+            {showClassControls && selectedClass && !selectedClass.isDemo && !isDirectorUser && (
               <span className={`hidden sm:inline-flex items-center min-h-11 px-3.5 rounded-md border text-xs font-extrabold whitespace-nowrap ${
                 'border-rule text-ink-2'
               }`}>
                 {isKo ? `${selectedClass?.activeWeekNumber || 1}주차` : `Week ${selectedClass?.activeWeekNumber || 1}`}
               </span>
             )}
-            {selectedClass && !selectedClass.isDemo && isDirectorUser && (
+            {showClassControls && selectedClass && !selectedClass.isDemo && isDirectorUser && (
               <div className="flex items-center gap-2">
                 <div className="flex items-center overflow-hidden rounded-md ring-1 ring-inset ring-rule">
                   <button
@@ -2688,7 +2685,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         </header>
 
         {/* Tab Content Rendering Container */}
-        <section className={`p-3 sm:p-6 md:p-8 flex-1 relative z-10 ${isDirectorUser ? '' : 'pb-24 md:pb-8'}`}>
+        <section className={`p-3 sm:p-6 md:p-8 flex-1 relative z-10 pb-24 md:pb-8`}>
           {/* Someone opened a teacher/director invite link while already
               signed into a different account in this browser — invites are
               only redeemed by the unauthenticated signup form (see

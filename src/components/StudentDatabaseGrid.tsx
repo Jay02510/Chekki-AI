@@ -152,7 +152,7 @@ export function StudentDatabaseGrid({
           onClick={() => runAction(() => handleRemoveStudent(row.uid))}
           disabled={isActionBusy}
           type="button"
-          className={`${staffUi.quietBtn} text-wrong`}
+          className="min-h-11 cursor-pointer px-2 text-[14px] font-bold text-wrong underline-offset-2 hover:underline disabled:opacity-50"
         >
           {isKo ? '삭제' : 'Remove'}
         </button>

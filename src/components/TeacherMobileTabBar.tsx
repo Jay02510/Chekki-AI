@@ -1,11 +1,11 @@
 import React from 'react';
-import { Tray, Notebook, UsersThree, ClockCounterClockwise, DotsThreeOutline } from '@phosphor-icons/react';
+import { Tray, Notebook, UsersThree, ClockCounterClockwise, DotsThreeOutline, Buildings, Table } from '@phosphor-icons/react';
 import type { TabId } from '../../hooks/useTeacherTabs';
 
 interface Props {
   isNight: boolean;
   isKo: boolean;
-  educatorRole: 'ft' | 'kt';
+  educatorRole: 'ft' | 'kt' | 'director';
   activeTab: TabId;
   setActiveTab: (tab: TabId) => void;
   /** KT inbox badge — reports waiting for review. */
@@ -14,12 +14,18 @@ interface Props {
   onMore: () => void;
 }
 
-// Phone-only bottom nav for teachers: the daily tabs one tap away instead of
+// Phone-only bottom nav for staff: the daily tabs one tap away instead of
 // behind the hamburger drawer. Everything else (answer key, weekly report,
 // settings, logout) stays in the drawer, opened via "More".
 export function TeacherMobileTabBar({ isNight, isKo, educatorRole, activeTab, setActiveTab, pendingCount, onMore }: Props) {
   const items: { id: TabId; label: string; Icon: typeof Tray; badge?: number }[] =
-    educatorRole === 'kt'
+    educatorRole === 'director'
+      ? [
+          { id: 'director_hq', label: isKo ? '대시보드' : 'Dashboard', Icon: Buildings },
+          { id: 'students', label: isKo ? '학생' : 'Students', Icon: UsersThree },
+          { id: 'classes', label: isKo ? '학급' : 'Classes', Icon: Table },
+        ]
+      : educatorRole === 'kt'
       ? [
           { id: 'kt_script', label: isKo ? '검토함' : 'Inbox', Icon: Tray, badge: pendingCount },
           { id: 'kt_log', label: isKo ? '일지 쓰기' : 'Write log', Icon: Notebook },

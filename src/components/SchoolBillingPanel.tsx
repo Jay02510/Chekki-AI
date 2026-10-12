@@ -174,6 +174,7 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isKo = false, schoolId, se
     return new Date(new Date(latest.paidAt).getTime() + cycleDays * 24 * 60 * 60 * 1000);
   }, [invoices, planId]);
 
+  const planPrice = (planId && PRICING_BILLING[planId as keyof typeof PRICING_BILLING]?.monthly.krw) || 0;
   const fmtDate = (d: string | Date) => new Date(d).toLocaleDateString(isKo ? 'ko-KR' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
   return (
@@ -185,6 +186,7 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isKo = false, schoolId, se
             <h2 className={staffUi.h2}>{planLabel}</h2>
             <p className={staffUi.sub}>
               {[
+                planPrice > 0 && `₩${planPrice.toLocaleString()}${isKo ? '/월' : '/mo'}`,
                 createdAt && (isKo ? `시작일 ${fmtDate(createdAt)}` : `Since ${fmtDate(createdAt)}`),
                 renewsAt && (isKo ? `다음 결제일 ${fmtDate(renewsAt)}` : `Renews ${fmtDate(renewsAt)}`),
               ].filter(Boolean).join(' · ')}
@@ -234,7 +236,7 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isKo = false, schoolId, se
                 <div className="min-w-0">
                   <p className="truncate text-[15px] font-bold">{inv.planName}</p>
                   <p className="truncate text-[13px] text-ink-3">
-                    {[inv.invoiceId, `${inv.teacherCount} ${isKo ? '명' : 'teacher(s)'}`, fmtDate(inv.createdAt)].join(' · ')}
+                    {[inv.invoiceId, isKo ? `${inv.teacherCount}명` : `${inv.teacherCount} ${inv.teacherCount === 1 ? 'teacher' : 'teachers'}`, fmtDate(inv.createdAt)].join(' · ')}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
