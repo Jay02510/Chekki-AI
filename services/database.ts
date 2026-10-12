@@ -26,7 +26,12 @@ import { Capacitor } from '@capacitor/core';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBU8ehL18e1y-WXMULzA9XkKFkC7BkzX8k',
-  authDomain: 'homework-assistant-c00b9.firebaseapp.com',
+  // Set VITE_FIREBASE_AUTH_DOMAIN=www.chekkiai.com (served via the /__/auth
+  // rewrite in vercel.json) so the sign-in popup is same-site; Incognito and
+  // Safari block the firebaseapp.com iframe the popup waits on. Needs
+  // https://www.chekkiai.com/__/auth/handler in the Google OAuth client and
+  // Apple Services ID first.
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'homework-assistant-c00b9.firebaseapp.com',
   projectId: 'homework-assistant-c00b9',
   storageBucket: 'homework-assistant-c00b9.firebasestorage.app',
   messagingSenderId: '123535525914',

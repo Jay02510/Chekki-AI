@@ -47,6 +47,11 @@ import { subscriptionService, AppleProducts } from '../services/subscriptionServ
 import { revenueCatService } from '../services/revenueCatService';
 import { PUBLIC_APP_URL, API_BASE_URL } from '../config';
 
+// Web Kakao login needs the app's JavaScript key (Kakao console > App Keys).
+// The fallback is the native app key, which Kakao rejects on web with
+// "js_client_not_allowed"; set VITE_KAKAO_JS_KEY in Vercel.
+const KAKAO_JS_KEY = import.meta.env.VITE_KAKAO_JS_KEY || 'f06bc75426bf2b41940620d3ee942f06';
+
 const withTimeout = <T,>(promise: Promise<T>, ms: number, timeoutMsg: string): Promise<T> => {
   return Promise.race([
     promise,
@@ -844,7 +849,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/1.43.1/kakao.min.js';
             script.onload = () => {
               if ((window as any).Kakao && !(window as any).Kakao.isInitialized()) {
-                (window as any).Kakao.init('f06bc75426bf2b41940620d3ee942f06');
+                (window as any).Kakao.init(KAKAO_JS_KEY);
               }
               resolve();
             };
@@ -863,7 +868,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         if (!(window as any).Kakao.isInitialized()) {
-          (window as any).Kakao.init('f06bc75426bf2b41940620d3ee942f06');
+          (window as any).Kakao.init(KAKAO_JS_KEY);
         }
 
         const Kakao = (window as any).Kakao;
