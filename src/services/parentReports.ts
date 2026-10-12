@@ -21,3 +21,7 @@ export function parentReportRecipients(
   );
   return uids.map((studentUid) => ({ studentUid, note: noteByUid.get(studentUid) || null }));
 }
+
+/** Whether a student's note reaches a parent in the app (same rule as above). */
+export const noteReachesApp = (studentUid: string | null | undefined) =>
+  !!studentUid && !studentUid.startsWith('pending:');

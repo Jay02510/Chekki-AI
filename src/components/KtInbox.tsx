@@ -4,6 +4,7 @@ import { Bell, BellSlash, CaretLeft, CaretRight, CheckCircle, Copy, Sparkle } fr
 import { doc, updateDoc } from 'firebase/firestore';
 import { dbInstance } from '../../services/database';
 import { logDate, logTime, type ApprovedNote, type PendingClassLog } from '../../hooks/useKtReviewQueue';
+import { noteReachesApp } from '../services/parentReports';
 import type { UserProfile } from '../../types';
 
 interface Props {
@@ -113,8 +114,8 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
       log={current}
       academyName={academyName}
       remaining={logs.filter((l) => l.id !== current.id).length}
-      approve={async (summary, notes) => {
-        setOpenLog(current);
+      approve={async (summary, notes, stayOnScreen) => {
+        if (stayOnScreen) setOpenLog(current);
         return approve(current, summary, notes);
       }}
       setDirty={setDirty}
@@ -236,7 +237,7 @@ interface ReviewProps {
   log: PendingClassLog;
   academyName: string;
   remaining: number;
-  approve: (summary: string, notes: ApprovedNote[]) => Promise<boolean>;
+  approve: (summary: string, notes: ApprovedNote[], stayOnScreen: boolean) => Promise<boolean>;
   setDirty: (dirty: boolean) => void;
   onNext: () => void;
   onDiscard: () => void;
@@ -255,7 +256,8 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
   const initialNotes = (log.aiStudentReports || []).map((r) => r.koreanUpdate || '');
   const [summary, setSummary] = useState(initialSummary);
   const [notes, setNotes] = useState(initialNotes);
-  const [status, setStatus] = useState<'review' | 'saving' | 'done'>('review');
+  const [status, setStatus] = useState<'review' | 'queued' | 'saving' | 'done'>('review');
+  const [secondsLeft, setSecondsLeft] = useState(0);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [copyFailed, setCopyFailed] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
@@ -272,17 +274,47 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
 
   const canApprove = status === 'review' && summary.trim().length > 0;
 
-  const handleApprove = async () => {
+  const approvedNotes = (): ApprovedNote[] => (log.aiStudentReports || []).map((r, i) => ({
+    studentName: r.studentName,
+    studentUid: r.studentUid ?? null,
+    approvedText: notes[i].trim(),
+  })).filter((n) => n.approvedText);
+
+  // Approve holds the send for UNDO_SECONDS so a wrong tap never reaches a
+  // parent. Leaving the review mid-countdown (next class, back gesture)
+  // still sends: the KT meant to. Closing the tab asks first.
+  const UNDO_SECONDS = 10;
+  const sendRef = useRef<(() => void) | null>(null);
+  const handleApprove = () => {
     if (!canApprove) return;
-    setStatus('saving');
-    const approved: ApprovedNote[] = (log.aiStudentReports || []).map((r, i) => ({
-      studentName: r.studentName,
-      studentUid: r.studentUid ?? null,
-      approvedText: notes[i].trim(),
-    })).filter((n) => n.approvedText);
-    const ok = await approve(summary.trim(), approved);
-    setStatus(ok ? 'done' : 'review');
+    const send = () => approve(summary.trim(), approvedNotes(), false);
+    sendRef.current = send;
+    setSecondsLeft(UNDO_SECONDS);
+    setStatus('queued');
   };
+  const undo = () => {
+    sendRef.current = null;
+    setStatus('review');
+  };
+  useEffect(() => {
+    if (status !== 'queued') return;
+    if (secondsLeft <= 0) {
+      sendRef.current = null;
+      setStatus('saving');
+      approve(summary.trim(), approvedNotes(), true).then((ok) => setStatus(ok ? 'done' : 'review'));
+      return;
+    }
+    const t = setTimeout(() => setSecondsLeft((n) => n - 1), 1000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, secondsLeft]);
+  useEffect(() => {
+    if (status !== 'queued') return;
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [status]);
+  useEffect(() => () => { sendRef.current?.(); }, []);
 
   // Parent messages stay in Korean whatever the KT's UI language — the body
   // is the Korean summary.
@@ -302,7 +334,7 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
 
   const panel = 'bg-surface border-rule';
   const muted = 'text-ink-3';
-  const field = `w-full p-3.5 rounded-lg border resize-none overflow-hidden text-base md:text-sm leading-relaxed outline-none transition-colors focus:border-line ${
+  const field = `w-full p-3.5 rounded-lg border break-keep resize-none overflow-hidden text-base md:text-sm leading-relaxed outline-none transition-colors focus:border-line ${
     'bg-surface border-rule text-ink'
   }`;
   const copyButton = (key: string, text: string, label: string) => (
@@ -385,6 +417,7 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
                 ref={autoSize}
                 onChange={(e) => { setSummary(e.target.value); autoSize(e.target); }}
                 rows={3}
+                readOnly={status !== 'review'}
                 className={field}
               />
               {log.aiEnglishSummary && (
@@ -425,12 +458,20 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
                         {r.category === 'praise' ? (isKo ? '칭찬' : 'Praise') : (isKo ? '관심 필요' : 'Needs attention')}
                       </span>
                     </div>
+                    {!noteReachesApp(r.studentUid) && notes[i]?.trim() && (
+                      <p className="text-sm text-line-ink bg-line-soft rounded-md px-3 py-2 break-keep">
+                        {isKo
+                          ? '아직 학부모가 앱에 가입하지 않아서 이 노트는 앱으로 전달되지 않아요. 보낸 뒤 카카오톡으로 복사해 보내 주세요.'
+                          : "This parent hasn't joined the app yet, so this note won't reach them there. After sending, copy it to KakaoTalk."}
+                      </p>
+                    )}
                     <textarea
                       id={`kt-note-${log.id}-${i}`}
                       value={notes[i]}
                       ref={autoSize}
                       onChange={(e) => { setNotes((prev) => prev.map((n, j) => (j === i ? e.target.value : n))); autoSize(e.target); }}
                       rows={3}
+                      readOnly={status !== 'review'}
                       className={field}
                     />
                   </div>
@@ -442,6 +483,20 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
           <footer className={`sticky bottom-0 p-4 sm:px-6 border-t rounded-b-3xl max-md:pb-[calc(env(safe-area-inset-bottom)+1rem)] ${
             'bg-surface border-rule'
           }`}>
+            {status === 'queued' ? (
+              <div role="status" className="w-full min-h-12 px-4 rounded-md bg-sign text-on-sign flex items-center justify-between gap-3">
+                <span className="text-sm font-bold num">
+                  {isKo ? `${secondsLeft}초 뒤에 ${families}가정에 보내요` : `Sending to ${families} ${families === 1 ? 'family' : 'families'} in ${secondsLeft}s`}
+                </span>
+                <button
+                  type="button"
+                  onClick={undo}
+                  className="min-h-11 px-4 rounded-md bg-line text-[#2b211a] text-sm font-extrabold cursor-pointer active:scale-[0.97]"
+                >
+                  {isKo ? '취소' : 'Undo'}
+                </button>
+              </div>
+            ) : (
             <button
               type="button"
               onClick={handleApprove}
@@ -463,10 +518,11 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
                 `Approve and send to ${families} ${families === 1 ? 'family' : 'families'}`
               )}
             </button>
+            )}
             <button
               type="button"
               onClick={onDiscard}
-              disabled={status === 'saving'}
+              disabled={status !== 'review'}
               className={`mt-2 w-full min-h-11 text-sm font-bold cursor-pointer transition-colors disabled:opacity-40 text-ink-3 hover:text-wrong`}
             >
               {isKo ? '보내지 않고 삭제 (중복·실수)' : "Discard, don't send (duplicate or mistake)"}
