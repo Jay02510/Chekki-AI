@@ -1,139 +1,47 @@
 import React from 'react';
-import { Buildings, Users, Table, UserGear, CreditCard, CaretRight } from '@phosphor-icons/react';
+import { Buildings, Users, Table, UserGear, CreditCard } from '@phosphor-icons/react';
 import type { TabId } from '../../hooks/useTeacherTabs';
 
 interface Props {
-  isNight: boolean;
   isKo: boolean;
   activeTab: TabId;
   setActiveTab: (tab: TabId) => void;
 }
 
-// Director's sidebar nav (Phase 6 of the buzzing-nibbling-hearth TeacherPage
-// split) — director_hq hub + the "Setup" section's student-roster link.
-// Purely presentational: activeTab/setActiveTab are the only state it touches.
-export function DirectorSidebarNav({ isNight, isKo, activeTab, setActiveTab }: Props) {
-  return (
-    <>
+const SETUP: { id: TabId; Icon: typeof Users; ko: string; en: string }[] = [
+  { id: 'students', Icon: Users, ko: '학생', en: 'Students' },
+  { id: 'classes', Icon: Table, ko: '학급', en: 'Classes' },
+  { id: 'teacher_assignment', Icon: UserGear, ko: '선생님 배정', en: 'Teachers' },
+  { id: 'billing', Icon: CreditCard, ko: '결제', en: 'Billing' },
+];
+
+// Director's sidebar nav: the dashboard, then the "Setup" pages. One accent
+// (the active row), plain icons; same warm tokens as /schools.
+export function DirectorSidebarNav({ isKo, activeTab, setActiveTab }: Props) {
+  const item = (id: TabId, Icon: typeof Users, label: string) => {
+    const active = activeTab === id;
+    return (
       <button
-        onClick={() => setActiveTab('director_hq')}
-        className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-[background-color,border-color,color,transform] duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-          activeTab === 'director_hq'
-            ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-            : isNight
-              ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-              : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
+        key={id}
+        type="button"
+        onClick={() => setActiveTab(id)}
+        aria-current={active ? 'page' : undefined}
+        className={`btn-press flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-md px-3 text-left text-[15px] font-bold ${
+          active ? 'bg-line-soft text-ink' : 'text-ink-2 hover:bg-sunken hover:text-ink'
         }`}
       >
-        <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-xl transition-colors ${
-            activeTab === 'director_hq'
-              ? 'bg-orange-500/20 text-orange-500'
-              : isNight ? 'bg-white/5 text-zinc-400 group-hover:text-white' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'
-          }`}>
-            <Buildings size={18} weight="bold" />
-          </div>
-          <span>{isKo ? '대시보드' : 'Dashboard'}</span>
-        </div>
-        <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'director_hq' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
+        <Icon size={20} weight={active ? 'fill' : 'regular'} className={active ? 'text-line-ink' : 'text-ink-3'} aria-hidden="true" />
+        <span>{label}</span>
       </button>
+    );
+  };
 
-      <div className="pt-6 mt-2 border-t border-white/5 space-y-2">
-        <span className="block px-4 text-[10px] font-black uppercase tracking-widest text-zinc-400">
-          {isKo ? '설정' : 'Setup'}
-        </span>
-
-        <button
-          onClick={() => setActiveTab('students')}
-          className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-[background-color,border-color,color,transform] duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-            activeTab === 'students'
-              ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-              : isNight
-                ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-xl transition-colors ${
-              activeTab === 'students'
-                ? 'bg-orange-500/20 text-orange-500'
-                : isNight ? 'bg-white/5 text-purple-400 group-hover:text-white' : 'bg-purple-100 text-purple-600 group-hover:text-zinc-900'
-            }`}>
-              <Users size={18} weight="bold" />
-            </div>
-            <span>{isKo ? '학생' : 'Students'}</span>
-          </div>
-          <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'students' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-        </button>
-
-        <button
-          onClick={() => setActiveTab('classes')}
-          className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-[background-color,border-color,color,transform] duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-            activeTab === 'classes'
-              ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-              : isNight
-                ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-xl transition-colors ${
-              activeTab === 'classes'
-                ? 'bg-orange-500/20 text-orange-500'
-                : isNight ? 'bg-white/5 text-emerald-400 group-hover:text-white' : 'bg-emerald-100 text-emerald-600 group-hover:text-zinc-900'
-            }`}>
-              <Table size={18} weight="bold" />
-            </div>
-            <span>{isKo ? '학급' : 'Classes'}</span>
-          </div>
-          <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'classes' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-        </button>
-
-        <button
-          onClick={() => setActiveTab('teacher_assignment')}
-          className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-[background-color,border-color,color,transform] duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-            activeTab === 'teacher_assignment'
-              ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-              : isNight
-                ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-xl transition-colors ${
-              activeTab === 'teacher_assignment'
-                ? 'bg-orange-500/20 text-orange-500'
-                : isNight ? 'bg-white/5 text-blue-400 group-hover:text-white' : 'bg-blue-100 text-blue-600 group-hover:text-zinc-900'
-            }`}>
-              <UserGear size={18} weight="bold" />
-            </div>
-            <span>{isKo ? '선생님 배정' : 'Teachers'}</span>
-          </div>
-          <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'teacher_assignment' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-        </button>
-
-        <button
-          onClick={() => setActiveTab('billing')}
-          className={`w-full px-4 py-3.5 rounded-2xl text-left text-xs font-bold transition-[background-color,border-color,color,transform] duration-200 active:scale-[0.98] flex items-center justify-between group cursor-pointer border ${
-            activeTab === 'billing'
-              ? 'bg-orange-500/10 text-orange-500 border-orange-500/30 shadow-xl shadow-orange-500/10'
-              : isNight
-                ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
-                : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent'
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-xl transition-colors ${
-              activeTab === 'billing'
-                ? 'bg-orange-500/20 text-orange-500'
-                : isNight ? 'bg-white/5 text-rose-400 group-hover:text-white' : 'bg-rose-100 text-rose-600 group-hover:text-zinc-900'
-            }`}>
-              <CreditCard size={18} weight="bold" />
-            </div>
-            <span>{isKo ? '결제' : 'Billing'}</span>
-          </div>
-          <CaretRight size={14} weight="bold" className={`transition-transform duration-200 ${activeTab === 'billing' ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0 group-hover:opacity-50'}`} />
-        </button>
+  return (
+    <>
+      {item('director_hq', Buildings, isKo ? '대시보드' : 'Dashboard')}
+      <div className="mt-4 space-y-1 border-t border-rule pt-4">
+        <span className="block px-3 pb-1 text-[13px] font-bold text-ink-3">{isKo ? '설정' : 'Setup'}</span>
+        {SETUP.map(({ id, Icon, ko, en }) => item(id, Icon, isKo ? ko : en))}
       </div>
     </>
   );

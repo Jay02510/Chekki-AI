@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { doc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { auth, dbInstance } from '../../services/database';
 import { PLAN_LABELS, PLAN_SEATS, PRICING_BILLING } from '../../api/_lib/pricingTiers';
+import { DownloadSimple, X } from '@phosphor-icons/react';
+import { useDialogA11y } from '../../hooks/useDialogA11y';
+import { staffUi, msgTone } from './staffUi';
 
 interface Props {
-  isNight?: boolean;
   isKo?: boolean;
   schoolId: string;
   seatsTotal: { ft: number; kt: number };
@@ -23,12 +25,13 @@ const SELECTABLE_PLAN_IDS = ['solo', 'starter', 'school_pro', 'enterprise'] as c
  * Reads schools/{schoolId} directly (client SDK; firestore.rules already
  * scopes that read to the director whose own schoolId matches).
  */
-export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = false, schoolId, seatsTotal, trialStatus, onRequestPlanChange }) => {
+export const SchoolBillingPanel: React.FC<Props> = ({ isKo = false, schoolId, seatsTotal, trialStatus, onRequestPlanChange }) => {
   const [planId, setPlanId] = useState<string | null>(null);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
   const [usedSeats, setUsedSeats] = useState({ ft: 0, kt: 0 });
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [isSubmittingPlanChange, setIsSubmittingPlanChange] = useState(false);
+  const planDialogRef = useDialogA11y<HTMLDivElement>({ isOpen: showPlanModal, onClose: () => setShowPlanModal(false) });
   const [planRequestSent, setPlanRequestSent] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isRequestingDeletion, setIsRequestingDeletion] = useState(false);
@@ -171,210 +174,180 @@ export const SchoolBillingPanel: React.FC<Props> = ({ isNight = true, isKo = fal
     return new Date(new Date(latest.paidAt).getTime() + cycleDays * 24 * 60 * 60 * 1000);
   }, [invoices, planId]);
 
+  const fmtDate = (d: string | Date) => new Date(d).toLocaleDateString(isKo ? 'ko-KR' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
   return (
-    <div className="space-y-6 animate-fade-in text-left">
-      <div className={`p-6 rounded-2xl border space-y-5 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+    <div className={`${staffUi.page} space-y-10`}>
+      <section>
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <span className="text-xs font-bold text-zinc-400 block">{isKo ? '현재 요금제' : 'Current plan'}</span>
-            <h4 className={`font-black text-lg ${isNight ? 'text-white' : 'text-zinc-900'}`}>{planLabel}</h4>
-            {createdAt && <p className="text-[11px] text-zinc-400 mt-0.5">{isKo ? `시작일: ${new Date(createdAt).toLocaleDateString()}` : `Since ${new Date(createdAt).toLocaleDateString()}`}</p>}
-            {renewsAt && (
-              <p className="text-[11px] text-zinc-400 mt-0.5">
-                {isKo ? `다음 결제일: ${renewsAt.toLocaleDateString()}` : `Renews ${renewsAt.toLocaleDateString()}`}
-              </p>
-            )}
+            <p className="text-[13px] font-bold text-ink-3">{isKo ? '현재 요금제' : 'Current plan'}</p>
+            <h2 className={staffUi.h2}>{planLabel}</h2>
+            <p className={staffUi.sub}>
+              {[
+                createdAt && (isKo ? `시작일 ${fmtDate(createdAt)}` : `Since ${fmtDate(createdAt)}`),
+                renewsAt && (isKo ? `다음 결제일 ${fmtDate(renewsAt)}` : `Renews ${fmtDate(renewsAt)}`),
+              ].filter(Boolean).join(' · ')}
+            </p>
           </div>
-          <button
-            type="button"
-            onClick={() => { setPlanRequestSent(false); setShowPlanModal(true); }}
-            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold rounded-xl shadow-md transition-[color,background-color,border-color,box-shadow,transform] active:scale-95 inline-block text-center"
-          >
-            {isKo ? '요금제 변경 / 업그레이드' : 'Change Plan / Upgrade'}
+          <button type="button" onClick={() => { setPlanRequestSent(false); setShowPlanModal(true); }} className={staffUi.primaryBtn}>
+            {isKo ? '요금제 변경' : 'Change plan'}
           </button>
         </div>
 
         {trialStatus?.onTrial && (
-          <div className={`p-3 rounded-xl border text-xs font-bold ${trialStatus.expired ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' : 'bg-amber-500/10 border-amber-500/30 text-amber-400'}`}>
+          <p className={`mt-4 rounded-lg p-4 text-[15px] font-bold ${trialStatus.expired ? 'bg-wrong-soft text-wrong' : 'bg-line-soft text-ink'}`}>
             {trialStatus.expired
-              ? (isKo ? '⚠️ 무료 체험이 종료되었습니다. 계속하려면 업그레이드하세요.' : '⚠️ Your trial has ended. Upgrade to continue.')
-              : (isKo ? `🕐 무료 체험 ${trialStatus.daysRemaining}일 남음` : `🕐 ${trialStatus.daysRemaining} day${trialStatus.daysRemaining === 1 ? '' : 's'} left in trial`)}
-          </div>
+              ? (isKo ? '무료 체험이 끝났어요. 계속하려면 요금제를 선택하세요.' : 'Your trial has ended. Choose a plan to continue.')
+              : (isKo ? `무료 체험 ${trialStatus.daysRemaining}일 남음` : `${trialStatus.daysRemaining} day${trialStatus.daysRemaining === 1 ? '' : 's'} left in trial`)}
+          </p>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className={`p-4 rounded-xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
-            <span className="text-xs font-bold text-zinc-400 block">{isKo ? '원어민 선생님 좌석' : 'FT seats'}</span>
-            <h4 className={`text-xl font-black mt-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-              {usedSeats.ft} <span className="text-xs font-normal text-zinc-400">/ {seatsTotal.ft} {isKo ? '사용' : 'used'}</span>
-            </h4>
-          </div>
-          <div className={`p-4 rounded-xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}>
-            <span className="text-xs font-bold text-zinc-400 block">{isKo ? '한국인 선생님 좌석' : 'KT seats'}</span>
-            <h4 className={`text-xl font-black mt-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-              {usedSeats.kt} <span className="text-xs font-normal text-zinc-400">/ {seatsTotal.kt} {isKo ? '사용' : 'used'}</span>
-            </h4>
-          </div>
-        </div>
-      </div>
+        <dl className="mt-6 grid grid-cols-2 divide-x divide-rule border-y border-rule">
+          {([
+            ['ft', isKo ? '원어민 선생님 좌석' : 'FT seats'],
+            ['kt', isKo ? '한국인 선생님 좌석' : 'KT seats'],
+          ] as const).map(([k, label], i) => (
+            <div key={k} className={i === 0 ? 'py-4 pr-4' : 'py-4 pl-4'}>
+              <dt className="text-[13px] font-bold text-ink-3">{label}</dt>
+              <dd className="mt-1 text-[28px] font-extrabold tabular-nums">
+                {usedSeats[k]}
+                <span className="text-[14px] font-semibold text-ink-3"> / {seatsTotal[k]} {isKo ? '사용' : 'used'}</span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
 
-      <div className={`p-6 rounded-2xl border space-y-3 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-        <span className="text-xs font-bold text-zinc-400 block">
-          {isKo ? '데이터 관리' : 'Data Management'}
-        </span>
-        <p className={`text-xs ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
-          {isKo
-            ? '학원의 모든 데이터를 내보내거나 삭제를 요청할 수 있습니다.'
-            : 'Export everything tied to your school, or request full deletion.'}
+      <section>
+        <h3 className={staffUi.h3}>{isKo ? '요청 내역' : 'Billing history'}</h3>
+        {invoicesError ? (
+          <p className={`mt-2 ${msgTone('error')}`}>{invoicesError}</p>
+        ) : invoices === null ? (
+          <p className={`mt-2 ${staffUi.sub}`}>{isKo ? '불러오는 중...' : 'Loading...'}</p>
+        ) : invoices.length === 0 ? (
+          <p className={`mt-2 ${staffUi.notice}`}>{isKo ? '아직 요청한 청구서가 없습니다.' : 'No billing requests yet.'}</p>
+        ) : (
+          <ul className={`mt-1 ${staffUi.rows}`}>
+            {invoices.map((inv) => (
+              <li key={inv.invoiceId} className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <p className="truncate text-[15px] font-bold">{inv.planName}</p>
+                  <p className="truncate text-[13px] text-ink-3">
+                    {[inv.invoiceId, `${inv.teacherCount} ${isKo ? '명' : 'teacher(s)'}`, fmtDate(inv.createdAt)].join(' · ')}
+                  </p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="text-[16px] font-extrabold tabular-nums">₩{Number(inv.totalAmount || 0).toLocaleString()}</p>
+                  <span className={inv.status === 'paid' ? staffUi.pill.good : staffUi.pill.warm}>
+                    {inv.status === 'paid' ? (isKo ? '결제 확인됨' : 'Paid') : (isKo ? '입금 대기' : 'Awaiting payment')}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section>
+        <h3 className={staffUi.h3}>{isKo ? '데이터 관리' : 'Your data'}</h3>
+        <p className={`${staffUi.sub} mb-3`}>
+          {isKo ? '학원의 모든 데이터를 내보내거나 삭제를 요청할 수 있습니다.' : 'Export everything tied to your school, or request full deletion.'}
         </p>
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={handleExport}
-            disabled={isExporting}
-            className={`px-4 py-2 text-xs font-bold rounded-xl transition-[color,background-color,border-color,box-shadow,transform] active:scale-95 disabled:opacity-50 ${isNight ? 'bg-white/5 text-white hover:bg-white/10 border border-white/10' : 'bg-white text-zinc-900 hover:bg-zinc-100 border border-zinc-200'}`}
-          >
-            {isExporting ? (isKo ? '내보내는 중...' : 'Exporting...') : (isKo ? '전체 데이터 내보내기' : 'Export All Data')}
+        <div className="flex flex-wrap items-center gap-4">
+          <button type="button" onClick={handleExport} disabled={isExporting} className={staffUi.quietBtn}>
+            <DownloadSimple size={16} weight="bold" aria-hidden="true" />
+            {isExporting ? (isKo ? '내보내는 중...' : 'Exporting...') : (isKo ? '전체 데이터 내보내기' : 'Export all data')}
           </button>
           {deletionRequested ? (
-            <span className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 inline-flex items-center">
-              {isKo ? '삭제 요청 접수됨' : 'Deletion requested'}
-            </span>
+            <span className={staffUi.pill.good}>{isKo ? '삭제 요청 접수됨' : 'Deletion requested'}</span>
           ) : (
-            <button
-              type="button"
-              onClick={handleDeleteRequest}
-              disabled={isRequestingDeletion}
-              className="px-4 py-2 text-xs font-bold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-[color,background-color,border-color,box-shadow,transform] active:scale-95 disabled:opacity-50"
-            >
-              {isRequestingDeletion ? (isKo ? '요청 중...' : 'Requesting...') : (isKo ? '데이터 삭제 요청' : 'Request Data Deletion')}
+            <button type="button" onClick={handleDeleteRequest} disabled={isRequestingDeletion} className={`${staffUi.dangerText} min-h-10`}>
+              {isRequestingDeletion ? (isKo ? '요청 중...' : 'Requesting...') : (isKo ? '데이터 삭제 요청' : 'Request data deletion')}
             </button>
           )}
         </div>
-        {dataActionError && <p className="text-xs font-bold text-rose-400">{dataActionError}</p>}
-      </div>
-
-      <div className={`p-6 rounded-2xl border space-y-3 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-        <span className="text-xs font-bold text-zinc-400 block">
-          {isKo ? '요청 내역' : 'Billing History'}
-        </span>
-        {invoicesError ? (
-          <p className="text-xs font-bold text-rose-400">{invoicesError}</p>
-        ) : invoices === null ? (
-          <p className={`text-xs ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>{isKo ? '불러오는 중...' : 'Loading...'}</p>
-        ) : invoices.length === 0 ? (
-          <p className={`text-xs ${isNight ? 'text-zinc-500' : 'text-zinc-400'}`}>
-            {isKo ? '아직 요청한 청구서가 없습니다.' : 'No billing requests yet.'}
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {invoices.map((inv) => (
-              <div
-                key={inv.invoiceId}
-                className={`flex items-center justify-between gap-3 p-3 rounded-xl border text-xs ${isNight ? 'bg-white/5 border-white/10' : 'bg-white border-zinc-200'}`}
-              >
-                <div>
-                  <p className={`font-bold font-mono ${isNight ? 'text-white' : 'text-zinc-900'}`}>{inv.invoiceId}</p>
-                  <p className="text-zinc-400 mt-0.5">
-                    {inv.planName} · {inv.teacherCount} {isKo ? '명' : 'teacher(s)'} · {new Date(inv.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className={`font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>₩{Number(inv.totalAmount || 0).toLocaleString()}</p>
-                  <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full font-bold text-[10px] ${
-                    inv.status === 'paid'
-                      ? 'bg-emerald-500/10 text-emerald-400'
-                      : 'bg-amber-500/10 text-amber-400'
-                  }`}>
-                    {inv.status === 'paid' ? (isKo ? '결제 확인됨' : 'Payment Confirmed') : (isKo ? '입금 대기' : 'Pending Payment')}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+        {dataActionError && <p className={`mt-2 ${msgTone('error')}`}>{dataActionError}</p>}
+      </section>
 
       {showPlanModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowPlanModal(false)} />
-          <div className={`relative w-full max-w-md rounded-2xl border p-6 space-y-4 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-white border-zinc-200'}`}>
-            <div>
-              <h4 className={`font-black text-lg ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {isKo ? '요금제 변경 요청' : 'Request a Plan Change'}
-              </h4>
-              {!planRequestSent && (
-                <p className={`text-xs mt-1 ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                  {isKo
-                    ? '월간 요금 기준입니다. 요청 즉시 계좌이체 정보가 담긴 청구서 이메일이 발송되며, 입금 확인 후 24시간 이내에 활성화됩니다.'
-                    : "Prices shown are monthly. You'll get an invoice email with bank transfer details right away — activation follows within 24 hours of us confirming payment."}
-                </p>
-              )}
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
+          <div className="absolute inset-0 bg-[#2b211a]/55" onClick={() => setShowPlanModal(false)} aria-hidden="true" />
+          <div
+            ref={planDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="plan-change-title"
+            tabIndex={-1}
+            className="modal-enter relative w-full max-w-md space-y-4 rounded-t-lg bg-surface p-6 text-ink shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)] sm:rounded-lg"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 id="plan-change-title" className="text-[20px] font-extrabold">{isKo ? '요금제 변경 요청' : 'Request a plan change'}</h3>
+                {!planRequestSent && (
+                  <p className="mt-1 text-[14px] text-ink-2">
+                    {isKo
+                      ? '월간 요금 기준입니다. 요청 즉시 계좌이체 정보가 담긴 청구서 이메일이 발송되며, 입금 확인 후 24시간 이내에 활성화됩니다.'
+                      : "Prices shown are monthly. You'll get an invoice email with bank transfer details right away — activation follows within 24 hours of us confirming payment."}
+                  </p>
+                )}
+              </div>
+              <button type="button" onClick={() => setShowPlanModal(false)} aria-label={isKo ? '닫기' : 'Close'} className={staffUi.iconBtn}>
+                <X size={20} weight="bold" />
+              </button>
             </div>
 
             {planRequestSent ? (
               <div className="space-y-4">
-                <p className={`text-sm ${isNight ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                <p className="rounded-lg bg-right-soft p-4 text-[15px]">
                   {isKo
                     ? '요청이 접수되었습니다. 계좌이체 정보가 담긴 청구서를 이메일로 보내드렸습니다 — 입금 확인 후 24시간 이내에 활성화됩니다.'
                     : "Request sent — check your email for an invoice with bank transfer details. We'll activate it within 24 hours of confirming payment."}
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setShowPlanModal(false)}
-                  className="w-full px-4 py-2 bg-zinc-200 hover:bg-zinc-300 text-zinc-900 text-xs font-bold rounded-xl transition-[color,background-color,border-color,box-shadow,transform] active:scale-95"
-                >
-                  {isKo ? '닫기' : 'Close'}
+                <button type="button" onClick={() => setShowPlanModal(false)} className={`${staffUi.primaryBtn} w-full`}>
+                  {isKo ? '확인' : 'Done'}
                 </button>
               </div>
             ) : (
-              <div className="space-y-2">
+              <ul className={staffUi.rows}>
                 {SELECTABLE_PLAN_IDS.filter((id) => id !== planId).map((id) => {
                   const label = PLAN_LABELS[id];
                   const seats = PLAN_SEATS[id];
                   const billing = PRICING_BILLING[id];
                   return (
-                    <button
-                      key={id}
-                      type="button"
-                      disabled={isSubmittingPlanChange}
-                      onClick={async () => {
-                        setIsSubmittingPlanChange(true);
-                        const ok = await onRequestPlanChange?.(id, isKo ? label.nameKo : label.nameEn);
-                        setIsSubmittingPlanChange(false);
-                        if (ok) {
-                          setPlanRequestSent(true);
-                          fetchInvoices();
-                        }
-                      }}
-                      className={`w-full text-left px-4 py-3 rounded-xl border transition-[color,background-color,border-color,box-shadow,transform] disabled:opacity-50 ${isNight ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-zinc-50 border-zinc-200 hover:bg-zinc-100'}`}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <span className={`block text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                          {isKo ? label.nameKo : label.nameEn}
+                    <li key={id}>
+                      <button
+                        type="button"
+                        disabled={isSubmittingPlanChange}
+                        onClick={async () => {
+                          setIsSubmittingPlanChange(true);
+                          const ok = await onRequestPlanChange?.(id, isKo ? label.nameKo : label.nameEn);
+                          setIsSubmittingPlanChange(false);
+                          if (ok) {
+                            setPlanRequestSent(true);
+                            fetchInvoices();
+                          }
+                        }}
+                        className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-md px-2 py-3 text-left hover:bg-sunken disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <span className="min-w-0">
+                          <span className="block text-[15px] font-bold">{isKo ? label.nameKo : label.nameEn}</span>
+                          {seats && (
+                            <span className="block text-[13px] text-ink-3">
+                              {seats.ft} FT + {seats.kt} KT {isKo ? '좌석' : 'seats'}
+                            </span>
+                          )}
                         </span>
                         {billing && (
-                          <span className="shrink-0 text-sm font-black text-orange-500 font-mono">
-                            {billing.monthly.krw > 0 ? `₩${billing.monthly.krw.toLocaleString()}/mo` : (isKo ? '무료' : 'Free')}
+                          <span className="shrink-0 text-[15px] font-extrabold tabular-nums text-line-ink">
+                            {billing.monthly.krw > 0 ? `₩${billing.monthly.krw.toLocaleString()}${isKo ? '/월' : '/mo'}` : (isKo ? '무료' : 'Free')}
                           </span>
                         )}
-                      </div>
-                      {seats && (
-                        <span className={`block text-[11px] mt-1 font-mono ${isNight ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                          {seats.ft} FT + {seats.kt} KT {isKo ? '좌석' : 'seats'}
-                        </span>
-                      )}
-                    </button>
+                      </button>
+                    </li>
                   );
                 })}
-                <button
-                  type="button"
-                  onClick={() => setShowPlanModal(false)}
-                  className={`w-full px-4 py-2 mt-2 text-xs font-bold rounded-xl transition-[color,background-color,border-color,box-shadow,transform] active:scale-95 ${isNight ? 'bg-white/5 text-zinc-300 hover:bg-white/10' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'}`}
-                >
-                  {isKo ? '취소' : 'Cancel'}
-                </button>
-              </div>
+              </ul>
             )}
           </div>
         </div>

@@ -3,6 +3,7 @@ import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firest
 import { UserPlus, UploadSimple, X, PaperPlaneTilt, Trash } from '@phosphor-icons/react';
 import { auth, dbInstance } from '../../services/database';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { staffUi, msgTone } from './staffUi';
 
 interface PendingStudent {
   id: string;
@@ -280,183 +281,129 @@ export const StudentInvitePanel: React.FC<Props> = ({
   };
 
   return (
-    <div className={`p-1 rounded-[2.5rem] text-left transition-colors ${
-      isNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'
-    }`}>
-      <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 transition-colors ${isNight ? 'bg-brand-dark' : 'bg-white'}`}>
-        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center">
-              <UserPlus size={22} weight="bold" />
-            </div>
-            <div>
-              <h4 className={`text-lg font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {isKo ? '학생 초대하기' : 'Invite Students'}
-              </h4>
-              <p className="text-xs text-zinc-400 leading-normal">
-                {isKo ? '학부모 이메일로 초대 링크를 보냅니다. 가입한 학생은 아래 학생 명단으로 옮겨집니다.' : "Email each parent an invite link. Once they join, the student moves to the roster below."}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowAddForm((v) => !v)}
-              className="px-3.5 py-2 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 text-xs font-bold border border-orange-500/30 cursor-pointer transition-colors flex items-center gap-1.5"
-            >
-              <UserPlus size={14} weight="bold" />
-              {isKo ? '학생 추가' : 'Add Student'}
-            </button>
-            <label className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-bold border border-white/10 cursor-pointer transition-colors flex items-center gap-1.5">
-              <UploadSimple size={14} weight="bold" />
-              {isKo ? '엑셀 업로드' : 'Upload Excel/CSV'}
-              <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFileChange} />
-            </label>
-          </div>
+    <section className="text-left text-ink">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className={staffUi.h2}>{isKo ? '학생 초대' : 'Invite students'}</h2>
+          <p className={staffUi.sub}>
+            {isKo ? '학부모 이메일로 초대 링크를 보냅니다. 가입한 학생은 아래 학생 명단으로 옮겨집니다.' : 'Email each parent an invite link. Once they join, the student moves to the roster below.'}
+          </p>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className={`${staffUi.quietBtn} focus-within:ring-2 focus-within:ring-line`}>
+            <UploadSimple size={16} weight="bold" aria-hidden="true" />
+            {isKo ? '엑셀 업로드' : 'Upload Excel/CSV'}
+            <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" className="sr-only" onChange={handleFileChange} />
+          </label>
+          <button type="button" onClick={() => setShowAddForm((v) => !v)} aria-expanded={showAddForm} className={staffUi.primaryBtn}>
+            <UserPlus size={18} weight="bold" aria-hidden="true" />
+            {isKo ? '학생 추가' : 'Add student'}
+          </button>
+        </div>
+      </div>
 
-        {message && (
-          <p className={`text-xs font-bold mb-4 ${message.type === 'error' ? 'text-rose-400' : 'text-emerald-400'}`}>{message.text}</p>
-        )}
+      {message && <p className={`mb-4 ${msgTone(message.type)}`} role="status">{message.text}</p>}
 
-        {showAddForm && (
-          <form onSubmit={handleAddSingle} className="flex flex-wrap items-end gap-2 mb-6 p-4 rounded-2xl bg-white/5 border border-white/10">
-            {classes.length > 1 && (
-              <div className="flex-1 min-w-[140px]">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase block mb-1">
-                  {isKo ? '학급' : 'Class'}
-                </label>
-                <select
-                  value={targetClassId}
-                  onChange={(e) => setTargetClassId(e.target.value)}
-                  className={`w-full p-2.5 rounded-xl border text-xs font-bold outline-none ${isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
-                >
-                  {classes.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-            <div className="flex-1 min-w-[140px]">
-              <label className="text-[10px] font-bold text-zinc-400 uppercase block mb-1">{isKo ? '학생 이름' : 'Student Name'}</label>
-              <input
-                type="text"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="David / 김다윗"
-                required
-                className={`w-full p-2.5 rounded-xl border text-xs font-bold outline-none ${isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
-              />
+      {showAddForm && (
+        <form onSubmit={handleAddSingle} className="mb-6 flex flex-wrap items-end gap-3 rounded-lg bg-sunken p-4">
+          {classes.length > 1 && (
+            <div className="min-w-[140px] flex-1">
+              <label htmlFor="sip-class" className={staffUi.label}>{isKo ? '학급' : 'Class'}</label>
+              <select id="sip-class" value={targetClassId} onChange={(e) => setTargetClassId(e.target.value)} className={staffUi.field}>
+                {classes.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
             </div>
-            <div className="flex-1 min-w-[180px]">
-              <label className="text-[10px] font-bold text-zinc-400 uppercase block mb-1">
-                {isKo ? '학부모 이메일 (선택)' : 'Parent Email (optional)'}
-              </label>
-              <input
-                type="email"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                placeholder="parent@email.com"
-                className={`w-full p-2.5 rounded-xl border text-xs font-bold outline-none ${isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-zinc-50 border-zinc-300 text-zinc-900'}`}
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-black text-xs font-bold cursor-pointer transition-colors"
-            >
-              {isSubmitting ? '...' : newEmail.trim() ? (isKo ? '초대 발송' : 'Send Invite') : (isKo ? '명단에 추가' : 'Add to Roster')}
-            </button>
-          </form>
-        )}
+          )}
+          <div className="min-w-[140px] flex-1">
+            <label htmlFor="sip-name" className={staffUi.label}>{isKo ? '학생 이름' : 'Student name'}</label>
+            <input id="sip-name" type="text" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="David / 김다윗" required className={staffUi.field} />
+          </div>
+          <div className="min-w-[180px] flex-1">
+            <label htmlFor="sip-email" className={staffUi.label}>{isKo ? '학부모 이메일 (선택)' : 'Parent email (optional)'}</label>
+            <input id="sip-email" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="parent@email.com" className={staffUi.field} />
+          </div>
+          <button type="submit" disabled={isSubmitting} className={staffUi.primaryBtn}>
+            {isSubmitting ? '...' : newEmail.trim() ? (isKo ? '초대 발송' : 'Send invite') : (isKo ? '명단에 추가' : 'Add to roster')}
+          </button>
+        </form>
+      )}
 
-        {previewRows && (
-          <div className="mb-6 p-4 rounded-2xl bg-orange-500/5 border border-orange-500/20">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold text-orange-400">
-                {isKo ? `${previewRows.length}명 확인됨 — 검토 후 전송하세요` : `${previewRows.length} student(s) found — review before sending`}
-              </p>
-              <button type="button" onClick={() => { setPreviewRows(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="text-zinc-400 hover:text-white cursor-pointer">
-                <X size={16} weight="bold" />
-              </button>
-            </div>
-            <div className="max-h-40 overflow-y-auto space-y-1 mb-3">
-              {previewRows.map((r, i) => (
-                <div key={i} className="text-[11px] text-zinc-400 flex gap-2">
-                  <span className="font-bold text-zinc-200">{r.name}</span>
-                  {r.parentEmail ? (
-                    <span className="font-mono">{r.parentEmail}</span>
-                  ) : (
-                    <span className="italic text-zinc-400">{isKo ? '이메일 없음 — 명단에만 추가' : 'no email — roster only'}</span>
-                  )}
-                </div>
-              ))}
-            </div>
+      {previewRows && (
+        <div className="mb-6 rounded-lg bg-line-soft p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <p className="text-[15px] font-bold">
+              {isKo ? `${previewRows.length}명 확인됨 — 검토 후 전송하세요` : `${previewRows.length} student(s) found — review before sending`}
+            </p>
             <button
               type="button"
-              disabled={isSubmitting}
-              onClick={() => void submitStudents(previewRows)}
-              className="w-full py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-black text-xs font-bold cursor-pointer transition-colors"
+              onClick={() => { setPreviewRows(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+              aria-label={isKo ? '닫기' : 'Close'}
+              className={staffUi.iconBtn}
             >
-              {isSubmitting ? '...' : isKo ? `${previewRows.length}명 전체 초대` : `Invite all ${previewRows.length}`}
+              <X size={18} weight="bold" />
             </button>
           </div>
-        )}
+          <ul className="mb-3 max-h-40 space-y-1 overflow-y-auto text-[14px] text-ink-2">
+            {previewRows.map((r, i) => (
+              <li key={i} className="flex gap-2">
+                <span className="font-bold text-ink">{r.name}</span>
+                {r.parentEmail ? <span className="break-all">{r.parentEmail}</span> : <span className="text-ink-3">{isKo ? '이메일 없음 — 명단에만 추가' : 'no email — roster only'}</span>}
+              </li>
+            ))}
+          </ul>
+          <button type="button" disabled={isSubmitting} onClick={() => void submitStudents(previewRows)} className={`${staffUi.primaryBtn} w-full`}>
+            {isSubmitting ? '...' : isKo ? `${previewRows.length}명 전체 초대` : `Invite all ${previewRows.length}`}
+          </button>
+        </div>
+      )}
 
-        {!hasLoaded ? (
-          <p className="text-xs text-zinc-400 text-center py-6">
-            {isKo ? '초대 목록 불러오는 중...' : 'Loading invite list...'}
-          </p>
-        ) : waiting.length === 0 ? (
-          <p className="text-xs text-zinc-400 text-center py-6">
-            {pending.length === 0
-              ? (isKo ? '아직 초대한 학생이 없습니다.' : 'No students invited yet.')
-              : (isKo ? '초대한 학부모가 모두 가입했습니다.' : 'Everyone you invited has joined.')}
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left border-collapse">
-              <thead>
-                <tr className={`border-b text-zinc-500 font-bold text-xs ${isNight ? 'border-white/5' : 'border-zinc-200'}`}>
-                  <th className="pb-3 pl-1">{isKo ? '학생' : 'Student'}</th>
-                  <th className="pb-3 hidden sm:table-cell">{isKo ? '학부모 이메일' : 'Parent email'}</th>
-                  <th className="pb-3">{isKo ? '상태' : 'Status'}</th>
-                  <th className="pb-3 text-right pr-1">{isKo ? '작업' : 'Actions'}</th>
-                </tr>
-              </thead>
-              <tbody className={`divide-y ${isNight ? 'divide-white/5' : 'divide-zinc-200'}`}>
-                {waiting.map((s) => (
-                  <React.Fragment key={s.id}>
-                    <tr>
-                      <td className={`py-3 pl-1 pr-2 font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                        {s.name}
-                        {/* Phones: email moves under the name — as its own
-                            column it pushed Status/Actions off-screen. */}
-                        <div className="sm:hidden mt-0.5 font-normal text-zinc-400 break-all">
-                          {s.parentEmail || (isKo ? '이메일 없음' : 'No email yet')}
-                        </div>
-                      </td>
-                      <td className="py-3 pr-2 text-zinc-400 hidden sm:table-cell break-all">
-                        {s.parentEmail || <span className="text-zinc-500">{isKo ? '이메일 없음' : 'No email yet'}</span>}
-                      </td>
-                      <td className="py-3">
-                        {s.status === 'redeemed' ? (
-                          <span className="px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                            {isKo ? '가입됨' : 'Joined'}
-                          </span>
-                        ) : s.parentEmail ? (
-                          <span className="px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                            {isKo ? '초대됨' : 'Invited'}
-                          </span>
-                        ) : (
-                          <span className="px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap bg-white/5 border border-white/10 text-zinc-300">
-                            {isKo ? '명단만' : 'Roster only'}
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3 text-right pr-1 space-x-2 whitespace-nowrap">
+      {!hasLoaded ? (
+        <p className={`${staffUi.sub} py-6 text-center`}>{isKo ? '초대 목록 불러오는 중...' : 'Loading invite list...'}</p>
+      ) : waiting.length === 0 ? (
+        <p className="rounded-lg bg-surface p-8 text-center ring-1 ring-inset ring-rule text-[15px] text-ink-3">
+          {pending.length === 0
+            ? (isKo ? '아직 초대한 학생이 없습니다.' : 'No students invited yet.')
+            : (isKo ? '초대한 학부모가 모두 가입했습니다.' : 'Everyone you invited has joined.')}
+        </p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left text-[15px]">
+            <thead>
+              <tr className="border-b border-rule">
+                <th className={staffUi.th}>{isKo ? '학생' : 'Student'}</th>
+                <th className={`${staffUi.th} hidden sm:table-cell`}>{isKo ? '학부모 이메일' : 'Parent email'}</th>
+                <th className={staffUi.th}>{isKo ? '상태' : 'Status'}</th>
+                <th className={`${staffUi.th} pr-0 text-right`}><span className="sr-only">{isKo ? '작업' : 'Actions'}</span></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-rule border-b border-rule">
+              {waiting.map((s) => (
+                <React.Fragment key={s.id}>
+                  <tr>
+                    <td className="py-3 pr-3 font-bold">
+                      {s.name}
+                      {/* Phones: email moves under the name — as its own
+                          column it pushed Status/Actions off-screen. */}
+                      <div className="mt-0.5 break-all text-[13px] font-normal text-ink-3 sm:hidden">
+                        {s.parentEmail || (isKo ? '이메일 없음' : 'No email yet')}
+                      </div>
+                    </td>
+                    <td className="hidden break-all py-3 pr-3 text-ink-2 sm:table-cell">
+                      {s.parentEmail || <span className="text-ink-3">{isKo ? '이메일 없음' : 'No email yet'}</span>}
+                    </td>
+                    <td className="py-3 pr-3">
+                      {s.status === 'redeemed' ? (
+                        <span className={staffUi.pill.good}>{isKo ? '가입됨' : 'Joined'}</span>
+                      ) : s.parentEmail ? (
+                        <span className={staffUi.pill.warm}>{isKo ? '초대됨' : 'Invited'}</span>
+                      ) : (
+                        <span className={staffUi.pill.neutral}>{isKo ? '명단만' : 'Roster only'}</span>
+                      )}
+                    </td>
+                    <td className="whitespace-nowrap py-2 text-right">
+                      <div className="inline-flex items-center gap-1">
                         {s.status === 'invited' && s.parentEmail && (
                           <button
                             type="button"
@@ -464,9 +411,9 @@ export const StudentInvitePanel: React.FC<Props> = ({
                             disabled={busyId === s.id}
                             title={isKo ? '재전송' : 'Resend'}
                             aria-label={isKo ? `${s.name} 초대 재전송` : `Resend invite to ${s.name}`}
-                            className="w-10 h-10 justify-center rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center"
+                            className={staffUi.iconBtn}
                           >
-                            <PaperPlaneTilt size={12} weight="bold" />
+                            <PaperPlaneTilt size={18} weight="bold" />
                           </button>
                         )}
                         {s.status === 'invited' && !s.parentEmail && (
@@ -475,10 +422,10 @@ export const StudentInvitePanel: React.FC<Props> = ({
                             onClick={() => { setAddEmailForId(s.id); setAddEmailValue(''); }}
                             disabled={busyId === s.id}
                             title={isKo ? '이메일 추가하고 초대 발송' : 'Add email and send invite'}
-                            className="px-2.5 min-h-10 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center gap-1"
+                            className={staffUi.quietBtn}
                           >
-                            <PaperPlaneTilt size={12} weight="bold" />
-                            <span className="text-xs font-bold">{isKo ? '이메일' : 'Email'}</span>
+                            <PaperPlaneTilt size={16} weight="bold" aria-hidden="true" />
+                            {isKo ? '이메일' : 'Email'}
                           </button>
                         )}
                         <button
@@ -487,58 +434,47 @@ export const StudentInvitePanel: React.FC<Props> = ({
                           disabled={busyId === s.id}
                           title={isKo ? '삭제' : 'Remove'}
                           aria-label={isKo ? `${s.name} 삭제` : `Remove ${s.name}`}
-                          className="w-10 h-10 justify-center rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center"
+                          className={`${staffUi.iconBtn} hover:text-wrong`}
                         >
-                          <Trash size={12} weight="bold" />
+                          <Trash size={18} weight="bold" />
                         </button>
+                      </div>
+                    </td>
+                  </tr>
+                  {addEmailForId === s.id && (
+                    <tr>
+                      <td colSpan={4} className="pb-3">
+                        <form
+                          onSubmit={(e) => { e.preventDefault(); void handleSendFirstInvite(s.id); }}
+                          className="flex flex-wrap items-center gap-2 rounded-lg bg-sunken p-3"
+                        >
+                          <input
+                            type="email"
+                            autoFocus
+                            value={addEmailValue}
+                            onChange={(e) => setAddEmailValue(e.target.value)}
+                            placeholder="parent@email.com"
+                            aria-label={isKo ? '학부모 이메일' : 'Parent email'}
+                            required
+                            className={`${staffUi.field} min-w-0 flex-1`}
+                          />
+                          <button type="submit" disabled={busyId === s.id} className={staffUi.primaryBtn}>{isKo ? '발송' : 'Send'}</button>
+                          <button type="button" onClick={() => { setAddEmailForId(null); setAddEmailValue(''); }} className={staffUi.quietBtn}>{isKo ? '취소' : 'Cancel'}</button>
+                        </form>
                       </td>
                     </tr>
-                    {addEmailForId === s.id && (
-                      <tr>
-                        <td colSpan={4} className="pb-3">
-                          <form
-                            onSubmit={(e) => { e.preventDefault(); void handleSendFirstInvite(s.id); }}
-                            className="flex items-center gap-2 p-3 rounded-xl bg-orange-500/5 border border-orange-500/20"
-                          >
-                            <input
-                              type="email"
-                              autoFocus
-                              value={addEmailValue}
-                              onChange={(e) => setAddEmailValue(e.target.value)}
-                              placeholder="parent@email.com"
-                              required
-                              className={`flex-1 min-w-0 p-2 rounded-lg border text-xs font-bold outline-none ${isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'}`}
-                            />
-                            <button
-                              type="submit"
-                              disabled={busyId === s.id}
-                              className="px-3 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-black text-[11px] font-bold cursor-pointer transition-colors"
-                            >
-                              {isKo ? '발송' : 'Send'}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => { setAddEmailForId(null); setAddEmailValue(''); }}
-                              className="px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 text-[11px] font-bold cursor-pointer transition-colors"
-                            >
-                              {isKo ? '취소' : 'Cancel'}
-                            </button>
-                          </form>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                  )}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {removeConfirm && (
         <ConfirmDialog
-          title={`Remove invite for ${removeConfirm.label}?`}
-          confirmText="Remove"
+          title={isKo ? `${removeConfirm.label} 초대를 삭제할까요?` : `Remove invite for ${removeConfirm.label}?`}
+          confirmText={isKo ? '삭제' : 'Remove'}
           variant="destructive"
           isNight={isNight}
           onConfirm={() => {
@@ -549,6 +485,6 @@ export const StudentInvitePanel: React.FC<Props> = ({
           onCancel={() => setRemoveConfirm(null)}
         />
       )}
-    </div>
+    </section>
   );
 };

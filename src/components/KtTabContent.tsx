@@ -73,14 +73,12 @@ export function KtTabContent(props: Props) {
       {activeTab === 'overview' && (
         <div className="space-y-6 animate-fade-in">
           <NativeDirectorStudentsTab
-            isNight={isNight}
             isKo={isKo}
             pendingRoster={props.pendingRoster}
             handleApproveStudent={props.handleApproveStudent}
             handleDeclineStudent={props.handleDeclineStudent}
           />
           <StudentDatabaseGrid
-            isNight={isNight}
             isKo={isKo}
             activeRoster={props.activeRoster}
             pendingRoster={props.pendingRoster}

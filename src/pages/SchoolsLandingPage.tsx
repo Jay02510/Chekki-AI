@@ -88,7 +88,7 @@ const QFold: React.FC<{ i: number; title: string; open: boolean; onToggle: (open
   <details id={`q${i + 1}`} open={open} onToggle={(e) => onToggle(e.currentTarget.open)} className="group scroll-mt-20">
     <summary className="relative flex min-h-[72px] cursor-pointer list-none items-center gap-3 rounded-md py-4 before:absolute before:-left-3 before:bottom-4 before:top-4 before:w-[3px] before:rounded-full before:bg-line before:opacity-0 before:transition-opacity group-open:before:opacity-100 focus-visible:outline-2 focus-visible:-outline-offset-2 [&::-webkit-details-marker]:hidden">
       <h2 className="flex-1 text-[19px] font-extrabold leading-snug tracking-[-0.01em] text-ink group-hover:text-line-ink sm:text-[22px]">{title}</h2>
-      <CaretDown size={20} weight="bold" className="shrink-0 text-ink-3 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+      <CaretDown size={20} weight="bold" className="shrink-0 text-ink-3 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-open:rotate-180" aria-hidden="true" />
     </summary>
     <div className="pb-10 pt-2">{children}</div>
   </details>
@@ -135,7 +135,7 @@ const SchoolsLandingPage: React.FC = () => {
     io.observe(close);
     return () => io.disconnect();
   }, []);
-  const [openQs, setOpenQs] = useState<boolean[]>(() => Array(6).fill(false));
+  const [openQs, setOpenQs] = useState<boolean[]>(() => [true, false, false, false, false, false]);
   const setQ = (i: number, v: boolean) => setOpenQs((prev) => (prev[i] === v ? prev : prev.map((o, j) => (j === i ? v : o))));
   // Links to a question (header "Pricing", #q5 URLs) open it, then scroll to it.
   const openQ = (i: number) => (e?: React.MouseEvent) => {
@@ -229,7 +229,7 @@ const SchoolsLandingPage: React.FC = () => {
   };
 
   const primaryBtn =
-    'btn-press inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-line px-6 text-[16px] font-extrabold text-[#2b211a]';
+    'btn-press inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-line px-6 text-[16px] font-extrabold text-on-line';
   const outlineBtn =
     'btn-press inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-surface px-5 text-[15px] font-bold text-ink ring-1 ring-inset ring-rule hover:ring-ink-3';
   const iconBtn =
@@ -248,7 +248,7 @@ const SchoolsLandingPage: React.FC = () => {
     <main className="font-warm min-h-dvh w-full overflow-x-clip bg-ground text-ink break-keep">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-line focus:px-4 focus:py-2 focus:font-bold focus:text-[#2b211a]"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-line focus:px-4 focus:py-2 focus:font-bold focus:text-on-line"
       >
         {isKo ? '본문으로 건너뛰기' : 'Skip to content'}
       </a>
@@ -335,7 +335,7 @@ const SchoolsLandingPage: React.FC = () => {
 
       {/* HERO: the offer on the left, Chekki on the right */}
       <section id="main-content" className="tile-ground">
-        <div className="mx-auto grid max-w-6xl items-center gap-4 px-4 pb-8 pt-8 md:grid-cols-[1.15fr_1fr] md:gap-12 md:pb-16 md:pt-16">
+        <div className="mx-auto grid max-w-6xl items-center gap-4 px-4 pb-8 pt-8 md:grid-cols-[1.15fr_1fr] md:gap-12 md:pb-8 md:pt-16">
           <div>
             <h1 className="text-[34px] font-extrabold leading-[1.12] tracking-[-0.03em] text-ink sm:text-[42px]">
               {isKo ? (
@@ -433,7 +433,7 @@ const SchoolsLandingPage: React.FC = () => {
                     </Roundel>
                     <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2 rounded-md bg-line-soft p-3">
                       <p className="text-[15px] font-bold text-ink">{isKo ? '한국인 선생님 확인 대기' : 'Waiting for the Korean teacher'}</p>
-                      <span className="rounded-md bg-line px-3 py-1.5 text-[14px] font-bold text-[#2b211a]" aria-hidden="true">
+                      <span className="rounded-md bg-line px-3 py-1.5 text-[14px] font-bold text-on-line" aria-hidden="true">
                         {isKo ? '확인하고 보내기' : 'Check and send'}
                       </span>
                     </div>
@@ -764,8 +764,7 @@ const SchoolsLandingPage: React.FC = () => {
 
       {/* CLOSE: cocoa panel, trial first, consultation second */}
       <section id="close-cta" className="mx-auto max-w-6xl px-4 py-12 md:py-16">
-        <div className="grid items-center gap-6 rounded-lg bg-sign p-6 text-on-sign md:grid-cols-[auto_1fr_auto] md:p-8">
-          <img src="/images/chekki-wave.webp" alt="" width={112} height={112} className="hidden h-28 w-28 object-contain md:block" />
+        <div className="grid items-center gap-6 rounded-lg bg-sign p-6 text-on-sign md:grid-cols-[1fr_auto] md:p-8">
           <div>
             <h2 className="text-[24px] font-extrabold tracking-[-0.02em] sm:text-[28px]">
               {isKo ? '이번 주 학부모 리포트부터 채키로 보내 보세요' : "Send this week's parent reports with Chekki"}

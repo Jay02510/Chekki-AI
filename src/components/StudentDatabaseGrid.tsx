@@ -8,12 +8,11 @@ import {
   flexRender,
   type SortingState,
 } from '@tanstack/react-table';
-import { ArrowClockwise, Warning, MagnifyingGlass, DownloadSimple, CaretUp, CaretDown, CaretUpDown, CheckCircle } from '@phosphor-icons/react';
+import { ArrowClockwise, Warning, MagnifyingGlass, DownloadSimple, CaretUp, CaretDown, CaretUpDown } from '@phosphor-icons/react';
 import { downloadCSV } from '../utils/csvExport';
-import { StatTile } from './ui/StatTile';
+import { staffUi } from './staffUi';
 
 interface Props {
-  isNight: boolean;
   isKo: boolean;
   activeRoster: any[];
   pendingRoster: any[];
@@ -55,7 +54,6 @@ const columnHelper = createColumnHelper<Row>();
  * no new Firestore writes introduced here.
  */
 export function StudentDatabaseGrid({
-  isNight,
   isKo,
   activeRoster,
   pendingRoster,
@@ -128,7 +126,7 @@ export function StudentDatabaseGrid({
     if (row.isInvitedOnly) {
       if (!handleRemoveStudent) return null;
       return (
-        <span className="text-[10px] text-zinc-500 italic">
+        <span className="text-[13px] text-ink-3">
           {isKo ? '위 초대 목록에서 관리' : 'Manage in Invite Students above'}
         </span>
       );
@@ -140,9 +138,8 @@ export function StudentDatabaseGrid({
           onChange={(e) => e.target.value && runAction(() => handleMoveStudent(row.uid, e.target.value))}
           value=""
           disabled={isActionBusy}
-          className={`text-[10px] font-bold px-2.5 py-1.5 max-md:min-h-11 max-md:px-4 max-md:text-xs rounded-lg cursor-pointer outline-none appearance-none disabled:opacity-40 disabled:cursor-not-allowed ${
-            isNight ? 'bg-brand-dark border border-white/10 text-zinc-400' : 'bg-zinc-100 border border-zinc-300 text-zinc-700'
-          }`}
+          aria-label={isKo ? `${row.studentName} 반 이동` : `Move ${row.studentName} to another class`}
+          className={`${staffUi.quietBtn} w-28 bg-surface pr-2 outline-none`}
         >
           <option value="">{isKo ? '반 이동' : 'Move'}</option>
           {classes.filter((c) => c.id !== row.classId).map((c) => (
@@ -154,16 +151,16 @@ export function StudentDatabaseGrid({
         <button
           onClick={() => runAction(() => handleRemoveStudent(row.uid))}
           disabled={isActionBusy}
-          className="px-3 py-1.5 max-md:min-h-11 max-md:px-4 max-md:text-xs border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 font-bold rounded-lg text-[10px] active:scale-[0.95] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          type="button"
+          className={`${staffUi.quietBtn} text-wrong`}
         >
           {isKo ? '삭제' : 'Remove'}
         </button>
         )}
         <button
           onClick={() => setSelectedStudentDetails(row.raw)}
-          className={`px-3 py-1.5 max-md:min-h-11 max-md:px-4 max-md:text-xs border font-bold rounded-lg text-[10px] active:scale-[0.95] cursor-pointer ${
-            isNight ? 'border-white/10 bg-brand-dark hover:bg-white/5 text-orange-400' : 'border-zinc-300 bg-zinc-100 hover:bg-zinc-200 text-orange-600'
-          }`}
+          type="button"
+          className={staffUi.quietBtn}
         >
           {isKo ? '상세' : 'Details'}
         </button>
@@ -174,12 +171,12 @@ export function StudentDatabaseGrid({
   const columns = useMemo(
     () => [
       columnHelper.accessor('studentName', {
-        header: isKo ? '학생 이름' : 'Student Name',
+        header: isKo ? '학생 이름' : 'Student',
         cell: (info) => (
-          <span className="flex items-center gap-1.5 font-black text-sm">
+          <span className="flex items-center gap-1.5 font-bold">
             {info.getValue()}
             {info.row.original.flagged && (
-              <span title="Flagged"><Warning size={14} weight="fill" className="text-amber-500" /></span>
+              <span title={isKo ? '주의' : 'Flagged'}><Warning size={16} weight="fill" className="text-line-ink" aria-label={isKo ? '주의' : 'Flagged'} /></span>
             )}
           </span>
         ),
@@ -187,48 +184,43 @@ export function StudentDatabaseGrid({
       columnHelper.accessor('parentName', {
         header: isKo ? '학부모' : 'Parent',
         cell: (info) => info.row.original.isInvitedOnly ? (
-          <span className="px-3 py-1.5 rounded-full text-[10px] font-bold bg-sky-500/10 border border-sky-500/20 text-sky-400 w-fit inline-block">
+          <span className={staffUi.pill.neutral}>
             {isKo ? '미가입 (초대됨)' : 'Not yet joined'}
           </span>
         ) : (
           <div>
-            <p className="font-bold">{info.getValue()}</p>
-            <p className="text-[10px] text-zinc-400 font-mono">{info.row.original.parentEmail}</p>
+            <p className="font-semibold">{info.getValue()}</p>
+            <p className="text-[13px] text-ink-3">{info.row.original.parentEmail}</p>
           </div>
         ),
       }),
       columnHelper.accessor('className', {
         header: isKo ? '반' : 'Class',
+        cell: (info) => <span className="whitespace-nowrap">{info.getValue()}</span>,
       }),
       columnHelper.accessor('status', {
         header: isKo ? '상태' : 'Status',
         cell: (info) => (
-          <span
-            className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
-              info.getValue() === 'active'
-                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                : 'bg-orange-500/10 border-orange-500/20 text-orange-500'
-            }`}
-          >
+          <span className={info.getValue() === 'active' ? staffUi.pill.good : staffUi.pill.warm}>
             {info.getValue() === 'active' ? (isKo ? '활동중' : 'Active') : (isKo ? '대기중' : 'Pending')}
           </span>
         ),
       }),
       columnHelper.accessor('lastScanDate', {
-        header: isKo ? '마지막 스캔일' : 'Last Active',
-        cell: (info) => <span className="font-mono text-[10px] text-zinc-400">{info.getValue() || '-'}</span>,
+        header: isKo ? '마지막 스캔일' : 'Last scan',
+        cell: (info) => <span className="whitespace-nowrap text-[14px] tabular-nums text-ink-2">{info.getValue() || '—'}</span>,
       }),
       columnHelper.accessor('weeklyMistakesCount', {
-        header: isKo ? '주간 오답' : 'Weekly Mistakes',
-        cell: (info) => <span className="font-mono">{info.getValue()}</span>,
+        header: isKo ? '주간 오답' : 'Mistakes',
+        cell: (info) => <span className="tabular-nums">{info.getValue()}</span>,
       }),
       columnHelper.display({
         id: 'actions',
-        header: isKo ? '관리' : 'Actions',
+        header: () => <span className="sr-only">{isKo ? '관리' : 'Actions'}</span>,
         cell: (info) => actionsFor(info.row.original),
       }),
     ],
-    [isKo, isNight, classes, handleMoveStudent, handleRemoveStudent, setSelectedStudentDetails, isActionBusy]
+    [isKo, classes, handleMoveStudent, handleRemoveStudent, setSelectedStudentDetails, isActionBusy]
   );
 
   const table = useReactTable({
@@ -257,161 +249,134 @@ export function StudentDatabaseGrid({
     downloadCSV(header, rows, 'student-database');
   };
 
+  const scannedCount = activeRoster.filter((s) => s.hasScannedThisWeek).length;
+
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
-        <div className="flex flex-col sm:flex-row gap-3 flex-1">
-          <div className={`relative flex-1 max-w-xs`}>
-            <MagnifyingGlass size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+    <section className="space-y-4 text-left text-ink">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className={staffUi.h3}>{isKo ? '학생 명단' : 'Roster'}</h3>
+        {!isLoadingRoster && activeRoster.length > 0 && (
+          <p className="text-[14px] font-semibold text-ink-3 tabular-nums">
+            {isKo
+              ? `이번 주 ${activeRoster.length}명 중 ${scannedCount}명 스캔`
+              : `${scannedCount} of ${activeRoster.length} scanned this week`}
+          </p>
+        )}
+      </div>
+
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="flex flex-1 flex-col gap-2 sm:flex-row">
+          <div className="relative max-w-xs flex-1">
+            <MagnifyingGlass size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-3" aria-hidden="true" />
             <input
-              type="text"
+              type="search"
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
-              placeholder={isKo ? '학생 검색...' : 'Search students...'}
-              className={`w-full pl-8 pr-3 py-2 rounded-xl text-xs outline-none border ${
-                isNight ? 'bg-white/5 border-white/10 text-white placeholder:text-zinc-500' : 'bg-zinc-50 border-zinc-200 text-zinc-900'
-              }`}
+              placeholder={isKo ? '학생 검색' : 'Search students'}
+              aria-label={isKo ? '학생 검색' : 'Search students'}
+              className={`${staffUi.field} pl-10`}
             />
           </div>
           <select
             value={classFilter}
             onChange={(e) => setClassFilter(e.target.value)}
-            className={`px-3 py-2 rounded-xl text-xs font-bold outline-none border ${
-              isNight ? 'bg-white/5 border-white/10 text-zinc-300' : 'bg-zinc-50 border-zinc-200 text-zinc-700'
-            }`}
+            aria-label={isKo ? '반 필터' : 'Filter by class'}
+            className={`${staffUi.field} font-semibold sm:w-auto`}
           >
-            <option value="">{isKo ? '모든 반' : 'All Classes'}</option>
+            <option value="">{isKo ? '모든 반' : 'All classes'}</option>
             {classes.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={fetchRosterAndMistakes}
-            className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.97] ${
-              isNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900'
-            }`}
-          >
-            <ArrowClockwise size={14} weight="bold" />
-            <span>{isKo ? '새로고침' : 'Refresh'}</span>
+          <button type="button" onClick={fetchRosterAndMistakes} className={staffUi.quietBtn}>
+            <ArrowClockwise size={16} weight="bold" aria-hidden="true" />
+            {isKo ? '새로고침' : 'Refresh'}
           </button>
-          <button
-            type="button"
-            onClick={exportCSV}
-            className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.97] ${
-              isNight ? 'bg-white/5 border-white/10 text-zinc-300 hover:text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:text-zinc-900'
-            }`}
-          >
-            <DownloadSimple size={14} weight="bold" />
-            <span>{isKo ? 'CSV 내보내기' : 'Export CSV'}</span>
+          <button type="button" onClick={exportCSV} className={staffUi.quietBtn}>
+            <DownloadSimple size={16} weight="bold" aria-hidden="true" />
+            {isKo ? 'CSV 내보내기' : 'Export CSV'}
           </button>
         </div>
       </div>
 
-      {!isLoadingRoster && activeRoster.length > 0 && (
-        <div className="max-w-xs">
-          <StatTile
-            isNight={isNight}
-            label={isKo ? '이번 주 스캔 완료' : 'Scanned This Week'}
-            icon={<CheckCircle size={14} weight="bold" className="text-orange-500" />}
-            ring={{
-              value: Math.round(
-                (activeRoster.filter((s) => s.hasScannedThisWeek).length / activeRoster.length) * 100
-              ),
-            }}
-            value={
-              <>
-                {activeRoster.filter((s) => s.hasScannedThisWeek).length}
-                <span className="text-sm font-normal text-zinc-400"> / {activeRoster.length}</span>
-              </>
-            }
-          />
+      {isLoadingRoster ? (
+        <div className="flex min-h-[30vh] items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-line/30 border-t-line" aria-label={isKo ? '불러오는 중' : 'Loading'} />
         </div>
-      )}
-
-      <div className={`p-1 rounded-[2.5rem] ${isNight ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-zinc-200 shadow-md'}`}>
-        <div className={`rounded-[calc(2.5rem-0.25rem)] p-5 sm:p-8 ${isNight ? 'bg-brand-dark text-white' : 'bg-white text-zinc-900'}`}>
-          {isLoadingRoster ? (
-            <div className="flex items-center justify-center min-h-[30vh]">
-              <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-            </div>
-          ) : filteredByClass.length === 0 ? (
-            <div className="py-16 text-center text-zinc-400 text-xs">
-              {isKo ? '표시할 학생이 없습니다.' : 'No students match this view.'}
-            </div>
-          ) : (
-            <>
-            {/* Phones: one card per student — as a table, the actions column
-                sat off-screen to the right. */}
-            <ul className={`md:hidden divide-y ${isNight ? 'divide-white/5' : 'divide-zinc-200'}`}>
-              {table.getRowModel().rows.map(({ original: r }) => (
-                <li key={r.uid} className="py-4 first:pt-0 last:pb-0 space-y-2">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="font-black text-sm flex items-center gap-1.5">
-                        {r.studentName}
-                        {r.flagged && <Warning size={14} weight="fill" className="text-amber-500" />}
-                      </p>
-                      <p className="text-xs text-zinc-400 break-all">
-                        {r.isInvitedOnly ? (isKo ? '미가입 (초대됨)' : 'Not yet joined') : [r.parentName, r.parentEmail].filter(Boolean).join(' · ')}
-                      </p>
-                    </div>
-                    {r.status !== 'active' && (
-                      <span className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold border bg-orange-500/10 border-orange-500/20 text-orange-500">
-                        {isKo ? '대기중' : 'Pending'}
-                      </span>
-                    )}
+      ) : filteredByClass.length === 0 ? (
+        <p className="rounded-lg bg-surface p-10 text-center ring-1 ring-inset ring-rule text-[15px] text-ink-3">
+          {isKo ? '표시할 학생이 없습니다.' : 'No students match this view.'}
+        </p>
+      ) : (
+        <>
+          {/* Phones: one row per student — as a table, the actions column
+              sat off-screen to the right. */}
+          <ul className={`${staffUi.rows} md:hidden`}>
+            {table.getRowModel().rows.map(({ original: r }) => (
+              <li key={r.uid} className="space-y-2 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-1.5 text-[16px] font-bold">
+                      {r.studentName}
+                      {r.flagged && <Warning size={16} weight="fill" className="text-line-ink" aria-label={isKo ? '주의' : 'Flagged'} />}
+                    </p>
+                    <p className="break-all text-[13px] text-ink-3">
+                      {r.isInvitedOnly ? (isKo ? '미가입 (초대됨)' : 'Not yet joined') : [r.parentName, r.parentEmail].filter(Boolean).join(' · ')}
+                    </p>
                   </div>
-                  <p className="text-xs text-zinc-400">
-                    {[r.className, r.lastScanDate && `${isKo ? '마지막 스캔' : 'Last scan'} ${r.lastScanDate}`].filter(Boolean).join(' · ')}
-                  </p>
-                  <div className="flex justify-start">{actionsFor(r)}</div>
-                </li>
-              ))}
-            </ul>
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-xs text-left border-collapse">
-                <thead>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id} className={`border-b text-zinc-500 font-bold uppercase tracking-wider text-[10px] ${isNight ? 'border-white/5' : 'border-zinc-200'}`}>
-                      {headerGroup.headers.map((header) => (
+                  {r.status !== 'active' && <span className={staffUi.pill.warm}>{isKo ? '대기중' : 'Pending'}</span>}
+                </div>
+                <p className="text-[13px] text-ink-3">
+                  {[r.className, r.lastScanDate && `${isKo ? '마지막 스캔' : 'Last scan'} ${r.lastScanDate}`].filter(Boolean).join(' · ')}
+                </p>
+                <div className="flex justify-start">{actionsFor(r)}</div>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden overflow-x-auto md:block">
+            <table className="w-full border-collapse text-left text-[15px]">
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id} className="border-b border-rule">
+                    {headerGroup.headers.map((header) => {
+                      const sorted = header.column.getIsSorted();
+                      return (
                         <th
                           key={header.id}
-                          className="pb-4 pl-2 first:pl-2 cursor-pointer select-none"
-                          onClick={header.column.getToggleSortingHandler()}
+                          className={staffUi.th}
+                          aria-sort={sorted === 'asc' ? 'ascending' : sorted === 'desc' ? 'descending' : undefined}
                         >
-                          <span className="flex items-center gap-1">
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                            {header.column.getCanSort() && (
-                              header.column.getIsSorted() === 'asc' ? <CaretUp size={10} weight="bold" /> :
-                              header.column.getIsSorted() === 'desc' ? <CaretDown size={10} weight="bold" /> :
-                              <CaretUpDown size={10} weight="bold" className="opacity-30" />
-                            )}
-                          </span>
+                          {header.column.getCanSort() ? (
+                            <button type="button" onClick={header.column.getToggleSortingHandler()} className="inline-flex cursor-pointer items-center gap-1 hover:text-ink">
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                              {sorted === 'asc' ? <CaretUp size={12} weight="bold" /> : sorted === 'desc' ? <CaretDown size={12} weight="bold" /> : <CaretUpDown size={12} weight="bold" className="opacity-40" />}
+                            </button>
+                          ) : (
+                            flexRender(header.column.columnDef.header, header.getContext())
+                          )}
                         </th>
-                      ))}
-                    </tr>
-                  ))}
-                </thead>
-                <tbody className={`divide-y ${isNight ? 'divide-white/5' : 'divide-zinc-200'}`}>
-                  {table.getRowModel().rows.map((row) => (
-                    <tr key={row.id} className={`transition-colors ${isNight ? 'hover:bg-white/[0.02]' : 'hover:bg-zinc-50'}`}>
-                      {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id} className="py-4 pl-2 first:pl-2">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </thead>
+              <tbody className="divide-y divide-rule border-b border-rule">
+                {table.getRowModel().rows.map((row) => (
+                  <tr key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="py-3 pr-3">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </section>
   );
 }

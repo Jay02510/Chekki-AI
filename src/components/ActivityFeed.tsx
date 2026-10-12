@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
-import { ClockCounterClockwise } from '@phosphor-icons/react';
 import { dbInstance } from '../../services/database';
 
 interface ActivityEntry {
@@ -12,7 +11,6 @@ interface ActivityEntry {
 }
 
 interface Props {
-  isNight?: boolean;
   isKo?: boolean;
   schoolId: string;
 }
@@ -32,7 +30,7 @@ const LABELS: Record<string, { en: string; ko: string }> = {
  * roster actions for now, not every action type in the app (class create/
  * delete, teacher invite/assign, etc. aren't wired into this log yet).
  */
-export const ActivityFeed: React.FC<Props> = ({ isNight = true, isKo = false, schoolId }) => {
+export const ActivityFeed: React.FC<Props> = ({ isKo = false, schoolId }) => {
   const [entries, setEntries] = useState<ActivityEntry[]>([]);
 
   useEffect(() => {
@@ -59,29 +57,24 @@ export const ActivityFeed: React.FC<Props> = ({ isNight = true, isKo = false, sc
   if (entries.length === 0) return null;
 
   return (
-    <div className={`p-6 rounded-2xl border space-y-3 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-      <div className="flex items-center gap-2">
-        <ClockCounterClockwise size={16} weight="bold" className="text-zinc-400" />
-        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
-          {isKo ? '최근 활동' : 'Recent Activity'}
-        </span>
-      </div>
-      <ul className="text-xs space-y-1.5">
+    <section>
+      <h3 className="mb-1 text-[20px] font-extrabold tracking-[-0.01em]">{isKo ? '최근 활동' : 'Recent activity'}</h3>
+      <ul className="divide-y divide-rule border-y border-rule">
         {entries.map((entry) => (
-          <li key={entry.id} className={`flex items-center justify-between gap-3 p-2 rounded ${isNight ? 'bg-white/5' : 'bg-white border border-zinc-200'}`}>
-            <span className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>
-              <span className="font-bold">{entry.actorName}</span>{' '}
+          <li key={entry.id} className="flex items-baseline justify-between gap-3 py-2.5 text-[15px] text-ink-2">
+            <span className="min-w-0">
+              <span className="font-bold text-ink">{entry.actorName}</span>{' '}
               {isKo ? (LABELS[entry.type]?.ko || entry.type) : (LABELS[entry.type]?.en || entry.type)}{' '}
-              <span className="font-bold">{entry.targetLabel}</span>
+              <span className="font-bold text-ink">{entry.targetLabel}</span>
             </span>
             {entry.createdAt && (
-              <span className="text-[10px] text-zinc-400 shrink-0">
+              <span className="shrink-0 text-[13px] text-ink-3 tabular-nums">
                 {entry.createdAt.toDate().toLocaleString(isKo ? 'ko-KR' : 'en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
               </span>
             )}
           </li>
         ))}
       </ul>
-    </div>
+    </section>
   );
 };

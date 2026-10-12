@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { auth, dbInstance } from '../../services/database';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { staffUi, msgTone } from './staffUi';
 
 interface Invite {
   id: string;
@@ -250,176 +251,165 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
     }
   };
 
+  const liveInvites = invites.filter((inv) => inv.status !== 'revoked');
+  const noSeats = role === 'ft' ? remainingFt <= 0 : remainingKt <= 0;
+
   return (
-    <div className={`rounded-2xl border p-5 space-y-4 ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-      <div className="flex items-center justify-between">
-        <h3 className="font-black text-sm">{isKo ? '선생님 초대' : 'Invite Teachers'}</h3>
-        <div className="flex gap-2 text-[11px] font-mono font-bold">
-          <span className="px-2 py-1 rounded-lg bg-orange-500/10 text-orange-400 border border-orange-500/20">
-            FT {isKo ? `${remainingFt}석 남음` : `${remainingFt} left`}
-          </span>
-          <span className="px-2 py-1 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
-            KT {isKo ? `${remainingKt}석 남음` : `${remainingKt} left`}
-          </span>
-        </div>
+    <section className="space-y-6 text-left text-ink">
+      <div>
+        <h2 className={staffUi.h2}>{isKo ? '선생님' : 'Teachers'}</h2>
+        <p className={`${staffUi.sub} tabular-nums`}>
+          {isKo ? `남은 좌석: FT ${remainingFt}석 · KT ${remainingKt}석` : `Seats left: FT ${remainingFt} · KT ${remainingKt}`}
+        </p>
       </div>
 
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setRole('ft')}
-          className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-colors ${
-            role === 'ft' ? 'bg-orange-500 border-orange-500 text-black' : isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-white border-zinc-300 text-zinc-600'
-          }`}
-        >
-          {isKo ? '원어민 선생님 (FT)' : 'Foreign Teacher (FT)'}
-        </button>
-        <button
-          type="button"
-          onClick={() => setRole('kt')}
-          className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-colors ${
-            role === 'kt' ? 'bg-blue-500 border-blue-500 text-white' : isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-white border-zinc-300 text-zinc-600'
-          }`}
-        >
-          {isKo ? '한국인 선생님 (KT)' : 'Korean Teacher (KT)'}
-        </button>
-      </div>
+      <div className="space-y-4 rounded-lg border border-rule bg-surface p-5">
+        <h3 className={staffUi.h3}>{isKo ? '선생님 초대' : 'Invite a teacher'}</h3>
 
-      <div className="space-y-1.5">
-        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
-          {isKo ? '배정할 학급' : 'Assign to class'}
-        </label>
-        <select
-          value={classId}
-          onChange={(e) => setClassId(e.target.value)}
-          className={`w-full p-3 rounded-xl border text-xs font-bold outline-none focus:border-orange-500 ${
-            isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
-          }`}
-        >
-          {classes.length === 0 && <option value="">{isKo ? '학급 없음' : 'No classes yet'}</option>}
-          {classes.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
+        <div className="flex gap-1 rounded-md bg-sunken p-1" role="radiogroup" aria-label={isKo ? '선생님 유형' : 'Teacher type'}>
+          {([
+            ['ft', isKo ? '원어민 선생님 (FT)' : 'Foreign teacher (FT)'],
+            ['kt', isKo ? '한국인 선생님 (KT)' : 'Korean teacher (KT)'],
+          ] as const).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              role="radio"
+              aria-checked={role === id}
+              onClick={() => setRole(id)}
+              className={`min-h-10 flex-1 cursor-pointer rounded px-3 text-[14px] font-bold ${
+                role === id ? 'bg-surface text-ink shadow-[0_1px_2px_rgba(43,33,26,0.12)]' : 'text-ink-2 hover:text-ink'
+              }`}
+            >
+              {label}
+            </button>
           ))}
-        </select>
-      </div>
-
-      {!isBulkMode ? (
-        <div className="space-y-2">
-          <input
-            type="email"
-            value={email}
-            disabled={noEmailYet}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={isKo ? '선생님 이메일 주소' : "Teacher's email address"}
-            className={`w-full p-3 rounded-xl border text-xs font-bold outline-none focus:border-orange-500 disabled:opacity-40 ${
-              isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
-            }`}
-          />
-          <label className="flex items-center gap-2 text-[11px] text-zinc-400 font-bold cursor-pointer">
-            <input type="checkbox" checked={noEmailYet} onChange={(e) => setNoEmailYet(e.target.checked)} />
-            {isKo ? '아직 이메일을 모릅니다 (공유 가능한 1회용 링크 생성)' : "I don't know their email yet (generate a single-use link instead)"}
-          </label>
         </div>
-      ) : (
-        <div className="space-y-1.5">
-          <textarea
-            value={bulkEmailsInput}
-            onChange={(e) => setBulkEmailsInput(e.target.value)}
-            rows={5}
-            placeholder={isKo ? '이메일을 한 줄에 하나씩 붙여넣으세요\nteacher1@example.com\nteacher2@example.com' : 'Paste one email per line\nteacher1@example.com\nteacher2@example.com'}
-            className={`w-full p-3 rounded-xl border text-xs font-mono outline-none focus:border-orange-500 ${
-              isNight ? 'bg-brand-dark border-white/10 text-white' : 'bg-white border-zinc-300 text-zinc-900'
-            }`}
-          />
-          {bulkProgress && (
-            <p className="text-[11px] text-zinc-400 font-mono">
-              {isKo ? `전송 중 ${bulkProgress.done}/${bulkProgress.total}` : `Sending ${bulkProgress.done}/${bulkProgress.total}`}
-            </p>
-          )}
-          {bulkResults.length > 0 && (
-            <div className="max-h-32 overflow-y-auto space-y-1 pt-1">
-              {bulkResults.map((r, idx) => (
-                <div key={`${r.email}-${idx}`} className="flex items-center justify-between text-[11px] gap-2">
-                  <span className="text-zinc-400 truncate">{r.email}</span>
-                  <span className={`font-bold shrink-0 ${r.success ? 'text-emerald-400' : 'text-rose-400'}`}>
-                    {r.success ? (isKo ? '전송됨 ✓' : 'sent ✓') : r.error || (isKo ? '실패' : 'failed')}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+
+        <div>
+          <label htmlFor="tip-class" className={staffUi.label}>{isKo ? '배정할 학급' : 'Assign to class'}</label>
+          <select id="tip-class" value={classId} onChange={(e) => setClassId(e.target.value)} className={`${staffUi.field} font-semibold`}>
+            {classes.length === 0 && <option value="">{isKo ? '학급 없음' : 'No classes yet'}</option>}
+            {classes.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
         </div>
-      )}
 
-      <button
-        type="button"
-        onClick={() => {
-          setMessage(null);
-          setIsBulkMode((prev) => !prev);
-        }}
-        className="text-[11px] text-orange-400 hover:text-orange-300 font-bold underline cursor-pointer"
-      >
-        {isBulkMode
-          ? (isKo ? '← 한 명씩 초대하기' : '← Invite one at a time')
-          : (isKo ? '여러 명 한번에 초대하기 (붙여넣기)' : 'Invite multiple at once (paste emails)')}
-      </button>
+        {!isBulkMode ? (
+          <div className="space-y-2">
+            <label htmlFor="tip-email" className={staffUi.label}>{isKo ? '선생님 이메일' : "Teacher's email"}</label>
+            <input
+              id="tip-email"
+              type="email"
+              value={email}
+              disabled={noEmailYet}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="teacher@email.com"
+              className={`${staffUi.field} disabled:cursor-not-allowed disabled:opacity-50`}
+            />
+            <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-[14px] text-ink-2">
+              <input type="checkbox" checked={noEmailYet} onChange={(e) => setNoEmailYet(e.target.checked)} className="h-5 w-5 accent-[var(--m-line)]" />
+              {isKo ? '아직 이메일을 몰라요 (1회용 초대 링크 만들기)' : "I don't know their email yet (make a single-use link instead)"}
+            </label>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <label htmlFor="tip-bulk" className={staffUi.label}>{isKo ? '이메일 (한 줄에 하나씩)' : 'Emails, one per line'}</label>
+            <textarea
+              id="tip-bulk"
+              value={bulkEmailsInput}
+              onChange={(e) => setBulkEmailsInput(e.target.value)}
+              rows={5}
+              placeholder={'teacher1@example.com\nteacher2@example.com'}
+              className={`${staffUi.field} py-2.5`}
+            />
+            {bulkProgress && (
+              <p className="text-[13px] text-ink-3 tabular-nums" role="status">
+                {isKo ? `전송 중 ${bulkProgress.done}/${bulkProgress.total}` : `Sending ${bulkProgress.done}/${bulkProgress.total}`}
+              </p>
+            )}
+            {bulkResults.length > 0 && (
+              <ul className="max-h-32 space-y-1 overflow-y-auto pt-1 text-[14px]">
+                {bulkResults.map((r, idx) => (
+                  <li key={`${r.email}-${idx}`} className="flex items-center justify-between gap-2">
+                    <span className="truncate text-ink-2">{r.email}</span>
+                    <span className={`shrink-0 font-bold ${r.success ? 'text-correct' : 'text-wrong'}`}>
+                      {r.success ? (isKo ? '전송됨' : 'Sent') : r.error || (isKo ? '실패' : 'Failed')}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
 
-      <button
-        type="button"
-        onClick={isBulkMode ? handleSendBulkInvites : handleSendInvite}
-        disabled={isSending || !classId || (role === 'ft' ? remainingFt <= 0 : remainingKt <= 0)}
-        className="w-full py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-xs rounded-xl transition-[background-color,opacity]"
-      >
-        {isSending
-          ? (isKo ? '전송 중...' : 'Sending...')
-          : (role === 'ft' ? remainingFt <= 0 : remainingKt <= 0)
-          ? (isKo ? '남은 좌석 없음' : 'No seats remaining')
-          : isBulkMode
-          ? (isKo ? '모두 초대 보내기' : 'Send all invites')
-          : noEmailYet
-          ? (isKo ? '초대 링크 생성' : 'Generate invite link')
-          : (isKo ? '초대 이메일 보내기' : 'Send invite email')}
-      </button>
-
-      {message && (
-        <p className={`text-xs font-bold ${message.type === 'error' ? 'text-rose-400' : 'text-emerald-400'}`}>{message.text}</p>
-      )}
-      {lastLink && (
-        <div className="flex items-center gap-2">
-          <input readOnly value={lastLink} className="flex-1 min-w-0 p-2 rounded-lg bg-black/30 border border-white/10 text-[10px] font-mono text-zinc-300 truncate" />
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
-            onClick={() => copyInviteLink(lastLink)}
-            className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-bold shrink-0"
+            onClick={() => {
+              setMessage(null);
+              setIsBulkMode((prev) => !prev);
+            }}
+            className="min-h-10 cursor-pointer text-[14px] font-bold text-line-ink hover:underline"
           >
-            {justCopied ? (isKo ? '복사됨!' : 'Copied!') : (isKo ? '복사' : 'Copy')}
+            {isBulkMode
+              ? (isKo ? '한 명씩 초대하기' : 'Invite one at a time')
+              : (isKo ? '여러 명 한번에 초대하기' : 'Invite several at once')}
+          </button>
+          <button
+            type="button"
+            onClick={isBulkMode ? handleSendBulkInvites : handleSendInvite}
+            disabled={isSending || !classId || noSeats}
+            className={staffUi.primaryBtn}
+          >
+            {isSending
+              ? (isKo ? '전송 중...' : 'Sending...')
+              : noSeats
+              ? (isKo ? '남은 좌석 없음' : 'No seats left')
+              : isBulkMode
+              ? (isKo ? '모두 초대 보내기' : 'Send all invites')
+              : noEmailYet
+              ? (isKo ? '초대 링크 만들기' : 'Make invite link')
+              : (isKo ? '초대 이메일 보내기' : 'Send invite email')}
           </button>
         </div>
-      )}
 
-      {invites.filter((inv) => inv.status !== 'revoked').length > 0 && (
-        <div className="pt-2 border-t border-white/10 space-y-1.5 max-h-40 overflow-y-auto">
-          {invites.filter((inv) => inv.status !== 'revoked').map((inv) => (
-            <div key={inv.id} className="flex items-center justify-between text-[11px] gap-2">
-              <span className="text-zinc-400 truncate">{inv.email || (isKo ? '(링크 전용)' : '(link only)')}</span>
-              <span className={`font-mono font-bold px-1.5 py-0.5 rounded shrink-0 ${inv.role === 'ft' ? 'text-orange-400' : 'text-blue-400'}`}>
-                {inv.role.toUpperCase()}
-              </span>
-              <span className={`font-bold shrink-0 ${inv.status === 'claimed' ? 'text-emerald-400' : 'text-zinc-400'}`}>
-                {inv.status === 'claimed' ? (isKo ? '수락됨' : 'claimed') : (isKo ? '대기중' : 'pending')}
-              </span>
-              {inv.status === 'pending' && (
-                <button
-                  type="button"
-                  onClick={() => handleRevokeInvite(inv.id)}
-                  disabled={revokingId === inv.id}
-                  className="shrink-0 text-rose-400 hover:text-rose-300 font-bold disabled:opacity-40 cursor-pointer"
-                >
-                  {revokingId === inv.id ? (isKo ? '취소 중…' : 'Revoking…') : (isKo ? '취소' : 'Revoke')}
-                </button>
-              )}
-            </div>
-          ))}
+        {message && <p className={msgTone(message.type)} role="status">{message.text}</p>}
+        {lastLink && (
+          <div className="flex items-center gap-2">
+            <input readOnly value={lastLink} aria-label={isKo ? '초대 링크' : 'Invite link'} className={`${staffUi.field} min-w-0 flex-1 bg-sunken text-[14px]`} />
+            <button type="button" onClick={() => copyInviteLink(lastLink)} className={staffUi.quietBtn}>
+              {justCopied ? (isKo ? '복사됨' : 'Copied') : (isKo ? '복사' : 'Copy')}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {liveInvites.length > 0 && (
+        <div>
+          <h3 className={`${staffUi.h3} mb-1`}>{isKo ? '보낸 초대' : 'Sent invites'}</h3>
+          <ul className={`${staffUi.rows} max-h-72 overflow-y-auto`}>
+            {liveInvites.map((inv) => (
+              <li key={inv.id} className="flex min-h-12 items-center gap-3 py-2 text-[15px]">
+                <span className="min-w-0 flex-1 truncate text-ink-2">{inv.email || (isKo ? '(링크 전용)' : '(link only)')}</span>
+                <span className="shrink-0 text-[13px] font-bold text-ink-3">{inv.role.toUpperCase()}</span>
+                <span className={inv.status === 'claimed' ? staffUi.pill.good : staffUi.pill.neutral}>
+                  {inv.status === 'claimed' ? (isKo ? '수락됨' : 'Joined') : (isKo ? '대기중' : 'Pending')}
+                </span>
+                {inv.status === 'pending' && (
+                  <button
+                    type="button"
+                    onClick={() => handleRevokeInvite(inv.id)}
+                    disabled={revokingId === inv.id}
+                    className={`${staffUi.dangerText} min-h-10 shrink-0`}
+                  >
+                    {revokingId === inv.id ? (isKo ? '취소 중…' : 'Revoking…') : (isKo ? '취소' : 'Revoke')}
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
@@ -435,6 +425,6 @@ export const TeacherInvitePanel: React.FC<Props> = ({ isNight = true, isKo = tru
           onCancel={() => setShowUpgradeConfirm(false)}
         />
       )}
-    </div>
+    </section>
   );
 };

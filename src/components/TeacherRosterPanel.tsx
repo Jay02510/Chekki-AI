@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { auth, dbInstance } from '../../services/database';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { Check, Plus } from '@phosphor-icons/react';
+import { staffUi, msgTone } from './staffUi';
 
 interface SchoolTeacher {
   uid: string;
@@ -116,45 +118,49 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, isKo = fal
 
   if (teachers.length === 0) {
     return (
-      <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-xs text-zinc-400 font-bold">
-        {isKo
-          ? '아직 초대를 수락한 선생님이 없습니다. 수락하면 여기에서 학급을 배정할 수 있습니다.'
-          : "No teachers have accepted an invite yet. Once one does, they'll appear here for class assignment."}
-      </div>
+      <section className="text-left text-ink">
+        <h3 className={`${staffUi.h3} mb-2`}>{isKo ? '우리 학원 선생님' : 'Your teachers'}</h3>
+        <p className={staffUi.notice}>
+          {isKo
+            ? '아직 초대를 수락한 선생님이 없습니다. 수락하면 여기에서 학급을 배정할 수 있습니다.'
+            : "No teachers have accepted an invite yet. Once one does, they'll appear here for class assignment."}
+        </p>
+      </section>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {message && (
-        <p className={`text-xs font-bold ${message.type === 'error' ? 'text-rose-400' : 'text-emerald-400'}`}>{message.text}</p>
-      )}
+    <section className="text-left text-ink">
+      <h3 className={staffUi.h3}>{isKo ? '우리 학원 선생님' : 'Your teachers'}</h3>
+      <p className={`${staffUi.sub} mb-2`}>{isKo ? '학급을 눌러 배정하거나 해제하세요.' : 'Tap a class to assign or unassign it.'}</p>
+      {message && <p className={`mb-2 ${msgTone(message.type)}`} role="status">{message.text}</p>}
+      <ul className={staffUi.rows}>
       {teachers.map((t) => {
         const label = t.name || t.email || t.uid;
         const assignedClassIds = new Set(localClasses.filter((c: any) => (c.assignedTeacherUids || []).includes(t.uid)).map((c: any) => c.id));
         return (
-          <div key={t.uid} className={`p-4 rounded-2xl border space-y-3 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-            <div className="flex items-center justify-between flex-wrap gap-2">
+          <li key={t.uid} className="space-y-3 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="min-w-0">
-                <h5 className={`font-bold text-sm truncate ${isNight ? 'text-white' : 'text-zinc-900'}`}>{label}</h5>
-                <span className="text-xs font-bold text-zinc-400">
+                <p className="truncate text-[16px] font-bold">{label}</p>
+                <p className="text-[13px] text-ink-3">
                   {t.educatorRole === 'kt' ? (isKo ? '한국인 선생님 (KT)' : 'Korean teacher (KT)') : (isKo ? '원어민 선생님 (FT)' : 'Foreign teacher (FT)')}
-                </span>
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => handleRemoveTeacher(t.uid, label)}
                 disabled={busyKey === t.uid}
-                className="min-h-11 px-3 rounded-lg text-rose-400 text-xs font-bold hover:bg-rose-500/10 disabled:opacity-40 cursor-pointer transition-colors"
+                className={`${staffUi.dangerText} min-h-11 px-1`}
               >
                 {busyKey === t.uid ? (isKo ? '삭제 중…' : 'Removing…') : (isKo ? '삭제' : 'Remove')}
               </button>
             </div>
 
             {localClasses.length === 0 ? (
-              <p className="text-xs text-zinc-400">{isKo ? '배정할 학급이 없습니다.' : 'No classes to assign yet.'}</p>
+              <p className="text-[14px] text-ink-3">{isKo ? '배정할 학급이 없습니다.' : 'No classes to assign yet.'}</p>
             ) : (
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {localClasses.map((c: any) => {
                   const isAssigned = assignedClassIds.has(c.id);
                   const key = `${c.id}_${t.uid}`;
@@ -165,24 +171,21 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, isKo = fal
                       onClick={() => handleToggleAssignment(c.id, t.uid, isAssigned)}
                       disabled={busyKey === key}
                       aria-pressed={isAssigned}
-                      className={`px-3 min-h-10 rounded-lg text-xs font-bold border transition-[background-color,border-color,opacity] cursor-pointer disabled:opacity-40 ${
-                        isAssigned
-                          ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400'
-                          : isNight
-                          ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-                          : 'bg-white border-zinc-300 text-zinc-600'
+                      className={`btn-press inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-md px-3 text-[14px] font-bold disabled:opacity-50 ${
+                        isAssigned ? 'bg-line-soft text-ink' : 'text-ink-2 ring-1 ring-inset ring-rule hover:text-ink hover:ring-ink-3'
                       }`}
                     >
-                      {isAssigned ? '✓ ' : '+ '}
+                      {isAssigned ? <Check size={16} weight="bold" className="text-line-ink" aria-hidden="true" /> : <Plus size={16} weight="bold" className="text-ink-3" aria-hidden="true" />}
                       {c.name || c.id}
                     </button>
                   );
                 })}
               </div>
             )}
-          </div>
+          </li>
         );
       })}
+      </ul>
 
       {removeConfirm && (
         <ConfirmDialog
@@ -202,6 +205,6 @@ export const TeacherRosterPanel: React.FC<Props> = ({ isNight = true, isKo = fal
           onCancel={() => setRemoveConfirm(null)}
         />
       )}
-    </div>
+    </section>
   );
 };

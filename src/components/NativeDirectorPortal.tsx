@@ -1,19 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Buildings,
-  WarningCircle,
-  SquaresFour,
-  CheckCircle,
-  Confetti
-} from '@phosphor-icons/react';
+import { Buildings, WarningCircle, CheckCircle, X } from '@phosphor-icons/react';
 import { collection, query, where, getCountFromServer, getDocs } from 'firebase/firestore';
 import { dbInstance } from '../../services/database';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { ActivityFeed } from './ActivityFeed';
 import { useLogCompliance, type ComplianceRow } from '../../hooks/useLogCompliance';
+import { staffUi } from './staffUi';
 
 interface Props {
-  isNight?: boolean;
   isKo?: boolean;
   academyName?: string;
   academyLogo?: string;
@@ -51,7 +45,6 @@ interface Props {
 }
 
 export const NativeDirectorPortal: React.FC<Props> = ({
-  isNight = true,
   isKo = false,
   academyName = 'Apex English Academy (Seocho)',
   academyLogo,
@@ -188,12 +181,14 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   }, [classes]);
 
 
+  const realClassCount = classes.filter((c: any) => !c.isDemo).length;
+  const seatCount = (seatsTotal?.ft || 0) + (seatsTotal?.kt || 0);
+  const today = new Intl.DateTimeFormat(isKo ? 'ko-KR' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
+  const { primaryBtn, quietBtn } = staffUi;
+  const closeSeatModal = () => { setShowSeatExpansionModal(false); setSeatRequestSent(false); };
+
   return (
-    <div
-      className={`p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-8 font-sans transition-[background-color,border-color,color] ${
-        isNight ? 'bg-brand-dark border-white/15 text-zinc-100' : 'bg-white border-zinc-200 text-zinc-900'
-      }`}
-    >
+    <div className="mx-auto max-w-5xl space-y-10 text-left text-ink">
       {/* Setup-First Activation Header Banner — real signal from
           schools/{schoolId}.planId, not sessionStorage (Audit: paid/seat
           status read from a per-tab value instead of Firestore, so a
@@ -203,19 +198,16 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           undefined means the fetch hasn't resolved, so we render nothing
           rather than flash this at an already-paid director. */}
       {planId === null && (
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-emerald-500/20 border border-orange-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-left">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-orange-500/20 border border-orange-500/30 text-orange-400 flex items-center justify-center font-bold text-lg shrink-0">
-              <Confetti size={20} weight="bold" />
-            </div>
-            <div>
-              <h4 className="font-black text-sm text-white flex items-center gap-2">
-                <span>{academyName || '어학원'} 캠퍼스 구축 완료!</span>
-              </h4>
-              <p className="text-xs text-zinc-300 mt-0.5">
-                원생 숙제 자동 스캐너 &amp; 학부모 카카오톡 연동을 위해 결제를 완료하세요. (7일 100% 환불 보장)
-              </p>
-            </div>
+        <div className="flex flex-col items-start justify-between gap-4 rounded-lg bg-line-soft p-5 sm:flex-row sm:items-center">
+          <div>
+            <p className="text-[16px] font-extrabold">
+              {isKo ? `${academyName || '학원'} 준비가 끝났어요` : `${academyName || 'Your academy'} is set up`}
+            </p>
+            <p className="mt-1 text-[14px] text-ink-2">
+              {isKo
+                ? '결제를 마치면 숙제 채점과 학부모 카카오톡 리포트가 켜져요. 7일 안에는 전액 환불돼요.'
+                : 'Finish payment to turn on homework grading and KakaoTalk parent reports. Full refund within 7 days.'}
+            </p>
           </div>
           <button
             type="button"
@@ -225,9 +217,9 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                 window.location.href = '/schools';
               }
             }}
-            className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs rounded-xl shadow-lg shadow-emerald-500/25 transition-[background-color,transform] flex items-center justify-center gap-2 shrink-0 cursor-pointer active:scale-95"
+            className={primaryBtn}
           >
-            <span>⚡ 결제 완료하고 최종 활성화하기 →</span>
+            {isKo ? '결제하고 시작하기' : 'Pay and start'}
           </button>
         </div>
       )}
@@ -235,130 +227,98 @@ export const NativeDirectorPortal: React.FC<Props> = ({
       {/* Trial Countdown / Expired Banner */}
       {trialStatus?.onTrial && (
         <div
-          className={`p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-left ${
-            trialStatus.expired
-              ? 'bg-red-500/10 border-red-500/30'
-              : trialStatus.daysRemaining <= 2
-                ? 'bg-orange-500/10 border-orange-500/30'
-                : 'bg-white/5 border-white/10'
+          className={`flex flex-col items-start justify-between gap-3 rounded-lg p-5 sm:flex-row sm:items-center ${
+            trialStatus.expired ? 'bg-wrong-soft' : trialStatus.daysRemaining <= 2 ? 'bg-line-soft' : 'bg-sunken'
           }`}
         >
           <div>
-            <p className={`text-sm font-black ${trialStatus.expired ? 'text-red-400' : trialStatus.daysRemaining <= 2 ? 'text-orange-400' : isNight ? 'text-white' : 'text-zinc-900'}`}>
+            <p className={`text-[16px] font-extrabold ${trialStatus.expired ? 'text-wrong' : ''}`}>
               {trialStatus.expired
-                ? (isKo ? '⏰ 무료 체험이 종료되었습니다' : '⏰ Your free trial has ended')
-                : (isKo ? `⏳ 무료 체험 ${trialStatus.daysRemaining}일 남음` : `⏳ ${trialStatus.daysRemaining} day${trialStatus.daysRemaining === 1 ? '' : 's'} left in your free trial`)}
+                ? (isKo ? '무료 체험이 끝났어요' : 'Your free trial has ended')
+                : (isKo ? `무료 체험 ${trialStatus.daysRemaining}일 남음` : `${trialStatus.daysRemaining} day${trialStatus.daysRemaining === 1 ? '' : 's'} left in your free trial`)}
             </p>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="mt-1 text-[14px] text-ink-2">
               {trialStatus.expired
                 ? (isKo ? '기존 학급과 데이터는 계속 볼 수 있지만, 새 학급 개설과 선생님 초대는 제한됩니다.' : 'Existing classes and data stay visible, but creating new classes or inviting teachers is paused until you upgrade.')
                 : (isKo ? '체험 종료 후에도 기존 데이터는 유지되며, 새 학급/초대만 제한됩니다.' : "New classes and invites will pause when it ends — your existing data isn't affected.")}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onNavigateToBilling}
-            className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-colors shrink-0 cursor-pointer whitespace-nowrap"
-          >
-            {isKo ? '플랜 업그레이드 →' : 'Upgrade Plan →'}
+          <button type="button" onClick={onNavigateToBilling} className={primaryBtn}>
+            {isKo ? '플랜 선택하기' : 'Choose a plan'}
           </button>
         </div>
       )}
 
-      {/* Portal Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
-        <h3 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
+      {/* Header: academy, today's date, and the flagged-students switch.
+          The exceptions view only exists while something is actually
+          flagged; at zero it was a dead tab. */}
+      <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div className="flex items-center gap-3">
           {academyLogo ? (
-            <img src={academyLogo} alt="" className="w-6 h-6 rounded-lg object-cover" />
+            <img src={academyLogo} alt="" width={40} height={40} className="h-10 w-10 rounded-md object-cover" />
           ) : (
-            <Buildings size={24} className="text-orange-500" />
+            <Buildings size={32} weight="duotone" className="text-line-ink" aria-hidden="true" />
           )}
-          <span>{academyName}</span>
-        </h3>
+          <div>
+            <h2 className="text-[26px] font-extrabold leading-tight tracking-[-0.02em] sm:text-[30px]">{academyName}</h2>
+            <p className="text-[14px] text-ink-3">{today}</p>
+          </div>
+        </div>
 
-        {/* Tab Navigation — the exceptions tab only exists while something
-            is actually flagged; at zero it was a dead tab plus a duplicate
-            "0" stat card. */}
         {(flaggedStudents.length > 0 || activeTab === 'exceptions') && (
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setActiveTab('overview')}
-              className={`px-4 py-2 min-h-11 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border ${
-                activeTab === 'overview'
-                  ? 'bg-orange-500 border-orange-500 text-black shadow-md'
-                  : isNight
-                  ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-                  : 'bg-zinc-100 border-zinc-200 text-zinc-700'
-              }`}
-            >
-              <SquaresFour size={16} weight="bold" />
-              <span>{isKo ? '개요' : 'Overview'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('exceptions')}
-              className={`px-4 py-2 min-h-11 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border ${
-                activeTab === 'exceptions'
-                  ? 'bg-orange-500 border-orange-500 text-black shadow-md'
-                  : isNight
-                  ? 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-                  : 'bg-zinc-100 border-zinc-200 text-zinc-700'
-              }`}
-            >
-              <WarningCircle size={16} weight="bold" className="text-amber-400" />
-              <span>{isKo ? `주의 학생 ${flaggedStudents.length}명` : `Flagged students (${flaggedStudents.length})`}</span>
-            </button>
+          <div className="flex gap-1 rounded-md bg-sunken p-1" role="tablist">
+            {([
+              ['overview', isKo ? '오늘 현황' : 'Overview'],
+              ['exceptions', isKo ? `주의 학생 ${flaggedStudents.length}명` : `Flagged (${flaggedStudents.length})`],
+            ] as const).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === id}
+                onClick={() => setActiveTab(id)}
+                className={`min-h-10 cursor-pointer rounded px-4 text-[14px] font-bold ${
+                  activeTab === id ? 'bg-surface text-ink shadow-[0_1px_2px_rgba(43,33,26,0.12)]' : 'text-ink-2 hover:text-ink'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         )}
-      </div>
+      </header>
 
-      {/* ========================================================================= */}
-      {/* TAB OVERVIEW: THIS UNIT, AT A GLANCE (selectedClass's active week: real */}
-      {/* target vocab + real per-student sync status, both already computed by */}
-      {/* TeacherPage — no separate mock data, no second source of truth) */}
-      {/* ========================================================================= */}
       {activeTab === 'overview' && (
-        <div className="space-y-6 animate-fade-in text-left">
-          <DirectorTodayPanel
-            isNight={isNight}
-            isKo={isKo}
-            rows={complianceRows}
-            isLoading={isLoadingCompliance}
-          />
+        <>
+          <DirectorTodayPanel isKo={isKo} rows={complianceRows} isLoading={isLoadingCompliance} />
 
-          {/* Campus totals. Horizontally scrollable on mobile. */}
-          <div className="flex items-center gap-3 overflow-x-auto pb-1">
-            <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <span className="text-xs font-bold text-zinc-400 block">{isKo ? '학급' : 'Classes'}</span>
-              <h4 className={`text-2xl font-black mt-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {classes.filter((c: any) => !c.isDemo).length}
-              </h4>
+          {/* Campus totals: one ruled row, not three boxes. */}
+          <dl className="grid grid-cols-3 divide-x divide-rule border-y border-rule">
+            <div className="py-4 pr-4">
+              <dt className="text-[13px] font-bold text-ink-3">{isKo ? '학급' : 'Classes'}</dt>
+              <dd className="mt-1 text-[28px] font-extrabold tabular-nums">{realClassCount}</dd>
             </div>
-            <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <span className="text-xs font-bold text-zinc-400 block">{isKo ? '학생' : 'Students'}</span>
-              <h4 className={`text-2xl font-black mt-1 ${isNight ? 'text-white' : 'text-zinc-900'}`}>{totalRosterCount}</h4>
+            <div className="px-4 py-4">
+              <dt className="text-[13px] font-bold text-ink-3">{isKo ? '학생' : 'Students'}</dt>
+              <dd className="mt-1 text-[28px] font-extrabold tabular-nums">{totalRosterCount}</dd>
             </div>
-            <div className={`shrink-0 min-w-[168px] p-5 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-zinc-400 block">{isKo ? '교사 좌석' : 'Staff seats'}</span>
+            <div className="py-4 pl-4">
+              <dt className="text-[13px] font-bold text-ink-3">{isKo ? '교사 좌석' : 'Staff seats'}</dt>
+              <dd className="mt-1 text-[28px] font-extrabold tabular-nums">{seatCount}</dd>
+              <dd className="flex flex-wrap items-center gap-x-3 text-[13px] text-ink-3">
+                <span className="whitespace-nowrap">{seatsTotal?.ft || 0} FT · {seatsTotal?.kt || 0} KT</span>
                 {planId !== 'trial' && (
                   <button
                     type="button"
                     onClick={() => setShowSeatExpansionModal(true)}
-                    className="text-xs font-bold text-orange-400 hover:underline cursor-pointer whitespace-nowrap"
+                    className="min-h-8 cursor-pointer font-bold text-line-ink hover:underline"
                   >
-                    {isKo ? '+ 추가' : '+ Add'}
+                    {isKo ? '좌석 추가' : 'Add seats'}
                   </button>
                 )}
-              </div>
-              <h4 className={`text-2xl font-black mt-1 whitespace-nowrap ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                {(seatsTotal?.ft || 0) + (seatsTotal?.kt || 0)}{' '}
-                <span className="text-xs font-normal text-zinc-400">({seatsTotal?.ft || 0} FT / {seatsTotal?.kt || 0} KT)</span>
-              </h4>
+              </dd>
             </div>
-          </div>
+          </dl>
 
           {/* selectedClass is never actually null — TeacherPage always falls
               back to a placeholder "Sample Class" object so the rest of the
@@ -371,117 +331,89 @@ export const NativeDirectorPortal: React.FC<Props> = ({
               a class"). Checking isDemo instead of truthiness shows the
               genuine empty state until a real class exists. */}
           {!selectedClass || selectedClass.isDemo ? (
-            <div className={`p-8 rounded-2xl border text-center ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-800'}`}>{isKo ? '아직 학급이 없습니다' : 'No class yet'}</p>
-              <p className="text-xs text-zinc-400 mt-1">{isKo ? '첫 학급을 만들면 이번 주 어휘와 학생 현황이 여기에 표시됩니다.' : "Create your first class to see this week's vocab and student status here."}</p>
+            <div className="rounded-lg bg-surface p-8 text-center ring-1 ring-inset ring-rule">
+              <p className="text-[16px] font-extrabold">{isKo ? '아직 학급이 없어요' : 'No class yet'}</p>
+              <p className="mt-1 text-[14px] text-ink-3">{isKo ? '첫 학급을 만들면 이번 주 어휘와 학생 현황이 여기에 표시됩니다.' : "Create your first class to see this week's vocab and student status here."}</p>
             </div>
           ) : (
-            <div className={`p-6 rounded-2xl border space-y-5 ${isNight ? 'bg-brand-dark border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-4">
-                <div>
-                  <span className="text-xs font-bold text-zinc-400 block">{isKo ? '이번 주' : 'This week'}</span>
-                  <h4 className={`font-black text-base sm:text-lg ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                    {selectedClass.name || selectedClass.className || 'Class'} • {isKo ? `${selectedClass.activeWeekNumber || 1}주차` : `Week ${selectedClass.activeWeekNumber || 1}`}
-                  </h4>
-                </div>
+            <section className="space-y-5">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className="text-[20px] font-extrabold tracking-[-0.01em]">
+                  {isKo ? '이번 주' : 'This week'}
+                  <span className="font-semibold text-ink-3">
+                    {' · '}{selectedClass.name || selectedClass.className || 'Class'}, {isKo ? `${selectedClass.activeWeekNumber || 1}주차` : `week ${selectedClass.activeWeekNumber || 1}`}
+                  </span>
+                </h3>
                 {flaggedStudents.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('exceptions')}
-                    className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold cursor-pointer hover:bg-amber-500/20 transition-colors"
-                  >
-                    {isKo ? `주의 학생 ${flaggedStudents.length}명 확인` : `Review ${flaggedStudents.length} flagged`}
+                  <button type="button" onClick={() => setActiveTab('exceptions')} className="min-h-10 cursor-pointer text-[14px] font-bold text-line-ink hover:underline">
+                    {isKo ? `주의 학생 ${flaggedStudents.length}명 보기` : `See ${flaggedStudents.length} flagged`}
                   </button>
                 )}
               </div>
 
               <div>
-                <span className="text-xs font-bold text-zinc-400 block mb-2">{isKo ? '목표 어휘' : 'Target vocab'}</span>
+                <p className="mb-2 text-[13px] font-bold text-ink-3">{isKo ? '목표 어휘' : 'Target vocab'}</p>
                 {weeklyVocabWords.length === 0 ? (
-                  <p className="text-xs text-zinc-400">{isKo ? '이번 주 어휘가 아직 없습니다 — 커리큘럼 탭에서 추가하세요.' : 'No vocab set for this week yet — add it from the Curriculum tab.'}</p>
+                  <p className="text-[14px] text-ink-3">{isKo ? '이번 주 어휘가 아직 없습니다 — 커리큘럼 탭에서 추가하세요.' : 'No vocab set for this week yet — add it from the Curriculum tab.'}</p>
                 ) : (
                   <div className="flex flex-wrap gap-1.5">
                     {weeklyVocabWords.map((word) => (
-                      <span
-                        key={word}
-                        className={`px-2 py-1 rounded-md text-xs font-bold border ${
-                          isNight ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'bg-orange-100 text-orange-800 border-orange-200'
-                        }`}
-                      >
-                        {word}
-                      </span>
+                      <span key={word} className="rounded-md bg-line-soft px-2.5 py-1 text-[14px] font-bold text-line-ink">{word}</span>
                     ))}
                   </div>
                 )}
               </div>
 
               <div>
-                <span className="text-xs font-bold text-zinc-400 block mb-2">
-                  {isKo ? `학생 현황 (${activeRoster.length})` : `Students (${activeRoster.length})`}
-                </span>
+                <p className="mb-1 text-[13px] font-bold text-ink-3">
+                  {isKo ? `학생 ${activeRoster.length}명` : `Students (${activeRoster.length})`}
+                </p>
                 {activeRoster.length === 0 ? (
-                  <p className="text-xs text-zinc-400">{isKo ? '아직 학생이 없습니다.' : 'No active students in this class yet.'}</p>
+                  <p className="text-[14px] text-ink-3">{isKo ? '아직 학생이 없습니다.' : 'No active students in this class yet.'}</p>
                 ) : (
-                  <ul className="text-xs space-y-1.5">
+                  <ul className="divide-y divide-rule border-y border-rule">
                     {activeRoster.map((student: any) => (
-                      <li
-                        key={student.uid || student.studentName}
-                        className={`flex justify-between items-center p-2 rounded ${isNight ? 'bg-white/5' : 'bg-white border border-zinc-200'}`}
-                      >
-                        <span className="font-medium">{student.studentName || student.name || (isKo ? '이름 없음' : 'Unnamed')}</span>
+                      <li key={student.uid || student.studentName} className="flex items-center justify-between gap-3 py-2.5 text-[15px]">
+                        <span className="min-w-0 truncate font-semibold">{student.studentName || student.name || (isKo ? '이름 없음' : 'Unnamed')}</span>
                         {student.flaggedException || student.weeklyMistakesCount > 0 ? (
-                          <span className="text-[10px] font-bold text-amber-400 flex items-center gap-1">
-                            <WarningCircle size={12} weight="fill" />
+                          <span className="flex shrink-0 items-center gap-1 text-[13px] font-bold text-line-ink">
+                            <WarningCircle size={16} weight="fill" aria-hidden="true" />
                             {student.weeklyMistakesCount > 0 ? (isKo ? `오답 ${student.weeklyMistakesCount}개` : `${student.weeklyMistakesCount} mistakes`) : (isKo ? '주의' : 'Flagged')}
                           </span>
                         ) : student.hasScannedThisWeek ? (
-                          <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
-                            <CheckCircle size={12} weight="fill" />
+                          <span className="flex shrink-0 items-center gap-1 text-[13px] font-bold text-correct">
+                            <CheckCircle size={16} weight="fill" aria-hidden="true" />
                             {isKo ? '스캔 완료' : 'Scanned'}
                           </span>
                         ) : (
-                          <span className="text-xs font-bold text-zinc-400">{isKo ? '스캔 전' : 'No scan yet'}</span>
+                          <span className="shrink-0 text-[13px] font-bold text-ink-3">{isKo ? '스캔 전' : 'No scan yet'}</span>
                         )}
                       </li>
                     ))}
                   </ul>
                 )}
               </div>
-            </div>
+            </section>
           )}
 
-          {schoolId && <ActivityFeed isNight={isNight} isKo={isKo} schoolId={schoolId} />}
-        </div>
+          {schoolId && <ActivityFeed isKo={isKo} schoolId={schoolId} />}
+        </>
       )}
 
-      {/* ========================================================================= */}
-      {/* TAB 2: FLAGGED STUDENT EXCEPTION CENTER */}
-      {/* ========================================================================= */}
       {activeTab === 'exceptions' && (
-        <div className="space-y-6">
-          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
-            <WarningCircle size={20} className="text-amber-400 shrink-0 mt-0.5" />
-            <div className="space-y-1 text-xs">
-              <h4 className="font-bold text-amber-400">{isKo ? '주의 학생' : 'Flagged students'}</h4>
-              <p className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>
-                {isKo
-                  ? '선생님이 학습·생활 문제로 표시한 학생입니다. 해결을 누르면 표시가 사라집니다.'
-                  : 'Students a teacher flagged for academic or behavior issues. Resolving clears the flag.'}
-              </p>
-            </div>
-          </div>
+        <section className="space-y-6">
+          <p className="max-w-2xl text-[15px] text-ink-2">
+            {isKo
+              ? '선생님이 학습·생활 문제로 표시한 학생입니다. 해결을 누르면 표시가 사라집니다.'
+              : 'Students a teacher flagged for academic or behavior issues. Resolving clears the flag.'}
+          </p>
 
           {logReviewStats.byClass.length > 0 && (
-            <div className={`p-4 rounded-2xl border space-y-2 ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <h4 className="text-xs font-bold text-zinc-400">
-                {isKo ? '검토 대기 일지' : 'Logs awaiting review'}
-              </h4>
+            <div>
+              <p className="mb-2 text-[13px] font-bold text-ink-3">{isKo ? '검토 대기 일지' : 'Logs awaiting review'}</p>
               <div className="flex flex-wrap gap-2">
                 {logReviewStats.byClass.map((c) => (
-                  <span
-                    key={c.classId}
-                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400"
-                  >
+                  <span key={c.classId} className="rounded-md bg-line-soft px-3 py-1.5 text-[14px] font-bold text-line-ink">
                     {c.className}: {isKo ? `${c.pending}건 대기` : `${c.pending} pending`}
                   </span>
                 ))}
@@ -490,53 +422,43 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           )}
 
           {flaggedStudents.length === 0 ? (
-            <div className={`p-12 rounded-2xl border text-center text-xs ${isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-50 border-zinc-200 text-zinc-500'}`}>
+            <p className="rounded-lg bg-surface p-10 text-center ring-1 ring-inset ring-rule text-[15px] text-ink-3">
               {isKo ? '주의 표시된 학생이 없습니다.' : 'No students are currently flagged.'}
-            </div>
+            </p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {flaggedStudents.map((st: any) => (
-                <div
-                  key={st.uid}
-                  className={`p-6 rounded-2xl border space-y-4 ${
-                    isNight ? 'bg-brand-dark border-white/10' : 'bg-white border-zinc-200 shadow-sm'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-black text-sm text-white">{st.studentName || st.name || (isKo ? '이름 없음' : 'Unnamed')}</h4>
-                      <span className="text-xs text-orange-400 font-mono">{st.email}</span>
+                <article key={st.uid} className="space-y-4 rounded-lg border border-rule bg-surface p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h4 className="truncate text-[16px] font-extrabold">{st.studentName || st.name || (isKo ? '이름 없음' : 'Unnamed')}</h4>
+                      <p className="truncate text-[13px] text-ink-3">{st.email}</p>
                     </div>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                      {st.flaggedException?.date}
-                    </span>
+                    <span className="shrink-0 rounded-md bg-sunken px-2 py-1 text-[13px] font-bold text-ink-2">{st.flaggedException?.date}</span>
                   </div>
 
-                  <div className={`p-4 rounded-xl border text-xs leading-relaxed ${isNight ? 'bg-brand-dark border-white/5 text-zinc-300' : 'bg-zinc-50 border-zinc-200 text-zinc-800'}`}>
-                    <span className="text-xs font-bold text-zinc-400 block mb-1">
+                  <div className="border-l-[3px] border-line pl-3 text-[14px] leading-relaxed">
+                    <p className="mb-0.5 text-[13px] font-bold text-ink-3">
                       {isKo ? `${st.flaggedException?.teacherName} 선생님 메모` : `Note from ${st.flaggedException?.teacherName}`}
-                    </span>
+                    </p>
                     <p>{st.flaggedException?.reason}</p>
                   </div>
 
                   {phoneScriptFor === st.uid && (
-                    <div className={`p-4 rounded-xl border text-xs leading-relaxed space-y-1 ${isNight ? 'bg-orange-500/5 border-orange-500/20 text-zinc-300' : 'bg-orange-50 border-orange-200 text-zinc-800'}`}>
-                      <span className="text-xs font-bold text-orange-400 block mb-1">
-                        {isKo ? '통화 요점' : 'Call talking points'}
-                      </span>
-                      <p>{isKo ? '1. 수업 노력 인정하기' : '1. Acknowledge class effort'}</p>
-                      <p>{isKo ? '2. 논의: ' : '2. Address: '}{st.flaggedException?.reason}</p>
-                      <p>{isKo ? '3. 통화 전에 학부모와 구체적인 후속 조치 하나 정하기' : '3. Agree on one concrete follow-up step with the parent before ending the call.'}</p>
-                    </div>
+                    <ol className="list-decimal space-y-1 rounded-md bg-sunken py-3 pl-8 pr-3 text-[14px] leading-relaxed">
+                      <li>{isKo ? '수업 노력 인정하기' : 'Acknowledge class effort'}</li>
+                      <li>{isKo ? '논의: ' : 'Address: '}{st.flaggedException?.reason}</li>
+                      <li>{isKo ? '통화 전에 학부모와 구체적인 후속 조치 하나 정하기' : 'Agree on one concrete follow-up step with the parent before ending the call.'}</li>
+                    </ol>
                   )}
 
-                  <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs">
+                  <div className="flex items-center justify-between gap-2">
                     <button
                       type="button"
                       onClick={() => setPhoneScriptFor((prev) => (prev === st.uid ? null : st.uid))}
-                      className="px-3 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 font-bold rounded-lg border border-orange-500/30 flex items-center gap-1.5 cursor-pointer transition-colors"
+                      className={quietBtn}
                     >
-                      <span>{phoneScriptFor === st.uid ? (isKo ? '통화 요점 숨기기' : 'Hide call notes') : (isKo ? '통화 요점 보기' : 'Call notes')}</span>
+                      {phoneScriptFor === st.uid ? (isKo ? '통화 요점 숨기기' : 'Hide call notes') : (isKo ? '통화 요점 보기' : 'Call notes')}
                     </button>
                     <button
                       type="button"
@@ -547,99 +469,90 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                         // campus-wide fetch above.
                         setCampusRoster((prev) => ({ ...prev, flagged: prev.flagged.filter((f) => f.uid !== st.uid) }));
                       }}
-                      className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-bold rounded-lg border border-emerald-500/30 cursor-pointer transition-colors"
+                      className={`${quietBtn} text-correct`}
                     >
+                      <CheckCircle size={16} weight="bold" className="mr-1.5" aria-hidden="true" />
                       {isKo ? '해결' : 'Resolve'}
                     </button>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           )}
-        </div>
+        </section>
       )}
 
       {/* SEAT EXPANSION REQUEST MODAL */}
       {showSeatExpansionModal && (
-        <div className="fixed inset-0 z-[550] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div className="fixed inset-0 z-[550] flex items-end justify-center bg-[#2b211a]/55 sm:items-center sm:p-4">
           <div
             ref={seatExpansionDialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="seat-expansion-title"
             tabIndex={-1}
-            className={`relative w-full max-w-md p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 text-left transition-colors ${
-            isNight ? 'bg-brand-dark border-white/15 text-white' : 'bg-white border-zinc-300 text-zinc-900'
-          }`}>
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-black text-lg">
-                  ➕
-                </div>
-                <div>
-                  <h3 id="seat-expansion-title" className="font-black text-lg">교사 석 추가 (Seat Expansion)</h3>
-                  <p className="text-xs text-zinc-400 font-mono">Current Allowance: {(seatsTotal?.ft || 0) + (seatsTotal?.kt || 0)} Seats</p>
-                </div>
+            className="modal-enter relative w-full max-w-md space-y-5 rounded-t-lg bg-surface p-6 text-left text-ink shadow-[0_24px_60px_-20px_rgba(43,33,26,0.45)] sm:rounded-lg"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 id="seat-expansion-title" className="text-[20px] font-extrabold">{isKo ? '교사 좌석 추가' : 'Add staff seats'}</h3>
+                <p className="text-[14px] text-ink-3">{isKo ? `지금 ${seatCount}석` : `${seatCount} seats now`}</p>
               </div>
               <button
                 type="button"
-                onClick={() => { setShowSeatExpansionModal(false); setSeatRequestSent(false); }}
-                aria-label="Close"
-                className="min-w-11 min-h-11 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                onClick={closeSeatModal}
+                aria-label={isKo ? '닫기' : 'Close'}
+                className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-ink-2 hover:bg-sunken hover:text-ink"
               >
-                ✕
+                <X size={20} weight="bold" />
               </button>
             </div>
 
             {seatRequestSent ? (
-              <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
-                <span className="text-3xl block">🎉</span>
-                <h4 className="font-black text-emerald-400 text-base">교사 석 추가 요청 접수 완료!</h4>
-                <p className="text-xs text-zinc-300 leading-relaxed">
-                  +{requestedExtraSeats}석 추가 요청이 등록되었고, 입금 계좌 정보를 이메일로 보내드렸습니다.<br />
-                  입금 확인 후 24시간 이내에 추가 교사 계정 초대가 활성화됩니다.
+              <div className="space-y-3 rounded-lg bg-right-soft p-5 text-center">
+                <CheckCircle size={32} weight="fill" className="mx-auto text-correct" aria-hidden="true" />
+                <p className="text-[16px] font-extrabold">{isKo ? '좌석 추가 요청을 받았어요' : 'Seat request received'}</p>
+                <p className="text-[14px] leading-relaxed text-ink-2">
+                  {isKo
+                    ? `+${requestedExtraSeats}석 요청이 등록되었고, 입금 계좌를 이메일로 보내드렸어요. 입금 확인 후 24시간 안에 초대가 열려요.`
+                    : `We logged +${requestedExtraSeats} seats and emailed the bank details. Invites open within 24 hours of payment.`}
                 </p>
-                <button
-                  type="button"
-                  onClick={() => { setShowSeatExpansionModal(false); setSeatRequestSent(false); }}
-                  className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer"
-                >
-                  확인 완료
+                <button type="button" onClick={closeSeatModal} className={primaryBtn}>
+                  {isKo ? '확인' : 'Done'}
                 </button>
               </div>
             ) : (
-              <div className="space-y-4 text-xs">
-                <p className={isNight ? 'text-zinc-300' : 'text-zinc-700'}>
-                  원어민 강사(FT) 또는 한국인 코티처(KT)를 추가 등록하기 위해 교사 계정 석을 확장합니다. (석당 ₩19,000 / 월)
+              <>
+                <p className="text-[15px] text-ink-2">
+                  {isKo
+                    ? '원어민 선생님(FT)이나 한국인 선생님(KT)을 더 초대하려면 좌석을 늘려요. 좌석당 월 ₩19,000이에요.'
+                    : 'Add seats to invite more foreign (FT) or Korean (KT) teachers. ₩19,000 per seat a month.'}
                 </p>
 
-                <div className="space-y-2">
-                  <label className="font-bold text-zinc-400 block">추가 교사 석 수 선택:</label>
+                <fieldset>
+                  <legend className="mb-2 text-[13px] font-bold text-ink-3">{isKo ? '추가할 좌석' : 'Seats to add'}</legend>
                   <div className="grid grid-cols-3 gap-2">
-                    {[+1, +3, +5].map((count) => (
+                    {[1, 3, 5].map((count) => (
                       <button
                         key={count}
                         type="button"
+                        aria-pressed={requestedExtraSeats === count}
                         onClick={() => setRequestedExtraSeats(count)}
-                        className={`p-3 rounded-xl border text-xs font-black transition-colors cursor-pointer ${
-                          requestedExtraSeats === count
-                            ? 'bg-orange-500 border-orange-500 text-black shadow-md'
-                            : isNight ? 'bg-white/5 border-white/10 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-700'
+                        className={`btn-press min-h-12 cursor-pointer rounded-md text-[16px] font-extrabold tabular-nums ${
+                          requestedExtraSeats === count ? 'bg-sign text-on-sign' : 'bg-sunken text-ink-2 hover:text-ink'
                         }`}
                       >
-                        +{count}석 추가
+                        +{count}
                       </button>
                     ))}
                   </div>
-                </div>
+                </fieldset>
 
-                <div className={`p-4 rounded-2xl border ${isNight ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-                  <div className="flex justify-between items-center text-xs font-mono">
-                    <span className="text-zinc-400">추가 석 요금:</span>
-                    <strong className="text-orange-400">₩{(requestedExtraSeats * 19000).toLocaleString()} / 월</strong>
-                  </div>
-                  <p className="text-[10px] text-zinc-400 mt-1">계좌이체 세금계산서로합산 청구됩니다.</p>
+                <div className="flex items-baseline justify-between border-y border-rule py-3">
+                  <span className="text-[14px] text-ink-2">{isKo ? '월 추가 요금' : 'Added each month'}</span>
+                  <strong className="text-[18px] font-extrabold tabular-nums">₩{(requestedExtraSeats * 19000).toLocaleString()}</strong>
                 </div>
+                <p className="-mt-3 text-[13px] text-ink-3">{isKo ? '계좌이체, 세금계산서에 합산 청구돼요.' : 'Billed by bank transfer on your tax invoice.'}</p>
 
                 <button
                   type="button"
@@ -653,11 +566,11 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                       setIsRequestingSeats(false);
                     }
                   }}
-                  className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-black font-black text-xs rounded-xl shadow-lg transition-[background-color,opacity] cursor-pointer"
+                  className={`${primaryBtn} w-full`}
                 >
-                  {isRequestingSeats ? '요청 중...' : `⚡ +${requestedExtraSeats}석 추가 세금계산서 청구하기 →`}
+                  {isRequestingSeats ? (isKo ? '요청 중...' : 'Sending...') : (isKo ? `+${requestedExtraSeats}석 요청하기` : `Request +${requestedExtraSeats} seats`)}
                 </button>
-              </div>
+              </>
             )}
           </div>
         </div>
@@ -670,53 +583,50 @@ export const NativeDirectorPortal: React.FC<Props> = ({
 // did parents get the report? Per class, from today's logs only
 // (useLogCompliance.todayStatus) — an older backlog shows in the KT inbox.
 function DirectorTodayPanel({
-  isNight,
   isKo,
   rows,
   isLoading,
 }: {
-  isNight: boolean;
   isKo: boolean;
   rows: ComplianceRow[];
   isLoading: boolean;
 }) {
   if (rows.length === 0 && !isLoading) return null;
-  const muted = isNight ? 'text-zinc-400' : 'text-zinc-500';
   const statusFor = (row: ComplianceRow) => {
-    if (row.todayStatus === 'none') return { key: 'none', label: isKo ? '아직 일지 없음' : 'Not logged yet', tone: isNight ? 'bg-white/10 text-zinc-300' : 'bg-zinc-100 text-zinc-600' };
-    if (row.todayStatus === 'pending') return { key: 'pending', label: isKo ? 'KT 검토 대기' : 'Waiting for KT review', tone: isNight ? 'bg-amber-500/15 text-amber-400' : 'bg-amber-100 text-amber-800' };
-    return { key: 'sent', label: isKo ? '학부모 전달 완료' : 'Sent to parents', tone: isNight ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-100 text-emerald-800' };
+    if (row.todayStatus === 'none') return { key: 'none', label: isKo ? '아직 일지 없음' : 'Not logged yet', tone: 'text-ink-2 ring-1 ring-inset ring-rule' };
+    if (row.todayStatus === 'pending') return { key: 'pending', label: isKo ? 'KT 검토 대기' : 'Waiting for KT review', tone: 'bg-line-soft text-line-ink' };
+    return { key: 'sent', label: isKo ? '학부모 전달 완료' : 'Sent to parents', tone: 'bg-right-soft text-correct' };
   };
   const sentCount = rows.filter((r) => statusFor(r).key === 'sent').length;
 
   return (
-    <section className={`rounded-2xl border ${isNight ? 'border-white/10' : 'border-zinc-200'}`}>
-      <header className={`flex items-baseline justify-between gap-3 px-5 py-4 border-b ${isNight ? 'border-white/10' : 'border-zinc-200'}`}>
-        <h4 className="font-black text-base">{isKo ? '오늘' : 'Today'}</h4>
+    <section className="rounded-lg border border-rule bg-surface">
+      <header className="flex items-baseline justify-between gap-3 border-b border-rule px-5 py-4">
+        <h3 className="text-[20px] font-extrabold tracking-[-0.01em]">{isKo ? '오늘 리포트' : "Today's reports"}</h3>
         {!isLoading && (
-          <span className={`text-sm ${muted}`}>
-            {isKo ? `${rows.length}개 반 중 ${sentCount}개 전달 완료` : `${sentCount} of ${rows.length} classes sent`}
+          <span className="text-[14px] font-semibold text-ink-3 tabular-nums">
+            {isKo ? `${rows.length}개 반 중 ${sentCount}개 전달` : `${sentCount} of ${rows.length} classes sent`}
           </span>
         )}
       </header>
       {isLoading && rows.length === 0 ? (
-        <p className={`px-5 py-4 text-sm ${muted}`}>{isKo ? '불러오는 중...' : 'Loading...'}</p>
+        <p className="px-5 py-4 text-[14px] text-ink-3">{isKo ? '불러오는 중...' : 'Loading...'}</p>
       ) : (
-        <ul className={`divide-y ${isNight ? 'divide-white/5' : 'divide-zinc-100'}`}>
+        <ul className="divide-y divide-rule">
           {rows.map((row) => {
             const status = statusFor(row);
             return (
-              <li key={row.classId} className="flex items-center justify-between gap-3 px-5 py-3">
+              <li key={row.classId} className="flex items-center justify-between gap-3 px-5 py-3.5">
                 <div className="min-w-0">
-                  <p className="text-sm font-bold truncate">{row.className}</p>
-                  <p className={`text-xs truncate ${row.missStreak >= 2 ? (isNight ? 'text-red-400' : 'text-red-600') : muted}`}>
+                  <p className="truncate text-[15px] font-bold">{row.className}</p>
+                  <p className={`truncate text-[13px] ${row.missStreak >= 2 ? 'font-semibold text-wrong' : 'text-ink-3'}`}>
                     {[
                       row.teacherName,
                       row.missStreak >= 2 && (isKo ? `${row.missStreak}일 연속 미제출` : `Missed ${row.missStreak} days in a row`),
                     ].filter(Boolean).join(' · ')}
                   </p>
                 </div>
-                <span className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-bold ${status.tone}`}>{status.label}</span>
+                <span className={`shrink-0 rounded-md px-2.5 py-1 text-[13px] font-bold ${status.tone}`}>{status.label}</span>
               </li>
             );
           })}

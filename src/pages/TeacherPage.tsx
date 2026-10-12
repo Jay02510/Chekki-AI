@@ -85,6 +85,13 @@ export default function TeacherPage({ isNight = true }: Props) {
     document.body.classList.add('schools-ui');
     return () => document.body.classList.remove('schools-ui');
   }, []);
+  // Warm tokens (text-ink, bg-surface...) follow this page's own theme
+  // toggle, not the device theme on html.
+  useEffect(() => {
+    document.body.classList.toggle('dark', isThemeNight);
+    document.body.classList.toggle('theme-light', !isThemeNight);
+    return () => document.body.classList.remove('dark', 'theme-light');
+  }, [isThemeNight]);
   const [confirmDialog, setConfirmDialog] = useState<{
     title: string;
     onConfirm: () => void;
@@ -2349,7 +2356,7 @@ export default function TeacherPage({ isNight = true }: Props) {
           {/* Nav per role — DirectorSidebarNav/KtSidebarNav/FtSidebarNav
               (Phase 6 of the buzzing-nibbling-hearth TeacherPage split). */}
           {(loginRole === 'director' || user?.role === 'director') && (
-            <DirectorSidebarNav isNight={isThemeNight} isKo={isKo} activeTab={activeTab} setActiveTab={setActiveTab} />
+            <DirectorSidebarNav isKo={isKo} activeTab={activeTab} setActiveTab={setActiveTab} />
           )}
 
           {loginRole !== 'director' && educatorRole === 'kt' && (
@@ -2442,7 +2449,6 @@ export default function TeacherPage({ isNight = true }: Props) {
       <main className={`flex-1 flex flex-col min-w-0 relative overflow-y-auto transition-colors ${
         isThemeNight ? 'bg-brand-dark text-white' : 'bg-slate-50 text-zinc-900'
       }`}>
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent pointer-events-none" />
         
         {/* Top Header Control Bar */}
         {/* The KT inbox spans every class, so the class switcher does nothing

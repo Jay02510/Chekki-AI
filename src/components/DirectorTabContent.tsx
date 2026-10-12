@@ -1,4 +1,5 @@
 import React from 'react';
+import { CaretDown, WarningCircle } from '@phosphor-icons/react';
 import { NativeDirectorPortal } from './NativeDirectorPortal';
 import { NativeDirectorStudentsTab } from './NativeDirectorStudentsTab';
 import { StudentInvitePanel } from './StudentInvitePanel';
@@ -7,6 +8,7 @@ import { TeacherInvitePanel } from './TeacherInvitePanel';
 import { TeacherRosterPanel } from './TeacherRosterPanel';
 import { SchoolBillingPanel } from './SchoolBillingPanel';
 import { useLogCompliance } from '../../hooks/useLogCompliance';
+import { staffUi } from './staffUi';
 import type { TabId } from '../../hooks/useTeacherTabs';
 
 interface Props {
@@ -70,7 +72,6 @@ export function DirectorTabContent(props: Props) {
     <>
       {activeTab === 'director_hq' && (
         <NativeDirectorPortal
-          isNight={isNight}
           isKo={isKo}
           academyName={props.academyName}
           academyLogo={props.academyLogo}
@@ -96,7 +97,6 @@ export function DirectorTabContent(props: Props) {
       {activeTab === 'billing' && (
         props.schoolId ? (
           <SchoolBillingPanel
-            isNight={isNight}
             isKo={isKo}
             schoolId={props.schoolId}
             seatsTotal={props.seatsTotal}
@@ -104,14 +104,14 @@ export function DirectorTabContent(props: Props) {
             onRequestPlanChange={props.onRequestPlanChange}
           />
         ) : (
-          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 font-bold">
-            School profile still loading — billing info will be available once it finishes.
-          </div>
+          <p className="rounded-lg bg-surface p-4 text-[14px] font-semibold text-ink-2 ring-1 ring-inset ring-rule">
+            {isKo ? '학원 정보를 불러오는 중이에요. 잠시 후 결제 정보가 보여요.' : 'School profile still loading — billing info will be available once it finishes.'}
+          </p>
         )
       )}
 
       {activeTab === 'students' && (
-        <div className="space-y-8">
+        <div className={`${staffUi.page} space-y-10`}>
           {(() => {
             // lastScanDate already exists on every activeRoster row (feeds
             // StudentDatabaseGrid's "Last Active" column below) — nobody
@@ -126,9 +126,9 @@ export function DirectorTabContent(props: Props) {
             });
             if (inactive.length === 0) return null;
             return (
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-3">
-                <span className="text-lg">⚠️</span>
-                <p className="text-xs font-bold text-amber-400">
+              <div className="flex items-center gap-3 rounded-lg bg-line-soft p-4">
+                <WarningCircle size={20} weight="fill" className="shrink-0 text-line-ink" aria-hidden="true" />
+                <p className="text-[14px] font-bold text-ink">
                   {isKo
                     ? `${inactive.length}명의 학생이 ${INACTIVE_DAYS}일 이상 스캔하지 않았습니다.`
                     : `${inactive.length} student${inactive.length === 1 ? '' : 's'} ${inactive.length === 1 ? 'hasn\'t' : 'haven\'t'} scanned in ${INACTIVE_DAYS}+ days.`}
@@ -147,14 +147,12 @@ export function DirectorTabContent(props: Props) {
             />
           )}
           <NativeDirectorStudentsTab
-            isNight={isNight}
             isKo={isKo}
             pendingRoster={props.pendingRoster}
             handleApproveStudent={props.handleApproveStudent}
             handleDeclineStudent={props.handleDeclineStudent}
           />
           <StudentDatabaseGrid
-            isNight={isNight}
             isKo={isKo}
             activeRoster={props.activeRoster}
             pendingRoster={props.pendingRoster}
@@ -171,159 +169,132 @@ export function DirectorTabContent(props: Props) {
       )}
 
       {activeTab === 'classes' && (
-        <div className={`p-1 rounded-[2.5rem] ${isNight ? 'bg-white/5 border border-white/10' : 'bg-white border border-zinc-200 shadow-md'}`}>
-          <div className={`rounded-[calc(2.5rem-0.25rem)] p-6 sm:p-8 ${isNight ? 'bg-brand-dark' : 'bg-white'}`}>
-            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-              <div>
-                <h4 className={`text-lg font-black ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                  {isKo ? '전체 학급' : 'All Classes'}
-                </h4>
-                <p className="text-xs text-zinc-400">
-                  {isKo ? '이 학원의 모든 학급입니다.' : 'Every class in this school.'}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={props.onNewClassClick}
-                className="px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold cursor-pointer transition-colors"
-              >
-                {isKo ? '+ 새 학급' : '+ New Class'}
-              </button>
+        <section className="mx-auto max-w-5xl text-left text-ink">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-[26px] font-extrabold leading-tight tracking-[-0.02em] sm:text-[30px]">{isKo ? '전체 학급' : 'All classes'}</h2>
+              <p className="text-[14px] text-ink-3">{isKo ? '학급을 누르면 최근 14일 일지 제출 현황이 보여요.' : 'Open a class to see the last 14 days of logs.'}</p>
             </div>
+            <button
+              type="button"
+              onClick={props.onNewClassClick}
+              className="btn-press inline-flex min-h-11 cursor-pointer items-center rounded-md bg-line px-5 text-[15px] font-extrabold text-on-line"
+            >
+              {isKo ? '새 학급' : 'New class'}
+            </button>
+          </div>
 
-            {props.classes.filter((c: any) => !c.isDemo).length === 0 ? (
-              <p className="text-xs text-zinc-500 text-center py-6">
-                {isKo ? '아직 학급이 없습니다.' : 'No classes yet.'}
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {props.classes
-                  .filter((c: any) => !c.isDemo)
-                  .map((c: any) => {
-                    const isSelected = props.selectedClass?.id === c.id;
-                    const compliance = complianceRows.find((row) => row.classId === c.id);
-                    // Clicking a row only ever set it as the "active class"
-                    // for other tabs (log form, script, etc.) — nothing
-                    // visibly changed on THIS screen, so it looked like the
-                    // click did nothing (Audit: director clicks a class,
-                    // sees no info about it). Student count is computed
-                    // from roster data the parent already fetched — no new
-                    // network call — so an expanded row costs nothing extra.
-                    const studentCount =
-                      props.activeRoster.filter((r: any) => r.classId === c.id).length +
-                      props.pendingRoster.filter((r: any) => r.classId === c.id).length;
-                    return (
-                      <div
-                        key={c.id}
-                        className={`rounded-2xl border transition-colors ${
-                          isSelected
-                            ? (isNight ? 'bg-orange-500/10 border-orange-500/40' : 'bg-orange-50 border-orange-300')
-                            : (isNight ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-zinc-50 border-zinc-200 hover:bg-zinc-100')
-                        }`}
+          {props.classes.filter((c: any) => !c.isDemo).length === 0 ? (
+            <p className="rounded-lg bg-surface p-10 text-center ring-1 ring-inset ring-rule text-[15px] text-ink-3">
+              {isKo ? '아직 학급이 없습니다.' : 'No classes yet.'}
+            </p>
+          ) : (
+            <ul className="divide-y divide-rule border-y border-rule">
+              {props.classes
+                .filter((c: any) => !c.isDemo)
+                .map((c: any) => {
+                  const isSelected = props.selectedClass?.id === c.id;
+                  const compliance = complianceRows.find((row) => row.classId === c.id);
+                  // Clicking a row only ever set it as the "active class"
+                  // for other tabs (log form, script, etc.) — nothing
+                  // visibly changed on THIS screen, so it looked like the
+                  // click did nothing (Audit: director clicks a class,
+                  // sees no info about it). Student count is computed
+                  // from roster data the parent already fetched — no new
+                  // network call — so an expanded row costs nothing extra.
+                  const studentCount =
+                    props.activeRoster.filter((r: any) => r.classId === c.id).length +
+                    props.pendingRoster.filter((r: any) => r.classId === c.id).length;
+                  return (
+                    <li key={c.id}>
+                      <button
+                        type="button"
+                        aria-expanded={isSelected}
+                        onClick={() => props.onSelectClass(c.id)}
+                        className="relative flex min-h-[64px] w-full cursor-pointer items-center justify-between gap-3 py-3 text-left before:absolute before:-left-3 before:bottom-3 before:top-3 before:w-[3px] before:rounded-full before:bg-line before:opacity-0 aria-expanded:before:opacity-100"
                       >
-                        <div
-                          role="button"
-                          tabIndex={0}
-                          onClick={() => props.onSelectClass(c.id)}
-                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); props.onSelectClass(c.id); } }}
-                          className="flex items-center justify-between p-4 cursor-pointer"
-                        >
-                          <div className="min-w-0">
-                            <p className={`text-sm font-bold ${isNight ? 'text-white' : 'text-zinc-900'}`}>
-                              {c.name}
-                            </p>
-                            <p className="text-xs text-zinc-400">
-                              {c.level || (isKo ? '일반' : 'General')} · {compliance?.teacherName || `${(c.assignedTeacherUids || []).length} ${isKo ? '명 배정' : 'teacher(s)'}`} · {studentCount} {isKo ? '명 원생' : 'student(s)'}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            {compliance && (
-                              compliance.missStreak > 0 ? (
-                                <span className="px-2 py-1 rounded-lg bg-rose-500/10 text-rose-400 text-[11px] font-bold whitespace-nowrap border border-rose-500/30">
-                                  {isKo ? `${compliance.missStreak}일 미제출` : `${compliance.missStreak} days missed`}
-                                </span>
-                              ) : (
-                                <span className="px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-[11px] font-bold whitespace-nowrap border border-emerald-500/30">
-                                  {isKo ? '제출 완료' : 'Up to date'}
-                                </span>
-                              )
-                            )}
-                          </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-[16px] font-bold">{c.name}</p>
+                          <p className="truncate text-[13px] text-ink-3">
+                            {c.level || (isKo ? '일반' : 'General')} · {compliance?.teacherName || `${(c.assignedTeacherUids || []).length} ${isKo ? '명 배정' : 'teacher(s)'}`} · {studentCount} {isKo ? '명 원생' : 'student(s)'}
+                          </p>
                         </div>
-                        {isSelected && (
-                          <div className={`mx-4 mb-4 p-4 rounded-xl border space-y-3 ${isNight ? 'bg-black/20 border-white/10' : 'bg-white border-zinc-200'}`}>
-                            <div className="grid grid-cols-3 gap-3">
-                              <div>
-                                <p className="text-[11px] font-bold text-zinc-500">{isKo ? '담임 교사' : 'Teacher'}</p>
-                                <p className={`text-xs font-bold mt-0.5 ${isNight ? 'text-white' : 'text-zinc-900'}`}>{compliance?.teacherName || '—'}</p>
+                        <div className="flex shrink-0 items-center gap-3">
+                          {compliance && (
+                            compliance.missStreak > 0 ? (
+                              <span className="rounded-md bg-wrong-soft px-2.5 py-1 text-[13px] font-bold text-wrong">
+                                {isKo ? `${compliance.missStreak}일 미제출` : `${compliance.missStreak} days missed`}
+                              </span>
+                            ) : (
+                              <span className="rounded-md bg-right-soft px-2.5 py-1 text-[13px] font-bold text-correct">
+                                {isKo ? '제출 완료' : 'Up to date'}
+                              </span>
+                            )
+                          )}
+                          <CaretDown size={18} weight="bold" className={`text-ink-3 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${isSelected ? 'rotate-180' : ''}`} aria-hidden="true" />
+                        </div>
+                      </button>
+                      {isSelected && (
+                        <div className="space-y-4 pb-5">
+                          {compliance && (
+                            <div>
+                              <p className="mb-1.5 text-[13px] font-bold text-ink-3">
+                                {isKo ? '최근 14일 일지 제출' : 'Last 14 days, log submitted'}
+                              </p>
+                              <div className="inline-flex max-w-full flex-col">
+                              <div className="flex gap-1 overflow-x-auto pb-1">
+                                {compliance.days.map((d) => (
+                                  <span
+                                    key={d.date}
+                                    title={d.date}
+                                    aria-label={`${d.date}: ${d.submitted ? (isKo ? '제출' : 'submitted') : d.isToday ? (isKo ? '오늘' : 'today') : (isKo ? '미제출' : 'missed')}`}
+                                    className={`h-6 w-6 shrink-0 rounded ${
+                                      d.submitted ? 'bg-correct' : d.isToday ? 'bg-sunken ring-1 ring-inset ring-ink-3' : 'bg-wrong-soft'
+                                    }`}
+                                  />
+                                ))}
                               </div>
-                              <div>
-                                <p className="text-[11px] font-bold text-zinc-500">{isKo ? '배정 교사' : 'Assigned'}</p>
-                                <p className={`text-xs font-bold mt-0.5 ${isNight ? 'text-white' : 'text-zinc-900'}`}>{(c.assignedTeacherUids || []).length}</p>
+                              <div className="flex justify-between text-[12px] text-ink-3">
+                                <span>{isKo ? '14일 전' : '14 days ago'}</span>
+                                <span>{isKo ? '오늘' : 'Today'}</span>
                               </div>
-                              <div>
-                                <p className="text-[11px] font-bold text-zinc-500">{isKo ? '원생 수' : 'Students'}</p>
-                                <p className={`text-xs font-bold mt-0.5 ${isNight ? 'text-white' : 'text-zinc-900'}`}>{studentCount}</p>
                               </div>
                             </div>
+                          )}
 
-                            {compliance && (
-                              <div>
-                                <p className="text-[11px] font-bold text-zinc-500 mb-1.5">
-                                  {isKo ? '최근 14일 일지 제출' : 'Last 14 days, log submitted'}
-                                </p>
-                                <div className="flex gap-1 overflow-x-auto pb-1">
-                                  {compliance.days.map((d) => (
-                                    <div
-                                      key={d.date}
-                                      title={d.date}
-                                      className={`w-5 h-5 rounded flex items-center justify-center text-[9px] shrink-0 ${
-                                        d.submitted
-                                          ? 'bg-emerald-500/20 text-emerald-400'
-                                          : d.isToday
-                                            ? (isNight ? 'bg-white/10 text-zinc-400' : 'bg-zinc-200 text-zinc-500')
-                                            : 'bg-rose-500/20 text-rose-400'
-                                      }`}
-                                    >
-                                      {d.submitted ? '✓' : d.isToday ? '·' : '✕'}
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            <p className={`text-[11px] ${isNight ? 'text-zinc-500' : 'text-zinc-500'}`}>
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <p className="text-[13px] text-ink-3">
                               {isKo
-                                ? '배정 교사 관리는 "교사 배정" 탭에서 할 수 있습니다.'
-                                : 'Manage which teachers are assigned from the Teacher Assignment tab.'}
+                                ? '배정 교사 관리는 "선생님 배정" 탭에서 할 수 있습니다.'
+                                : 'Manage which teachers are assigned from the Teachers tab.'}
                             </p>
                             {/* Delete lives inside the expanded row (still behind
                                 handleDeleteClass's confirm) rather than on
                                 every collapsed row. */}
                             <button
                               type="button"
-                              onClick={(e) => { e.stopPropagation(); props.onDeleteClass(c.id); }}
-                              className="min-h-11 px-3 text-xs font-bold text-rose-400 hover:underline cursor-pointer"
+                              onClick={() => props.onDeleteClass(c.id)}
+                              className="min-h-11 cursor-pointer px-1 text-[14px] font-bold text-wrong hover:underline"
                             >
                               {isKo ? '이 학급 삭제' : 'Delete this class'}
                             </button>
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
-              </div>
-            )}
-          </div>
-        </div>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+            </ul>
+          )}
+        </section>
       )}
 
       {activeTab === 'teacher_assignment' && (
-        <div className="space-y-6">
+        <div className={`${staffUi.page} space-y-10`}>
           {props.schoolId && props.classes.length === 0 ? (
-            <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-xs text-orange-400 font-bold">
-              Create at least one class before inviting teachers — invites need a class to assign the teacher to.
-            </div>
+            <p className="rounded-lg bg-line-soft p-4 text-[14px] font-semibold text-ink">
+              {isKo ? '선생님을 초대하려면 먼저 학급을 하나 만들어 주세요. 초대할 때 학급을 배정해야 해요.' : 'Create at least one class before inviting teachers — invites need a class to assign the teacher to.'}
+            </p>
           ) : props.schoolId ? (
             <TeacherInvitePanel
               isNight={isNight}
@@ -335,9 +306,9 @@ export function DirectorTabContent(props: Props) {
                 .map((c: any) => ({ id: c.id, name: c.name }))}
             />
           ) : (
-            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 font-bold">
-              School profile still loading — invites will be available once it finishes.
-            </div>
+            <p className="rounded-lg bg-surface p-4 text-[14px] font-semibold text-ink-2 ring-1 ring-inset ring-rule">
+              {isKo ? '학원 정보를 불러오는 중이에요.' : 'School profile still loading — invites will be available once it finishes.'}
+            </p>
           )}
 
           {props.schoolId ? (
@@ -349,9 +320,9 @@ export function DirectorTabContent(props: Props) {
               onAssignmentChanged={props.onClassesChanged}
             />
           ) : (
-            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 font-bold">
-              School profile still loading — teacher assignment will be available once it finishes.
-            </div>
+            <p className="rounded-lg bg-surface p-4 text-[14px] font-semibold text-ink-2 ring-1 ring-inset ring-rule">
+              {isKo ? '학원 정보를 불러오는 중이에요.' : 'School profile still loading — teacher assignment will be available once it finishes.'}
+            </p>
           )}
         </div>
       )}

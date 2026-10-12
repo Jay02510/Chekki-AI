@@ -4,8 +4,10 @@
    Warm cream paper, cocoa ink, Chekki's orange as the one accent line,
    numbered roundels, Korean set large over English. Built for a tired
    parent reading with a child beside them. Tokens flip with html.dark,
-   which follows the device theme. */
-:root {
+   which follows the device theme. Staff dashboards set .dark/.theme-light
+   on body from their own theme toggle instead. */
+:root,
+.theme-light {
   --m-ground: #fbf6ee;
   --m-surface: #ffffff;
   --m-sunken: #f5ecdf;
@@ -65,6 +67,8 @@
   --color-right-soft: var(--m-right-soft);
   /* `text-right` is also text-align:right, so green text uses text-correct. */
   --color-correct: var(--m-right);
+  /* Text on the orange line: cocoa in both themes. */
+  --color-on-line: #2b211a;
 }
 
 /* Pretendard as its own utility so pages on the landing bundle (where
