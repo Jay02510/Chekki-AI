@@ -28,6 +28,7 @@ import { Capacitor } from '@capacitor/core';
 import { cleanAnswerText } from '../utils/speechUtils';
 import { playSuccessSound, hapticSuccess, hapticError } from '../utils/feedbackUtils';
 import { copyToClipboard } from '../utils/clipboard';
+import { kstDate } from '../src/utils/localDate';
 
 interface DashboardProps {
   onClose: () => void;
@@ -138,7 +139,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       return;
     }
     if (user?.plan !== 'pro') {
-      const today = new Date().toISOString().split('T')[0];
+      const today = kstDate();
       const usedDate = localStorage.getItem('chekki_voice_limit_date');
       if (usedDate === today) {
         setShowPaywall(true);
@@ -155,7 +156,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       return;
     }
     if (user?.plan !== 'pro') {
-      const today = new Date().toISOString().split('T')[0];
+      const today = kstDate();
       const usedDate = localStorage.getItem('chekki_flashcard_limit_date');
       if (usedDate === today) {
         setShowPaywall(true);

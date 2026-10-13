@@ -8,6 +8,7 @@ import { CropModal } from './CropModal';
 import { LoopStrip, Stop } from './metro';
 import { ParentClassLogs } from './ParentClassLogs';
 import { useMistakes } from '../contexts/MistakeContext';
+import { kstDate } from '../src/utils/localDate';
 
 interface Props {
   onImageSelected: (base64: string) => void;
@@ -85,7 +86,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
 
   const linked = !!(user?.schoolId && user?.classId && user?.classStatus === 'active');
   const isPro = user?.plan === 'pro';
-  const today = new Date().toISOString().split('T')[0];
+  const today = kstDate();
   const scansUsed = user && user.lastScanDate === today ? user.scansUsedToday || 0 : 0;
   const scansLeft = Math.max(0, (user?.maxScansPerDay || 2) - scansUsed);
 

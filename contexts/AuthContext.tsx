@@ -46,6 +46,7 @@ const sha256 = async (plain: string): Promise<string> => {
 import { subscriptionService, AppleProducts } from '../services/subscriptionService';
 import { revenueCatService } from '../services/revenueCatService';
 import { PUBLIC_APP_URL, API_BASE_URL } from '../config';
+import { kstDate } from '../src/utils/localDate';
 
 // Web Kakao login needs the app's JavaScript key (Kakao console > App Keys).
 // The fallback is the native app key, which Kakao rejects on web with
@@ -283,11 +284,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               email: result.user.email || '',
               plan: 'free',
               scansUsedToday: 0,
-              lastScanDate: new Date().toISOString().split('T')[0],
+              lastScanDate: kstDate(),
               maxScansPerDay: FREE_DAILY_LIMIT,
               questionsUsedToday: 0,
               maxQuestionsPerDay: 5,
-              lastQuestionDate: new Date().toISOString().split('T')[0],
+              lastQuestionDate: kstDate(),
               schoolId: null,
               schoolName: null,
               subscriptionStartedAt: null,
@@ -400,11 +401,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               email: user.email || '',
               plan: 'free',
               scansUsedToday: 0,
-              lastScanDate: new Date().toISOString().split('T')[0],
+              lastScanDate: kstDate(),
               maxScansPerDay: FREE_DAILY_LIMIT,
               questionsUsedToday: 0,
               maxQuestionsPerDay: 5,
-              lastQuestionDate: new Date().toISOString().split('T')[0],
+              lastQuestionDate: kstDate(),
               schoolId: null,
               schoolName: null,
               subscriptionStartedAt: null,
@@ -468,11 +469,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: email.toLowerCase().trim(),
         plan: 'free',
         scansUsedToday: 0,
-        lastScanDate: new Date().toISOString().split('T')[0],
+        lastScanDate: kstDate(),
         maxScansPerDay: FREE_DAILY_LIMIT,
         questionsUsedToday: 0,
         maxQuestionsPerDay: 5,
-        lastQuestionDate: new Date().toISOString().split('T')[0],
+        lastQuestionDate: kstDate(),
         schoolId: null,
         schoolName: null,
         subscriptionStartedAt: null,
@@ -572,11 +573,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             role: 'parent',
             plan: 'free',
             scansUsedToday: 0,
-            lastScanDate: new Date().toISOString().split('T')[0],
+            lastScanDate: kstDate(),
             maxScansPerDay: FREE_DAILY_LIMIT,
             questionsUsedToday: 0,
             maxQuestionsPerDay: 5,
-            lastQuestionDate: new Date().toISOString().split('T')[0],
+            lastQuestionDate: kstDate(),
             schoolId: null,
             schoolName: null,
             subscriptionStartedAt: null,
@@ -634,11 +635,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   email: email,
                   plan: 'free',
                   scansUsedToday: 0,
-                  lastScanDate: new Date().toISOString().split('T')[0],
+                  lastScanDate: kstDate(),
                   maxScansPerDay: FREE_DAILY_LIMIT,
                   questionsUsedToday: 0,
                   maxQuestionsPerDay: 5,
-                  lastQuestionDate: new Date().toISOString().split('T')[0],
+                  lastQuestionDate: kstDate(),
                   schoolId: null,
                   schoolName: null,
                   subscriptionStartedAt: null,
@@ -674,11 +675,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 email,
                 plan: 'free',
                 scansUsedToday: 0,
-                lastScanDate: new Date().toISOString().split('T')[0],
+                lastScanDate: kstDate(),
                 maxScansPerDay: FREE_DAILY_LIMIT,
                 questionsUsedToday: 0,
                 maxQuestionsPerDay: 5,
-                lastQuestionDate: new Date().toISOString().split('T')[0],
+                lastQuestionDate: kstDate(),
                 schoolId: null,
                 schoolName: null,
                 subscriptionStartedAt: null,
@@ -738,11 +739,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   email: googleUser.email || result.user.email || '',
                   plan: 'free',
                   scansUsedToday: 0,
-                  lastScanDate: new Date().toISOString().split('T')[0],
+                  lastScanDate: kstDate(),
                   maxScansPerDay: FREE_DAILY_LIMIT,
                   questionsUsedToday: 0,
                   maxQuestionsPerDay: 5,
-                  lastQuestionDate: new Date().toISOString().split('T')[0],
+                  lastQuestionDate: kstDate(),
                   schoolId: null,
                   schoolName: null,
                   subscriptionStartedAt: null,
@@ -788,11 +789,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               email: result.user.email || '',
               plan: 'free',
               scansUsedToday: 0,
-              lastScanDate: new Date().toISOString().split('T')[0],
+              lastScanDate: kstDate(),
               maxScansPerDay: FREE_DAILY_LIMIT,
               questionsUsedToday: 0,
               maxQuestionsPerDay: 5,
-              lastQuestionDate: new Date().toISOString().split('T')[0],
+              lastQuestionDate: kstDate(),
               schoolId: null,
               schoolName: null,
               subscriptionStartedAt: null,
@@ -912,11 +913,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email: profile?.email || result.user.email || '',
             plan: 'free',
             scansUsedToday: 0,
-            lastScanDate: new Date().toISOString().split('T')[0],
+            lastScanDate: kstDate(),
             maxScansPerDay: FREE_DAILY_LIMIT,
             questionsUsedToday: 0,
             maxQuestionsPerDay: 5,
-            lastQuestionDate: new Date().toISOString().split('T')[0],
+            lastQuestionDate: kstDate(),
             schoolId: null,
             schoolName: null,
             subscriptionStartedAt: null,
@@ -1062,7 +1063,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const checkScanLimit = (): boolean => {
     if (!userProfile || userProfile.plan === 'pro') return true;
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = kstDate();
     const isNewDay = userProfile.lastScanDate !== today;
 
     const currentScans = isNewDay ? 0 : userProfile.scansUsedToday;
@@ -1077,7 +1078,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const incrementScan = async (): Promise<boolean> => {
     if (!firebaseUser || !userProfile) return true;
-    const today = new Date().toISOString().split('T')[0];
+    const today = kstDate();
     const isNewDay = userProfile.lastScanDate !== today;
     try {
       setUserProfile((prev) =>
@@ -1123,7 +1124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkQuestionLimit = (): boolean => {
     if (!userProfile || userProfile.plan === 'pro') return true;
-    const today = new Date().toISOString().split('T')[0];
+    const today = kstDate();
     const isNewDay = userProfile.lastQuestionDate !== today;
     const currentQuestions = isNewDay ? 0 : userProfile.questionsUsedToday;
     const limit = 1; // Enforce 1 question per day for free users
@@ -1136,7 +1137,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const incrementQuestion = async (): Promise<boolean> => {
     if (!firebaseUser || !userProfile) return true;
-    const today = new Date().toISOString().split('T')[0];
+    const today = kstDate();
     const isNewDay = userProfile.lastQuestionDate !== today;
     try {
       setUserProfile((prev) =>

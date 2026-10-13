@@ -10,6 +10,10 @@ import { createHash, timingSafeEqual } from 'crypto';
 import { generateJoinCode } from './_lib/joinCode.js';
 import { sendEmail, escapeHtml, emailLayout, emailButton } from './_lib/email.js';
 
+// Korea's date for daily quotas; must match src/utils/localDate.ts kstDate.
+const kstDate = () => new Date(Date.now() + 9 * 3_600_000).toISOString().slice(0, 10);
+
+
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE;
 
 // Plain `!==` leaks timing information proportional to how many leading
@@ -258,7 +262,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       const nextBilling = new Date();
       if (years) nextBilling.setFullYear(nextBilling.getFullYear() + years);
       else nextBilling.setMonth(nextBilling.getMonth() + 1);
-      const today = new Date().toISOString().split('T')[0];
+      const today = kstDate();
       await adminDb.collection('users').doc(created.uid).set({
         uid: created.uid,
         name: name || 'User',
