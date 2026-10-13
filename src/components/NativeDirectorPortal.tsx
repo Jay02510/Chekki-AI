@@ -385,7 +385,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                         {student.flaggedException || student.weeklyMistakesCount > 0 ? (
                           <span className="flex shrink-0 items-center gap-1 text-[13px] font-bold text-line-ink">
                             <WarningCircle size={16} weight="fill" aria-hidden="true" />
-                            {student.weeklyMistakesCount > 0 ? (isKo ? `오답 ${student.weeklyMistakesCount}개` : `${student.weeklyMistakesCount} mistakes`) : (isKo ? '주의' : 'Flagged')}
+                            {student.weeklyMistakesCount > 0 ? (isKo ? `오답 ${student.weeklyMistakesCount}개` : `${student.weeklyMistakesCount} ${student.weeklyMistakesCount === 1 ? 'mistake' : 'mistakes'}`) : (isKo ? '주의' : 'Flagged')}
                           </span>
                         ) : student.hasScannedThisWeek ? (
                           <span className="flex shrink-0 items-center gap-1 text-[13px] font-bold text-correct">
