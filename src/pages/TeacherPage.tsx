@@ -69,6 +69,7 @@ import {
   removePendingLogSubmission,
   QueuedLogSubmission,
 } from '../services/aiGenerator';
+import { localDate } from '../utils/localDate';
 
 interface Props {
   isNight?: boolean;
@@ -186,12 +187,13 @@ export default function TeacherPage({ isNight = true }: Props) {
       const [summary, studentReports] = await Promise.all([
         generateGeneralClassSummary({ ...payload, authorRole }),
         Promise.all(payload.exceptions.map(async (ex) => {
-          const updateText = await generateStudentExceptionReport(
-            ex.studentName,
-            payload.lessonTopic,
-            payload.textbook,
-            ex.details
-          );
+          const { text: updateText, failed } = await generateStudentExceptionReport({
+            studentName: ex.studentName,
+            classTopic: payload.lessonTopic,
+            textbook: payload.textbook,
+            exceptionDetails: ex.details,
+            category: ex.type,
+          });
           // No per-exception phoneTalkingPoints call here anymore — the old
           // same-day phone-consult drawer that displayed it was removed in
           // favor of ReportCardModal's weekly consolidated talking points
@@ -203,6 +205,7 @@ export default function TeacherPage({ isNight = true }: Props) {
             koreanUpdate: updateText,
             phoneTalkingPoints: [],
             category: ex.type,
+            failed,
           };
         })),
       ]);
@@ -228,6 +231,8 @@ export default function TeacherPage({ isNight = true }: Props) {
         aiKoreanSummary: summary.korean,
         aiEnglishSummary: summary.english,
         aiStudentReports: studentReports,
+        aiSummaryFallback: summary.fallback,
+        authorRole,
         reviewStatus: 'pending_review',
       });
       const newLog = { id: docRef.id, ...payload };
@@ -243,6 +248,8 @@ export default function TeacherPage({ isNight = true }: Props) {
           aiKoreanSummary: summary.korean,
           aiEnglishSummary: summary.english,
           aiStudentReports: studentReports,
+          aiSummaryFallback: summary.fallback,
+          authorRole,
         }]);
       }
       showToast({
@@ -1688,7 +1695,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       if (reason && reason.trim()) {
         await updateDoc(userRef, {
           flaggedException: {
-            date: new Date().toISOString().split('T')[0],
+            date: localDate(),
             reason: reason.trim(),
             teacherName: user?.name || user?.email?.split('@')[0] || (isKo ? '선생님' : 'Teacher'),
             resolved: false,
@@ -1700,7 +1707,7 @@ export default function TeacherPage({ isNight = true }: Props) {
       await fetchRosterAndMistakes();
       setSelectedStudentDetails((prev: any) =>
         prev && prev.uid === studentUid
-          ? { ...prev, flaggedException: reason && reason.trim() ? { date: new Date().toISOString().split('T')[0], reason: reason.trim(), teacherName: user?.name || user?.email?.split('@')[0] || 'Teacher', resolved: false } : null }
+          ? { ...prev, flaggedException: reason && reason.trim() ? { date: localDate(), reason: reason.trim(), teacherName: user?.name || user?.email?.split('@')[0] || 'Teacher', resolved: false } : null }
           : prev
       );
     } catch (err) {

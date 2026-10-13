@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { collection, getDocs, orderBy, query, where } from 'firebase/firestore';
 import { dbInstance } from '../services/database';
+import { localDate } from '../src/utils/localDate';
 
 const WINDOW_DAYS = 14;
 
-function isoDate(d: Date) {
-  return d.toISOString().split('T')[0];
-}
+const isoDate = localDate;
 
 function lastNDays(n: number): string[] {
   const days: string[] = [];

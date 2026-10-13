@@ -7,6 +7,7 @@ import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { dbInstance } from '../../services/database';
 import { collection, query, where, orderBy, getDocs, Timestamp } from 'firebase/firestore';
 import { generatePhoneConsultationPrep } from '../services/aiGenerator';
+import { localDate } from '../utils/localDate';
 
 interface Props {
   isKo: boolean;
@@ -19,7 +20,7 @@ interface Props {
   onClose: () => void;
 }
 
-const toDateInputValue = (date: Date) => date.toISOString().slice(0, 10);
+const toDateInputValue = localDate;
 
 export const ReportCardModal: React.FC<Props> = ({
   isKo,

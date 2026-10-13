@@ -145,41 +145,62 @@ async function callGenerateReport(type: string, payload: unknown): Promise<any> 
   return response.json();
 }
 
+export type RewriteStyle = 'shorter' | 'detail';
+/** Sent only when a KT asks for a rewrite on the review screen. */
+export interface RewriteRequest {
+  style?: RewriteStyle;
+  previous?: string;
+}
+
 /**
  * 1. General Class Summary Generator (Bilingual KO + EN)
+ * `fallback` means the AI call failed and the text is a plain template.
  */
-export async function generateGeneralClassSummary(payload: ClassLogPayload): Promise<{ korean: string; english: string }> {
+export async function generateGeneralClassSummary(
+  payload: ClassLogPayload,
+  rewrite?: RewriteRequest
+): Promise<{ korean: string; english: string; fallback: boolean }> {
   try {
-    return await callGenerateReport('summary', payload);
+    return await callGenerateReport('summary', { ...payload, ...rewrite });
   } catch (err) {
+    if (rewrite) throw err; // the KT is waiting on a button; show them the failure
     console.warn('generate-report call fallback to deterministic template:', err);
-    // Activities/energy are optional on the log form — skip that sentence when empty.
-    const hasActivities = payload.activities.length > 0;
+    // Same plain-facts template as api/analyze.ts, flagged so the KT rewrites it.
     return {
-      korean: `오늘 ${payload.className} 수업에서는 ${payload.textbook} (${payload.lessonTopic})의 핵심 내용을 집중 학습했습니다.${hasActivities ? ` 원생들은 ${payload.activities.join(', ')} 활동에 ${payload.energyLevel === 'High Energy and Engaged' ? '매우 밝고 적극적으로' : '차분하게'} 참여하였습니다.` : ''}`,
-      english: `Today in ${payload.className}, students focused on ${payload.lessonTopic} using ${payload.textbook}.${hasActivities ? ` Everyone participated attentively during ${payload.activities.join(' and ')}.` : ''}`,
+      korean: `오늘은 ${payload.textbook} 교재로 ${payload.lessonTopic} 수업을 했어요.`,
+      english: `Today's lesson: ${payload.lessonTopic} (${payload.textbook}).`,
+      fallback: true,
     };
   }
 }
 
 /**
- * 2. Personalized Student Exception Update Generator (Polite KO)
+ * 2. Personalized Student Note Generator (Korean)
+ * `failed` means translation failed and `text` carries the flagged raw note.
  */
 export async function generateStudentExceptionReport(
-  studentName: string,
-  classTopic: string,
-  textbook: string,
-  exceptionDetails: string
-): Promise<string> {
+  note: {
+    studentName: string;
+    classTopic: string;
+    textbook: string;
+    exceptionDetails: string;
+    category?: 'praise' | 'attention';
+    classSummary?: string;
+  },
+  rewrite?: RewriteRequest
+): Promise<{ text: string; failed: boolean }> {
   try {
-    const { text } = await callGenerateReport('exception', { studentName, classTopic, textbook, exceptionDetails });
-    return text || `${studentName} 원생은 오늘 ${textbook} (${classTopic}) 수업에 참여하였습니다. ${exceptionDetails}`;
+    const { text, failed } = await callGenerateReport('exception', { ...note, ...rewrite });
+    if (text) return { text, failed: !!failed };
   } catch (err) {
-    // API route itself unreachable — same flagged-fallback shape as the
-    // server-side retry exhaustion in api/analyze.ts, so a KT never sees
-    // raw English disguised as translated Korean either way.
-    return `⚠️ ${studentName} — 자동 번역 실패, 아래 원문을 직접 번역해 주세요 (auto-translation failed, please translate manually):\n${exceptionDetails}`;
+    if (rewrite) throw err;
   }
+  // Same flagged-fallback shape as the server-side retry exhaustion in
+  // api/analyze.ts, so a KT never sees raw English disguised as Korean.
+  return {
+    text: `⚠️ ${note.studentName} — 자동 번역 실패, 아래 원문을 직접 번역해 주세요 (auto-translation failed, please translate manually):\n${note.exceptionDetails}`,
+    failed: true,
+  };
 }
 
 /**

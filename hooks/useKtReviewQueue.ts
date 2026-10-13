@@ -4,6 +4,7 @@ import { collection, doc, getDocs, orderBy, limit as fbLimit, query, serverTimes
 import { dbInstance } from '../services/database';
 import type { UserProfile } from '../types';
 import { parentReportRecipients, type ApprovedNote } from '../src/services/parentReports';
+import { localDate } from '../src/utils/localDate';
 
 export type { ApprovedNote };
 
@@ -25,8 +26,18 @@ export interface PendingClassLog {
     studentUid?: string | null;
     koreanUpdate: string;
     category?: 'praise' | 'attention';
+    failed?: boolean;
   }>;
+  aiSummaryFallback?: boolean;
   enrolledStudentUids?: string[];
+  // The teacher's own input, shown to the KT next to the AI draft and sent
+  // back to the AI on a rewrite.
+  authorRole?: 'ft' | 'kt';
+  textbook?: string;
+  energyLevel?: string;
+  activities?: string[];
+  generalComments?: string;
+  exceptions?: Array<{ studentName: string; studentUid?: string | null; details: string; type?: 'praise' | 'attention' }>;
 }
 
 /** Submit time (HH:MM), to tell apart two logs for the same class and day. */
@@ -36,7 +47,7 @@ export const logTime = (log: PendingClassLog) => {
 };
 
 export const logDate = (log: PendingClassLog) =>
-  log.date || (log.createdAt?.toDate ? log.createdAt.toDate().toISOString().slice(0, 10) : '');
+  log.date || (log.createdAt?.toDate ? localDate(log.createdAt.toDate()) : '');
 
 // Owns the KT review queue: every pending class-day log across the KT's
 // classes, reviewed and approved one class-day at a time.
@@ -113,7 +124,7 @@ export function useKtReviewQueue(
     })();
   }, [educatorRole, classes.map((c: any) => c?.id).join('|')]);
 
-  const approveClassLog = async (log: PendingClassLog, summary: string, notes: ApprovedNote[]): Promise<boolean> => {
+  const approveClassLog = async (log: PendingClassLog, summary: string, notes: ApprovedNote[], summaryEn: string): Promise<boolean> => {
     if (!user?.uid) return false;
     const reviewedByName = user.name || user.email || 'Unknown teacher';
     const recipients = parentReportRecipients(log.enrolledStudentUids, notes);
@@ -137,9 +148,10 @@ export function useKtReviewQueue(
           date: logDate(log),
           lessonTopic: log.lessonTopic || '',
           summary,
-          // AI English draft for parents using the app in English; the KT
-          // reviews the Korean text, so this can trail their edits.
-          summaryEn: log.aiEnglishSummary || '',
+          // English for parents using the app in English. Empty once the KT
+          // hand-edits the Korean (the parent app then shows the Korean)
+          // rather than sending an English text that no longer matches.
+          summaryEn,
           note,
           reviewedByName,
           sentAt: serverTimestamp(),

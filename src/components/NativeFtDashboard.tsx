@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus } from '@phosphor-icons/react';
+import { CaretRight, Plus } from '@phosphor-icons/react';
 import { staffUi } from './staffUi';
 import { NativeTeacherLogForm } from './NativeTeacherLogForm';
 import { ClassLogPayload } from '../services/aiGenerator';
@@ -148,6 +148,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
                       <span className="font-bold">{log.reviewedByName}</span>
                     </p>
                   )}
+                  {log.reviewStatus === 'sent' && log.approvedSummary && <SentReport log={log} isKo={isKo} />}
                 </li>
               ))}
             </ul>
@@ -157,6 +158,44 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
     </>
   );
 });
+
+// What parents actually received, so the FT can see how their notes turned
+// into a report and what the KT changed — that's how logs get better.
+function SentReport({ log, isKo }: { log: any; isKo: boolean }) {
+  const edited = !!log.aiKoreanSummary && log.approvedSummary !== log.aiKoreanSummary;
+  const notes: { studentName: string; approvedText: string }[] = log.approvedExceptions || [];
+  return (
+    <details className="group mt-2">
+      <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1 text-[14px] font-bold text-line-ink [&::-webkit-details-marker]:hidden">
+        <CaretRight size={14} weight="bold" className="transition-transform group-open:rotate-90" aria-hidden="true" />
+        {isKo ? '학부모가 받은 리포트 보기' : 'See what parents got'}
+      </summary>
+      <div className="mt-1 space-y-3 pl-5 text-[14px] leading-relaxed">
+        <div>
+          <p className="text-[13px] font-bold text-ink-3">
+            {isKo ? '반 전체 요약' : 'Class summary (Korean, as sent)'}
+            {edited && <span className="ml-2 font-normal">{isKo ? '· 한국인 선생님이 수정함' : '· edited by the KT'}</span>}
+          </p>
+          <p className="whitespace-pre-line break-keep text-ink">{log.approvedSummary}</p>
+        </div>
+        {log.aiEnglishSummary && (
+          <div>
+            <p className="text-[13px] font-bold text-ink-3">
+              {edited ? (isKo ? '영어 초안 (수정 전)' : 'English draft (before the KT edited it)') : (isKo ? '영어 버전' : 'English version')}
+            </p>
+            <p className="text-ink-2">{log.aiEnglishSummary}</p>
+          </div>
+        )}
+        {notes.map((n, i) => (
+          <div key={`${n.studentName}-${i}`}>
+            <p className="text-[13px] font-bold text-ink-3">{n.studentName}</p>
+            <p className="whitespace-pre-line break-keep text-ink">{n.approvedText}</p>
+          </div>
+        ))}
+      </div>
+    </details>
+  );
+}
 
 // This week at a glance, above the log form: the topic, and which target
 // words the class is getting wrong on scanned homework (the class-level

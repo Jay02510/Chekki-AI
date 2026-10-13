@@ -5,6 +5,7 @@ import { VoiceFillException, VoiceFillFields } from '../services/voiceFill';
 import { UserProfile } from '../../types';
 import { VoiceFillAssistant } from './VoiceFillAssistant';
 import { staffUi } from './staffUi';
+import { localDate } from '../utils/localDate';
 
 interface Props {
   isNight?: boolean;
@@ -164,7 +165,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   const isKo = isKoProp ?? (typeof window !== 'undefined' && localStorage.getItem('chekki_lang') === 'ko');
   const effectiveRoster = roster.length > 0 ? roster : (isDemo ? DEMO_ROSTER : []);
   const [className, setClassName] = useState(selectedClassName || (isDemo ? DEMO_CLASS_NAME : ''));
-  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(() => localDate());
   const [lessonTopic, setLessonTopic] = useState(isDemo ? DEMO_LESSON_TOPIC : (selectedLessonTopic || ''));
   const [textbook, setTextbook] = useState(
     () => selectedTextbookName || (isDemo ? DEMO_TEXTBOOK : readLastTextbook(selectedClassName)),
@@ -682,6 +683,25 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
           </div>
         </div>
 
+        {/* General Class Comments — sits right under the topic: it's what
+            the parent report is written from, so it comes before the
+            optional one-tap chips. */}
+        <div className="space-y-1.5">
+          <label htmlFor="log-general-comments" className={staffUi.label}>{isKo ? '수업 코멘트' : 'Class comments'}</label>
+          <textarea
+            id="log-general-comments"
+            value={generalComments}
+            onChange={(e) => setGeneralComments(e.target.value)}
+            rows={3}
+            aria-describedby="log-general-comments-hint"
+            className={`${staffUi.field} py-3 leading-relaxed`}
+            placeholder={isKo ? '예: leaf, root, stem을 배우고 짝과 그림 카드를 분류했어요.' : 'e.g. Learned leaf, root, stem. Sorted picture cards in pairs.'}
+          />
+          <p id="log-general-comments-hint" className="text-[13px] text-ink-3">
+            {isKo ? '학부모 리포트는 이 메모로 써요. 한두 문장이면 충분해요.' : 'The parent report is written from this. One or two sentences is enough.'}
+          </p>
+        </div>
+
         {/* Class Energy Level */}
         <div className="space-y-2">
           <span id="log-energy-label" className={staffUi.label}>{isKo ? '수업 분위기 (선택)' : 'Class energy (optional)'}</span>
@@ -729,21 +749,6 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
               );
             })}
           </div>
-        </div>
-
-        {/* General Class Comments */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label htmlFor="log-general-comments" className={staffUi.label}>{isKo ? '수업 코멘트' : 'Class comments'}</label>
-          </div>
-          <textarea
-            id="log-general-comments"
-            value={generalComments}
-            onChange={(e) => setGeneralComments(e.target.value)}
-            rows={3}
-            className={`${staffUi.field} py-3 leading-relaxed`}
-            placeholder={isKo ? '전체 수업 코멘트를 입력하세요...' : 'Type general class notes here...'}
-          />
         </div>
 
         {/* Student Exceptions Section */}
@@ -839,9 +844,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
           <div
             role="group"
             aria-labelledby="exception-modal-title"
-            className={`p-4 rounded-lg border space-y-4 ${
-              'bg-line-soft border-rule text-ink'
-            }`}
+            className="p-4 rounded-lg border space-y-4 bg-surface border-rule text-ink"
           >
             <div className="flex items-center justify-between border-b border-rule pb-3">
               <div className="flex items-center gap-2">
@@ -873,24 +876,28 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => setModalCategory('praise')}
+                    aria-pressed={modalCategory === 'praise'}
                     className={`min-h-11 px-3 rounded-md text-[14px] font-bold border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                       modalCategory === 'praise'
-                        ? 'bg-right-soft border-rule text-correct font-extrabold'
-                        : 'bg-sunken border-rule text-ink-3'
+                        ? 'bg-right-soft border-correct text-correct font-extrabold'
+                        : 'bg-surface border-rule text-ink-2'
                     }`}
                   >
+                    {modalCategory === 'praise' && <Check size={16} weight="bold" />}
                     <span>{isKo ? '칭찬' : 'Praise'}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setModalCategory('attention')}
+                    aria-pressed={modalCategory === 'attention'}
                     className={`min-h-11 px-3 rounded-md text-[14px] font-bold border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                       modalCategory === 'attention'
                         ? 'bg-line-soft border-line text-line-ink font-extrabold'
-                        : 'bg-sunken border-rule text-ink-3'
+                        : 'bg-surface border-rule text-ink-2'
                     }`}
                   >
+                    {modalCategory === 'attention' && <Check size={16} weight="bold" />}
                     <span>{isKo ? '주의 필요' : 'Needs attention'}</span>
                   </button>
                 </div>
@@ -924,18 +931,26 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     className={staffUi.field}
                   />
                 ) : (
-                  <select
-                    id="exception-student-field"
-                    value={modalStudentUid}
-                    onChange={(e) => setModalStudentUid(e.target.value)}
-                    className={staffUi.field}
-                  >
+                  // One tap per name instead of a dropdown: a class roster is
+                  // short enough to show whole.
+                  <div id="exception-student-field" role="radiogroup" aria-label={isKo ? '학생' : 'Student'} className="flex flex-wrap gap-2">
                     {effectiveRoster.map((s) => (
-                      <option key={s.uid} value={s.uid}>
+                      <button
+                        key={s.uid}
+                        type="button"
+                        role="radio"
+                        aria-checked={modalStudentUid === s.uid}
+                        onClick={() => setModalStudentUid(s.uid)}
+                        className={`px-3.5 min-h-11 rounded-md border text-[14px] font-bold transition-colors cursor-pointer ${
+                          modalStudentUid === s.uid
+                            ? 'bg-line-soft border-line text-line-ink'
+                            : 'bg-surface border-rule text-ink-2 hover:text-ink'
+                        }`}
+                      >
                         {s.name}{s.isPending ? (isKo ? ' (가입 대기)' : ' (pending)') : ''}
-                      </option>
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 )}
               </div>
 
@@ -976,9 +991,10 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                   onClick={() => {
                     const rosterMatch = !isCustomStudentName ? effectiveRoster.find((s) => s.uid === modalStudentUid) : undefined;
                     const chosenName = (isCustomStudentName ? customStudentInput : rosterMatch?.name) || (isKo ? '학생' : 'Student');
-                    const detailText = modalDetails.trim() || (isKo
-                      ? (modalCategory === 'praise' ? '집중력이 좋고 열심히 참여했습니다!' : '목표 어휘 복습이 더 필요합니다.')
-                      : (modalCategory === 'praise' ? 'Great focus and enthusiastic participation!' : 'Needs extra review on target vocabulary.'));
+                    // No stand-in text for an empty note: it would reach a
+                    // parent as an observation nobody made.
+                    const detailText = modalDetails.trim();
+                    if (!detailText) return;
                     // No emoji prefix: `type` already carries praise/concern, and the
                     // prefix leaked into FT history and parent notes.
                     const savedException = { studentName: chosenName, studentUid: rosterMatch?.uid ?? null, details: detailText, type: modalCategory };
@@ -992,6 +1008,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     setEditingExceptionIndex(null);
                     setShowExceptionModal(false);
                   }}
+                  disabled={!modalDetails.trim() || (isCustomStudentName && !customStudentInput.trim())}
                   className={`${staffUi.primaryBtn} flex-1`}
                 >
                   {editingExceptionIndex !== null

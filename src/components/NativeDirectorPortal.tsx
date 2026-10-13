@@ -6,6 +6,7 @@ import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { ActivityFeed } from './ActivityFeed';
 import { useLogCompliance, type ComplianceRow } from '../../hooks/useLogCompliance';
 import { staffUi } from './staffUi';
+import { localDate } from '../utils/localDate';
 
 interface Props {
   isKo?: boolean;
@@ -635,7 +636,7 @@ function DirectorTodayPanel({
                     <p className="break-keep text-[13px] font-semibold text-line-ink">
                       {(() => {
                         const age = row.oldestPendingDate
-                          ? Math.max(0, Math.round((Date.parse(new Date().toISOString().split('T')[0]) - Date.parse(row.oldestPendingDate)) / 86400000))
+                          ? Math.max(0, Math.round((Date.parse(localDate()) - Date.parse(row.oldestPendingDate)) / 86400000))
                           : 0;
                         return isKo
                           ? `KT 검토 대기 ${row.pendingCount}건${age > 0 ? ` · 가장 오래된 일지 ${age}일 전` : ''}`

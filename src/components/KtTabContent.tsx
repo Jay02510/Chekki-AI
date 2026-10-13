@@ -18,7 +18,7 @@ interface Props {
   ktPendingLogs: PendingClassLog[];
   confirmDiscardKtDraft: () => boolean;
   setKtDraftDirty: (dirty: boolean) => void;
-  approveClassLog: (log: PendingClassLog, summary: string, notes: ApprovedNote[]) => Promise<boolean>;
+  approveClassLog: (log: PendingClassLog, summary: string, notes: ApprovedNote[], summaryEn: string) => Promise<boolean>;
   discardClassLog: (log: PendingClassLog) => Promise<boolean>;
   academyName: string;
   user: any;
