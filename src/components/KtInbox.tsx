@@ -601,7 +601,7 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
                   {isKo ? '수업 요약' : 'Class summary'}
                 </label>
                 <span className={`text-xs ${muted}`}>
-                  {isKo ? `${families}가정 모두에게` : (families === 1 ? 'Goes to 1 family' : `Goes to all ${families} families`)}
+                  {isKo ? (families === 1 ? '1가정에 보내요' : `${families}가정 모두에게`) : (families === 1 ? 'Goes to 1 family' : `Goes to all ${families} families`)}
                 </span>
               </div>
               {summaryFallback && (

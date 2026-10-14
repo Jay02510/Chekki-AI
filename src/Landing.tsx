@@ -63,14 +63,14 @@ export default function Home() {
 
   const steps = isKo
     ? [
-        { t: '숙제 사진 찍기', d: '아이가 푼 영어 숙제를 그대로 찍어요. 글자를 칠 필요 없어요.' },
-        { t: '채점과 한국어 설명', d: '채키가 손글씨를 읽고 채점해요. 왜 그런지 한국어로 알려 줘요.' },
-        { t: '아이와 같이 보기', d: '맞은 건 먼저 칭찬하고, 틀린 문제는 하나씩 같이 봐요.' },
+        { t: '숙제 사진 찍기', d: '아이가 푼 영어 숙제를 그대로 찍어요. 글자를 칠 필요 없어요.', alt: '앱 화면: 찍은 학습지를 채키가 채점하고 있어요' },
+        { t: '채점과 한국어 설명', d: '채키가 손글씨를 읽고 채점해요. 왜 그런지 한국어로 알려 줘요.', alt: '앱 화면: 학습지 사진 위에 틀린 칸의 정답 habitat이 표시돼요' },
+        { t: '아이와 같이 보기', d: '맞은 건 먼저 칭찬하고, 틀린 문제는 하나씩 같이 봐요.', alt: '앱 화면: 틀린 문제와 아이에게 할 말을 한국어로 보여 줘요' },
       ]
     : [
-        { t: 'Snap the homework', d: 'Take a photo of the page as it is. No typing.' },
-        { t: 'Graded, explained in Korean', d: "Chekki reads your child's handwriting, grades it and explains why." },
-        { t: 'Look at it together', d: 'Praise the right answers first, then go through the misses one by one.' },
+        { t: 'Snap the homework', d: 'Take a photo of the page as it is. No typing.', alt: 'App screen: Chekki grading a photographed worksheet' },
+        { t: 'Graded, explained in Korean', d: "Chekki reads your child's handwriting, grades it and explains why.", alt: 'App screen: the correct answer, habitat, marked on the worksheet photo' },
+        { t: 'Look at it together', d: 'Praise the right answers first, then go through the misses one by one.', alt: 'App screen: a missed question with what to say to your child' },
       ];
 
   const reasons = isKo
@@ -257,13 +257,25 @@ export default function Home() {
         </h2>
         <ol className="mt-6 grid gap-3 md:grid-cols-3">
           {steps.map((s, i) => (
-            <li key={s.t} className="flex gap-4 rounded-md bg-surface p-5 ring-1 ring-inset ring-rule md:flex-col">
-              <Roundel state={i === 0 ? 'current' : 'next'} size={40}>
-                {i + 1}
-              </Roundel>
-              <div>
-                <h3 className="text-[18px] font-extrabold text-ink">{s.t}</h3>
-                <p className="mt-1 text-[15px] leading-relaxed text-ink-2">{s.d}</p>
+            <li key={s.t} className="overflow-hidden rounded-md bg-surface ring-1 ring-inset ring-rule">
+              {/* Real app screens from a sample worksheet, cropped from a 440px-wide phone capture. */}
+              <img
+                src={`/images/parent/step${i + 1}-${isKo ? 'ko' : 'en'}.webp`}
+                alt={s.alt}
+                width={440}
+                height={600}
+                loading="lazy"
+                decoding="async"
+                className="block h-auto max-h-[360px] w-full border-b border-rule object-cover object-top md:max-h-none"
+              />
+              <div className="flex gap-4 p-5 md:flex-col">
+                <Roundel state={i === 0 ? 'current' : 'next'} size={40}>
+                  {i + 1}
+                </Roundel>
+                <div>
+                  <h3 className="text-[18px] font-extrabold text-ink">{s.t}</h3>
+                  <p className="mt-1 text-[15px] leading-relaxed text-ink-2">{s.d}</p>
+                </div>
               </div>
             </li>
           ))}

@@ -67,7 +67,7 @@ const SampleTag: React.FC<{ isKo: boolean }> = ({ isKo }) => (
 
 // A real dashboard capture (test data, class/student names swapped for
 // neutral ones). Images live in public/images/schools as <name>-ko/-en.webp
-// at 2x; w/h are the CSS size.
+// at 2x (q4, a phone capture, at 3x); w/h are the CSS size.
 const RealShot: React.FC<{ isKo: boolean; name: string; w: number; h: number; alt: string; caption: string; phone?: { w: number; h: number } }> = ({ isKo, name, w, h, alt, caption, phone }) => {
   const lang = isKo ? 'ko' : 'en';
   return (
@@ -424,9 +424,9 @@ const SchoolsLandingPage: React.FC = () => {
               <RealShot
                 isKo={isKo}
                 name="q1"
-                w={632}
-                h={469}
-                phone={{ w: 390, h: 566 }}
+                w={592}
+                h={825}
+                phone={{ w: 390, h: 844 }}
                 alt={isKo ? '한국인 선생님 화면: 원어민 선생님 기록으로 만든 한국어 수업 요약과 승인하고 보내기 버튼' : "Korean teacher's screen: the Korean class summary drafted from the foreign teacher's note, with an approve-and-send button"}
                 caption={isKo ? '한국인 선생님이 확인하고 보내는 화면' : 'The Korean teacher checks and sends it here'}
               />
@@ -508,8 +508,8 @@ const SchoolsLandingPage: React.FC = () => {
               <RealShot
                 isKo={isKo}
                 name="q3"
-                w={403}
-                h={160}
+                w={600}
+                h={327}
                 alt={isKo ? '원어민 선생님 화면: 이번 주 숙제 스캔 수와 이번 주 단어' : "Foreign teacher's screen: homework scanned this week and this week's words"}
                 caption={isKo ? '원어민 선생님 화면. 숙제가 들어오면 많이 틀린 단어가 여기 떠요.' : "Foreign teacher's screen. Most-missed words show here as homework comes in."}
               />
@@ -530,8 +530,8 @@ const SchoolsLandingPage: React.FC = () => {
               <RealShot
                 isKo={isKo}
                 name="q4"
-                w={342}
-                h={595}
+                w={392}
+                h={429}
                 alt={isKo ? '학부모 앱: 한국인 선생님이 확인하고 보낸 수업 리포트와 아이에 대한 메모' : 'Parent app: the class report a Korean teacher checked and sent, with a note about the child'}
                 caption={isKo ? '학부모 앱 · 무료' : 'Parent app · free for parents'}
               />
