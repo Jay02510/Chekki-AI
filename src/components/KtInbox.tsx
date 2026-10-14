@@ -178,7 +178,7 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
           </h2>
           <p className={`text-sm mt-1 ${muted}`}>
             {logs.length === 0
-              ? isKo ? '검토할 리포트가 없습니다' : 'Nothing to review'
+              ? isKo ? '검토할 리포트가 없어요' : 'Nothing to review'
               : isKo ? `${logs.length}개 리포트 검토 대기` : `${logs.length} ${logs.length === 1 ? 'report' : 'reports'} to review`}
           </p>
         </div>
@@ -188,7 +188,7 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
       {loadError && (
         <p role="alert" className="p-3.5 rounded-lg border text-sm bg-wrong-soft border-rule text-wrong">
           {isKo
-            ? '리포트 대기열을 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.'
+            ? '리포트 목록을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.'
             : "Couldn't load the review queue. Refresh the page and try again."}
         </p>
       )}
@@ -196,10 +196,10 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
       {logs.length === 0 && !openLog ? (
         <div className={`p-8 sm:p-12 rounded-lg border text-center space-y-3 bg-surface border-rule`}>
           <CheckCircle size={32} weight="bold" className="mx-auto text-correct" />
-          <h3 className="text-lg font-extrabold">{isKo ? '모두 확인했습니다' : "You're all caught up"}</h3>
+          <h3 className="text-lg font-extrabold">{isKo ? '모두 확인했어요' : "You're all caught up"}</h3>
           <p className={`text-sm max-w-sm mx-auto break-keep ${muted}`}>
             {isKo
-              ? '선생님이 수업 일지를 제출하면 여기에 수업별로 표시됩니다. 한 번 검토하고 승인하면 반 전체 학부모님께 전달됩니다.'
+              ? '선생님이 수업 일지를 내면 여기에 수업별로 보여요. 한 번 검토하고 승인하면 반 전체 학부모님께 전달돼요.'
               : 'When a teacher logs a class, it shows up here. Review it once and approve, and every family in that class gets it.'}
           </p>
         </div>
@@ -557,9 +557,9 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
           <div className="flex items-start gap-3">
             <CheckCircle size={28} weight="fill" className="shrink-0 text-correct" />
             <div>
-              <p className="font-extrabold">{isKo ? `${families}가정에 전달되었습니다` : `Sent to ${families} ${families === 1 ? 'family' : 'families'}`}</p>
+              <p className="font-extrabold">{isKo ? `${families}가정에 전달됐어요` : `Sent to ${families} ${families === 1 ? 'family' : 'families'}`}</p>
               <p className={`text-sm mt-0.5 ${muted}`}>
-                {isKo ? '학부모님은 채키 앱에서 확인할 수 있습니다.' : 'Parents can read it in the Chekki app.'}
+                {isKo ? '학부모님은 채키 앱에서 볼 수 있어요.' : 'Parents can read it in the Chekki app.'}
               </p>
             </div>
           </div>
@@ -578,7 +578,7 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
             </div>
             {copyFailed && (
               <p role="alert" className="text-sm text-wrong">
-                {isKo ? '복사하지 못했습니다. 브라우저의 클립보드 권한을 확인해 주세요.' : "Couldn't copy. Check your browser's clipboard permission."}
+                {isKo ? '복사하지 못했어요. 브라우저의 클립보드 권한을 확인해 주세요.' : "Couldn't copy. Check your browser's clipboard permission."}
               </p>
             )}
           </section>
@@ -601,7 +601,7 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
                   {isKo ? '수업 요약' : 'Class summary'}
                 </label>
                 <span className={`text-xs ${muted}`}>
-                  {isKo ? `${families}가정 모두에게` : `Goes to all ${families} ${families === 1 ? 'family' : 'families'}`}
+                  {isKo ? `${families}가정 모두에게` : (families === 1 ? 'Goes to 1 family' : `Goes to all ${families} families`)}
                 </span>
               </div>
               {summaryFallback && (
@@ -859,7 +859,7 @@ function DigestSettings({ isNight, isKo, user }: { isNight: boolean; isKo: boole
             />
           </label>
           <p className={`text-xs text-ink-3`}>
-            {isKo ? '매일 오전 9시(한국 시간)에 검토 대기 일지를 이메일로 알려드립니다.' : 'Sent every morning at 9:00 KST when logs are waiting.'}
+            {isKo ? '검토할 일지가 있으면 매일 오전 9시(한국 시간)에 이메일로 알려 드려요.' : 'Sent every morning at 9:00 KST when logs are waiting.'}
           </p>
           {saving && <p className="text-xs text-ink-3">{isKo ? '저장 중...' : 'Saving...'}</p>}
         </div>

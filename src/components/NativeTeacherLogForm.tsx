@@ -570,7 +570,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
           'bg-sunken border-rule text-ink-2'
         }`}>
           <FloppyDisk size={16} weight="fill" className="shrink-0" />
-          <span className="flex-1">{isKo ? '이전에 저장하지 못한 임시 기록을 불러왔습니다.' : 'Restored your unsaved draft from last time.'}</span>
+          <span className="flex-1">{isKo ? '저장하지 못했던 임시 기록을 불러왔어요.' : 'Restored your unsaved draft from last time.'}</span>
           <button
             type="button"
             onClick={discardRestoredDraft}
@@ -585,7 +585,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
       {isDemo && demoScripted && isPlayingScriptedVoiceFill && (
         <div className="mb-6 p-3.5 bg-line-soft border border-rule rounded-lg flex items-center gap-2.5 text-[14px] font-bold text-line-ink">
           <Microphone size={18} weight="fill" className="animate-pulse text-line-ink shrink-0" />
-          <span>{isKo ? '듣는 중... 말씀하신 수업 내용으로 양식을 채우고 있습니다.' : 'Listening... filling the form from a spoken class recap.'}</span>
+          <span>{isKo ? '듣고 있어요… 말씀하신 수업 내용으로 양식을 채우고 있어요.' : 'Listening... filling the form from a spoken class recap.'}</span>
         </div>
       )}
 
@@ -773,7 +773,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
 
           {/* List of Flagged Exceptions */}
           {exceptions.length === 0 ? (
-            <p className={`${staffUi.sub} py-2`}>{isKo ? '아직 추가된 학생이 없습니다.' : 'No students added yet.'}</p>
+            <p className={`${staffUi.sub} py-2`}>{isKo ? '아직 추가한 학생이 없어요.' : 'No students added yet.'}</p>
           ) : (
             <div className="space-y-2">
               {exceptions.map((ex, idx) => (
@@ -813,7 +813,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     }`}>
                       <span>
                         {isKo
-                          ? `혹시 "${ex.suggestedMatch.name}"을(를) 말씀하신 건가요? 음성 인식이 이름을 정확히 잡지 못했을 수 있습니다.`
+                          ? `혹시 "${ex.suggestedMatch.name}"을(를) 말씀하신 건가요? 음성 인식이 이름을 정확히 못 들었을 수 있어요.`
                           : `Did you mean "${ex.suggestedMatch.name}"? Voice input may not have caught the name exactly.`}
                       </span>
                       <span className="flex items-center gap-1.5 shrink-0">

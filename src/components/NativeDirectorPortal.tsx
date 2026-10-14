@@ -246,8 +246,8 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             </p>
             <p className="mt-1 text-[14px] text-ink-2">
               {trialStatus.expired
-                ? (isKo ? '기존 학급과 데이터는 계속 볼 수 있지만, 새 학급 개설과 선생님 초대는 제한됩니다.' : 'Existing classes and data stay visible, but creating new classes or inviting teachers is paused until you upgrade.')
-                : (isKo ? '체험 종료 후에도 기존 데이터는 유지되며, 새 학급/초대만 제한됩니다.' : "New classes and invites will pause when it ends — your existing data isn't affected.")}
+                ? (isKo ? '지금 있는 학급과 데이터는 계속 볼 수 있어요. 새 학급 만들기와 선생님 초대만 멈춰요.' : 'Existing classes and data stay visible, but creating new classes or inviting teachers is paused until you upgrade.')
+                : (isKo ? '체험이 끝나도 지금 데이터는 그대로예요. 새 학급 만들기와 초대만 멈춰요.' : "New classes and invites will pause when it ends — your existing data isn't affected.")}
             </p>
           </div>
           <button type="button" onClick={onNavigateToBilling} className={primaryBtn}>
@@ -340,7 +340,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
           {!selectedClass || selectedClass.isDemo ? (
             <div className="rounded-lg bg-surface p-8 text-center ring-1 ring-inset ring-rule">
               <p className="text-[16px] font-extrabold">{isKo ? '아직 학급이 없어요' : 'No class yet'}</p>
-              <p className="mt-1 text-[14px] text-ink-3">{isKo ? '첫 학급을 만들면 이번 주 어휘와 학생 현황이 여기에 표시됩니다.' : "Create your first class to see this week's vocab and student status here."}</p>
+              <p className="mt-1 text-[14px] text-ink-3">{isKo ? '첫 학급을 만들면 이번 주 어휘와 학생 현황이 여기에 보여요.' : "Create your first class to see this week's vocab and student status here."}</p>
             </div>
           ) : (
             <section className="space-y-5">
@@ -361,7 +361,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
               <div>
                 <p className="mb-2 text-[13px] font-bold text-ink-3">{isKo ? '목표 어휘' : 'Target vocab'}</p>
                 {weeklyVocabWords.length === 0 ? (
-                  <p className="text-[14px] text-ink-3">{isKo ? '이번 주 어휘가 아직 없습니다 — 커리큘럼 탭에서 추가하세요.' : 'No vocab set for this week yet — add it from the Curriculum tab.'}</p>
+                  <p className="text-[14px] text-ink-3">{isKo ? '이번 주 어휘가 아직 없어요. 선생님이 "정답지 올리기"에서 올리면 여기에 보여요.' : 'No vocab for this week yet. It shows here once a teacher uploads it in Answer key.'}</p>
                 ) : (
                   <div className="flex flex-wrap gap-1.5">
                     {weeklyVocabWords.map((word) => (
@@ -376,7 +376,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                   {isKo ? `학생 ${activeRoster.length}명` : `Students (${activeRoster.length})`}
                 </p>
                 {activeRoster.length === 0 ? (
-                  <p className="text-[14px] text-ink-3">{isKo ? '아직 학생이 없습니다.' : 'No active students in this class yet.'}</p>
+                  <p className="text-[14px] text-ink-3">{isKo ? '아직 학생이 없어요.' : 'No active students in this class yet.'}</p>
                 ) : (
                   <ul className="divide-y divide-rule border-y border-rule">
                     {activeRoster.map((student: any) => (
@@ -411,7 +411,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
         <section className="space-y-6">
           <p className="max-w-2xl text-[15px] text-ink-2">
             {isKo
-              ? '선생님이 학습·생활 문제로 표시한 학생입니다. 해결을 누르면 표시가 사라집니다.'
+              ? '선생님이 학습·생활 문제로 표시한 학생이에요. 해결을 누르면 표시가 사라져요.'
               : 'Students a teacher flagged for academic or behavior issues. Resolving clears the flag.'}
           </p>
 
@@ -430,7 +430,7 @@ export const NativeDirectorPortal: React.FC<Props> = ({
 
           {flaggedStudents.length === 0 ? (
             <p className="rounded-lg bg-surface p-10 text-center ring-1 ring-inset ring-rule text-[15px] text-ink-3">
-              {isKo ? '주의 표시된 학생이 없습니다.' : 'No students are currently flagged.'}
+              {isKo ? '주의 표시된 학생이 없어요.' : 'No students are currently flagged.'}
             </p>
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

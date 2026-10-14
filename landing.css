@@ -104,7 +104,7 @@
     color: #2b211a;
   }
   .font-warm :focus-visible {
-    outline: 3px solid var(--m-line);
+    outline: 3px solid var(--m-line-ink);
     outline-offset: 2px;
   }
 
@@ -203,4 +203,12 @@
   body.schools-ui textarea {
     font-size: 16px;
   }
+}
+
+/* Staff fields: many legacy class strings use outline-none with a 1px border
+   colour as the only focus cue. Unlayered, so it beats those utilities.
+   Orange Ink, not Orange: Orange is under 3:1 on cream and white. */
+body.schools-ui :is(input, textarea, select):focus-visible {
+  outline: 2px solid var(--m-line-ink);
+  outline-offset: 1px;
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CaretDown, WarningCircle } from '@phosphor-icons/react';
+import { CaretDown, Check, WarningCircle, X } from '@phosphor-icons/react';
 import { NativeDirectorPortal } from './NativeDirectorPortal';
 import { NativeDirectorStudentsTab } from './NativeDirectorStudentsTab';
 import { StudentInvitePanel } from './StudentInvitePanel';
@@ -130,7 +130,7 @@ export function DirectorTabContent(props: Props) {
                 <WarningCircle size={20} weight="fill" className="shrink-0 text-line-ink" aria-hidden="true" />
                 <p className="text-[14px] font-bold text-ink">
                   {isKo
-                    ? `${inactive.length}명의 학생이 ${INACTIVE_DAYS}일 이상 스캔하지 않았습니다.`
+                    ? `학생 ${inactive.length}명이 ${INACTIVE_DAYS}일 넘게 스캔하지 않았어요.`
                     : `${inactive.length} student${inactive.length === 1 ? '' : 's'} ${inactive.length === 1 ? 'hasn\'t' : 'haven\'t'} scanned in ${INACTIVE_DAYS}+ days.`}
                 </p>
               </div>
@@ -186,7 +186,7 @@ export function DirectorTabContent(props: Props) {
 
           {props.classes.filter((c: any) => !c.isDemo).length === 0 ? (
             <p className="rounded-lg bg-surface p-10 text-center ring-1 ring-inset ring-rule text-[15px] text-ink-3">
-              {isKo ? '아직 학급이 없습니다.' : 'No classes yet.'}
+              {isKo ? '아직 학급이 없어요.' : 'No classes yet.'}
             </p>
           ) : (
             <ul className="divide-y divide-rule border-y border-rule">
@@ -224,7 +224,7 @@ export function DirectorTabContent(props: Props) {
                           {compliance && (
                             compliance.missStreak > 0 ? (
                               <span className="rounded-md bg-wrong-soft px-2.5 py-1 text-[13px] font-bold text-wrong">
-                                {isKo ? `${compliance.missStreak}일 미제출` : `${compliance.missStreak} days missed`}
+                                {isKo ? `${compliance.missStreak}일 미제출` : `${compliance.missStreak} ${compliance.missStreak === 1 ? 'day' : 'days'} missed`}
                               </span>
                             ) : (
                               <span className="rounded-md bg-right-soft px-2.5 py-1 text-[13px] font-bold text-correct">
@@ -243,16 +243,19 @@ export function DirectorTabContent(props: Props) {
                                 {isKo ? '최근 14일 일지 제출' : 'Last 14 days, log submitted'}
                               </p>
                               <div className="inline-flex max-w-full flex-col">
-                              <div className="flex gap-1 overflow-x-auto pb-1">
+                              <div tabIndex={0} aria-label={isKo ? '최근 14일 일지 제출' : 'Last 14 days, log submitted'} className="flex gap-1 overflow-x-auto pb-1">
                                 {compliance.days.map((d) => (
                                   <span
                                     key={d.date}
+                                    role="img"
                                     title={d.date}
                                     aria-label={`${d.date}: ${d.submitted ? (isKo ? '제출' : 'submitted') : d.isToday ? (isKo ? '오늘' : 'today') : d.isDayOff ? (isKo ? '휴일' : 'day off') : (isKo ? '미제출' : 'missed')}`}
-                                    className={`h-6 w-6 shrink-0 rounded ${
-                                      d.submitted ? 'bg-correct' : d.isToday ? 'bg-sunken ring-1 ring-inset ring-ink-3' : d.isDayOff ? 'bg-sunken' : 'bg-wrong-soft'
+                                    className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded ${
+                                      d.submitted ? 'bg-correct text-white' : d.isToday ? 'bg-sunken ring-1 ring-inset ring-ink-3' : d.isDayOff ? 'bg-sunken' : 'bg-wrong-soft text-wrong'
                                     }`}
-                                  />
+                                  >
+                                    {d.submitted ? <Check size={14} weight="bold" /> : !d.isToday && !d.isDayOff && <X size={12} weight="bold" />}
+                                  </span>
                                 ))}
                               </div>
                               <div className="flex justify-between text-[12px] text-ink-3">
@@ -266,7 +269,7 @@ export function DirectorTabContent(props: Props) {
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <p className="text-[13px] text-ink-3">
                               {isKo
-                                ? '배정 교사 관리는 "선생님 배정" 탭에서 할 수 있습니다.'
+                                ? '담당 선생님은 "선생님 배정" 탭에서 바꿀 수 있어요.'
                                 : 'Manage which teachers are assigned from the Teachers tab.'}
                             </p>
                             {/* Delete lives inside the expanded row (still behind

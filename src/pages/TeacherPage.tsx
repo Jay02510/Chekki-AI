@@ -2492,7 +2492,8 @@ export default function TeacherPage({ isNight = true }: Props) {
               className={`p-2 rounded-md transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
                 'text-ink-2 hover:text-ink hover:bg-sunken'
               }`}
-              title={isKo ? '교사 설정' : 'Teacher Settings'}
+              title={isKo ? '교사 설정' : 'Teacher settings'}
+              aria-label={isKo ? '교사 설정' : 'Teacher settings'}
             >
               <Gear size={16} weight="bold" />
             </button>
@@ -2501,7 +2502,8 @@ export default function TeacherPage({ isNight = true }: Props) {
               className={`p-2 rounded-md transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
                 'text-ink-3 hover:text-wrong hover:bg-wrong-soft'
               }`}
-              title={isKo ? '로그아웃' : 'Log Out'}
+              title={isKo ? '로그아웃' : 'Log out'}
+              aria-label={isKo ? '로그아웃' : 'Log out'}
             >
               <SignOut size={16} weight="bold" />
             </button>
@@ -2556,6 +2558,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                       current class (audit: "no option to switch classes",
                       when the switcher already existed and worked). */}
                   <select
+                    aria-label={isKo ? '반 선택' : 'Choose class'}
                     value={selectedClass?.id || ''}
                     onChange={(e) => {
                       const found = realClasses.find(c => c.id === e.target.value);

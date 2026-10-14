@@ -119,9 +119,9 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
 
           {submittedLogs.length === 0 ? (
             <div className="rounded-lg bg-surface p-10 text-center ring-1 ring-inset ring-rule">
-              <p className="text-[16px] font-extrabold">{isKo ? '아직 제출한 일지가 없습니다' : 'No logs yet'}</p>
+              <p className="text-[16px] font-extrabold">{isKo ? '아직 낸 일지가 없어요' : 'No logs yet'}</p>
               <p className="mt-1 text-[14px] text-ink-3">
-                {isKo ? '일지를 제출하면 여기에서 한국인 선생님의 검토 상태를 확인할 수 있습니다.' : 'Submitted logs appear here with their KT review status.'}
+                {isKo ? '일지를 내면 여기에서 한국인 선생님의 검토 상태를 볼 수 있어요.' : 'Submitted logs appear here with their KT review status.'}
               </p>
             </div>
           ) : (
@@ -262,7 +262,7 @@ function WeekFocusCard({
           <p className={`text-[14px] ${muted}`}>
             {missed.length > 0
               ? isKo ? '숙제에서 많이 틀린 단어 — 수업 시작할 때 복습해 보세요.' : 'Most-missed words on homework. Worth a quick review at the start of class.'
-              : isKo ? '이번 주 단어 — 아직 채점된 오답이 없습니다.' : "This week's words. No homework mistakes scanned yet."}
+              : isKo ? '이번 주 단어. 아직 채점된 오답이 없어요.' : "This week's words. No homework mistakes scanned yet."}
           </p>
           <ul className="flex flex-wrap gap-1.5">
             {(missed.length > 0 ? missed : vocabWords.map((word) => ({ word, count: 0 }))).map(({ word, count }) => (
