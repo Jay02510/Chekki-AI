@@ -69,7 +69,7 @@ export const ParentClassLogs: React.FC<Props> = ({ classId, studentUid, studentN
               <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 py-3 [&::-webkit-details-marker]:hidden">
                 <span className="min-w-0">
                   <span className="block text-[15px] font-bold text-ink">{log.className}</span>
-                  {log.lessonTopic && <span className="block truncate text-[13px] text-ink-3">{log.lessonTopic}</span>}
+                  {log.lessonTopic && <span className="block truncate text-[13px] text-ink-3 group-open/log:whitespace-normal">{log.lessonTopic}</span>}
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
                   <span className="num text-[13px] text-ink-3">{log.date}</span>

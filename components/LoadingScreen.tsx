@@ -57,7 +57,11 @@ export const LoadingScreen: React.FC<Props> = ({ onCancel, imageUrl }) => {
           </div>
           {/* the moving Chekki, peeking in */}
           <span className="absolute -bottom-8 -right-4 inline-flex h-28 w-28 overflow-hidden rounded-full border-[6px] border-ground bg-black ring-4 ring-line sm:-right-8">
-            <img src={ASSETS.ANIM_ANALYZING} alt="" className="h-full w-full scale-125 object-cover" />
+            {/* Animated webp ignores the CSS reduced-motion override; swap in a still. */}
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcSet="/images/chekki-thumbs.webp" />
+              <img src={ASSETS.ANIM_ANALYZING} alt="" className="h-full w-full scale-125 object-cover" />
+            </picture>
           </span>
         </div>
 

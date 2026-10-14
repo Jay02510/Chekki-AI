@@ -15,9 +15,9 @@ colors:
   line: "#ef7c1c"
   line-ink: "#a84d06"
   line-soft: "#fdebd8"
-  wrong: "#d4462a"
+  wrong: "#bf3a20"
   wrong-soft: "#fce6df"
-  right: "#1f8a4c"
+  right: "#1b7a43"
   right-soft: "#e1f3e6"
   tile: "rgba(239, 124, 28, 0.10)"
   ground-dark: "#17120f"
@@ -184,8 +184,8 @@ All colours live as `--m-*` variables in `tokens.css` and swap together under `h
 
 ### Primary
 
-- **Chekki Orange** (`line`): the primary button, focus outline, caret, selection, progress fills, the active roundel, selected chip rings.
-- **Orange Ink** (`line-ink`): orange that is dark enough for text. Links, small labels ("Premium", "같이 볼 문제"), counts, icons inside Orange Wash circles.
+- **Chekki Orange** (`line`): the primary button, caret, selection, progress fills, the active roundel, selected chip rings.
+- **Orange Ink** (`line-ink`): orange that is dark enough for text. Links, small labels ("Premium", "같이 볼 문제"), counts, icons inside Orange Wash circles, and the focus outline (Orange is under 3:1 on cream and white).
 - **Orange Wash** (`line-soft`): notes, praise, selected options, suggestion chips, icon circles, the user's own chat bubbles.
 
 ### Signals (reserved)
@@ -279,7 +279,7 @@ Full-width 48px rows: unselected `bg-surface ring-1 ring-rule text-ink-2`; selec
 
 ### Inputs
 
-`bg-sunken ring-1 ring-inset ring-rule rounded-md min-h-12 px-4 text-[16px]`, placeholder `text-ink-3`, focus `ring-2 ring-line`. Always a visible `<label>` above, 14px semibold `ink-2`.
+`bg-sunken ring-1 ring-inset ring-rule rounded-md min-h-12 px-4 text-[16px]`, placeholder `text-ink-3`, focus `ring-2 ring-line`. Every input, textarea and select also gets a 2 to 3px Orange Ink outline on `:focus-visible` from one unlayered rule in `index.css` (app) and `landing.css` (staff), so `outline-none` on a field can't remove the focus cue. Always a visible `<label>` above, 14px semibold `ink-2`.
 
 ### Cards, notes, foldable cards
 

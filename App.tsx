@@ -718,8 +718,8 @@ function AppContent() {
             <span className="mt-1 h-3 w-3 shrink-0 rounded-full bg-line" aria-hidden="true" />
             <p className="text-[14px] font-semibold leading-snug">
               {language === 'ko'
-                ? '도착: 한국어 설명. 다시 볼 문제부터 아이와 같이 봐요.'
-                : "Arrived: Explain. Start with the ones to look at together."}
+                ? '채점이 끝났어요. 같이 볼 문제부터 아이와 봐요.'
+                : 'Grading done. Start with the ones to look at together.'}
             </p>
           </div>
         )}

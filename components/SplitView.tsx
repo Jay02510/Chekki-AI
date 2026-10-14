@@ -742,14 +742,14 @@ export const SplitView: React.FC<SplitViewProps> = ({
                   src={wrongItems.length === 0 && hasGrading && !isLoadingItems ? '/images/chekki-wave.webp' : '/images/chekki-thumbs.webp'}
                   alt=""
                   onError={() => setMascotError(true)}
-                  className="h-16 w-16 shrink-0 object-contain"
+                  className="hidden h-14 w-14 shrink-0 object-contain min-[360px]:block sm:h-16 sm:w-16"
                 />
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-semibold text-ink-3">
+                <p className="truncate pr-20 text-[13px] font-semibold text-ink-3" title={worksheetTitle}>
                   {worksheetTitle || (language === 'ko' ? '학습지' : 'Worksheet')}
                 </p>
-                <h2 className="sign-ko mt-0.5 text-[24px] sm:text-[28px] text-ink break-keep">
+                <h2 className="sign-ko mt-0.5 pr-20 text-[24px] sm:text-[28px] text-ink break-keep">
                   {isLoadingItems
                     ? t('ws_scanning_header')
                     : !hasGrading
@@ -780,7 +780,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                           : `${wrongItems.length} to look at together · ${localItems.length} total`}
                 </p>
               </div>
-              <div className="-mr-2 -mt-2 flex shrink-0 items-center">
+              <div className="absolute right-3 top-3 flex items-center">
                 <button
                   aria-label={language === 'ko' ? '이미지 저장' : 'Save image'}
                   title={language === 'ko' ? '기록 저장' : 'Save image'}

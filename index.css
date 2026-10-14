@@ -156,7 +156,7 @@
     color: #16191c;
   }
   :focus-visible {
-    outline: 3px solid var(--m-line);
+    outline: 3px solid var(--m-line-ink);
     outline-offset: 2px;
   }
   a {
@@ -254,6 +254,14 @@
       transform: translateY(100%);
     }
   }
+}
+
+/* Fields: many class strings use outline-none with a faint ring or a 1px
+   border colour as the only focus cue. Unlayered, so it beats those
+   utilities. Orange Ink, not Orange: Orange is under 3:1 on cream and white. */
+:is(input, textarea, select):focus-visible {
+  outline: 3px solid var(--m-line-ink);
+  outline-offset: 1px;
 }
 
 /* Accessibility: disable all motion for users who prefer it */

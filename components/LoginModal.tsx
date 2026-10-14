@@ -470,7 +470,7 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
                         onClick={() => setShowPassword(!showPassword)}
                         aria-label={isKo ? '비밀번호 보기' : 'Show password'}
                         aria-pressed={showPassword}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-3 hover:text-line-ink transition-colors duration-250"
+                        className="absolute right-1 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-md text-ink-3 hover:text-line-ink transition-colors duration-250"
                       >
                         {showPassword ? (
                           <svg

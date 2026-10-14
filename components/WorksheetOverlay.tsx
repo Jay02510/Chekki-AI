@@ -358,10 +358,10 @@ export const WorksheetOverlay: React.FC<Props> = ({
         <div className="absolute top-4 right-4 md:top-8 md:right-8 z-50 flex flex-col items-end pointer-events-none gap-2">
           <div className="flex flex-col gap-3 items-start pointer-events-auto relative shrink-0">
             <button
-              aria-label={language === 'ko' ? '정답 설정' : 'Overlay Settings'}
+              aria-label={language === 'ko' ? '정답 설정' : 'Answer settings'}
               onClick={() => setShowSettings(!showSettings)}
               className={`w-11 h-11 rounded-md bg-surface/95 text-ink ring-1 ring-rule ${showSettings ? 'ring-2 ring-line text-line-ink opacity-100' : 'opacity-70 md:opacity-40 md:hover:opacity-100'} hover:scale-110 active:scale-90 hover:text-line-ink transition-[border-color,color,opacity,transform] duration-200 flex items-center justify-center text-xl shadow-2xl group shrink-0`}
-              title={language === 'ko' ? '정답 설정' : 'Overlay Settings'}
+              title={language === 'ko' ? '정답 설정' : 'Answer settings'}
             >
               <svg
                 className={`w-7 h-7 ${showSettings ? 'scale-110' : 'group-hover:scale-110'} transition-transform`}
@@ -489,7 +489,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
                 <button
                   onClick={() => setShowFullscreenSettings(!showFullscreenSettings)}
                   className={`w-11 h-11 rounded-md bg-surface/95 text-ink ring-1 ring-rule ${showFullscreenSettings ? 'ring-2 ring-line text-line-ink opacity-100' : 'opacity-40 hover:opacity-100'} transition-[border-color,color,opacity,transform] flex items-center justify-center text-2xl shadow-2xl active:scale-90 group relative`}
-                  title={language === 'ko' ? '정답 설정' : 'Overlay Settings'}
+                  title={language === 'ko' ? '정답 설정' : 'Answer settings'}
                 >
                   <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path

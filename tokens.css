@@ -23,7 +23,7 @@
   --m-line-soft: #fdebd8;
   --m-wrong: #bf3a20; /* 4.5:1+ on white and wrong-soft (was #d4462a, 4.46:1) */
   --m-wrong-soft: #fce6df;
-  --m-right: #1f8a4c;
+  --m-right: #1b7a43; /* 4.5:1+ on white and right-soft (was #1f8a4c, 3.79:1 on right-soft) */
   --m-right-soft: #e1f3e6;
   --m-tile: rgba(239, 124, 28, 0.10);
 }

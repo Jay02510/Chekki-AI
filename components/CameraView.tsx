@@ -216,7 +216,7 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
                     ? '학습지 찍기'
                     : 'Scan homework'}
             </span>
-            <span className={`mt-1 block text-[15px] font-semibold ${isLocked ? 'text-ink-2' : 'text-[#2b211a]/75'}`}>
+            <span className={`mt-1 block text-[15px] font-semibold ${isLocked ? 'text-ink-2' : 'text-[#2b211a]'}`}>
               {isLocked
                 ? t('guest_used_desc')
                 : !isAuthenticated && !guestUsed

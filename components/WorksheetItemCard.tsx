@@ -321,10 +321,10 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                           setIsScriptExpanded(!isScriptExpanded);
                           if (!isScriptExpanded) setIsAnswerExpanded(false);
                         }}
-                        className="flex flex-1 items-center justify-between text-left"
+                        className="flex min-h-11 flex-1 items-center gap-1.5 text-left"
                       >
-                        <span className="text-[15px] font-bold text-ink">{ko ? '아이에게 이렇게 말해 주세요' : 'What to say to your child'}</span>
-                        <CaretDown size={16} weight="bold" className={`text-ink-3 transition-transform ${isScriptExpanded ? 'rotate-180' : ''}`} />
+                        <span className="text-[15px] font-bold text-ink">{ko ? '아이에게 할 말' : 'What to say'}</span>
+                        <CaretDown size={16} weight="bold" className={`shrink-0 text-ink-3 transition-transform ${isScriptExpanded ? 'rotate-180' : ''}`} />
                       </button>
                       <div role="group" aria-label={ko ? '스크립트 언어' : 'Script language'} className="flex shrink-0 rounded bg-surface p-0.5">
                         {(['ko', 'en'] as const).map((lng) => (
