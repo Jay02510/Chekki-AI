@@ -137,6 +137,7 @@ function AppContent() {
     handleImageSelected: baseHandleImageSelected,
     handleScanAgain: hookHandleScanAgain,
     executeReset: hookExecuteReset,
+    openSavedScan,
   } = useWorksheetAnalysis();
 
   const [isNight, setIsNight] = useState(getInitialTheme());
@@ -809,6 +810,7 @@ function AppContent() {
                     minimal
                     onOpenHelp={() => window.dispatchEvent(new CustomEvent('open-help'))}
                     onOpenDashboard={() => setShowDashboard(true)}
+                    onOpenScan={openSavedScan}
                   />
                 )}
               </div>

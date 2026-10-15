@@ -31,6 +31,9 @@ export interface ClassLogPayload {
   // prompt needs to polish instead of "translate from English" (that framing
   // would otherwise garble/mistranslate input that's already Korean).
   authorRole?: 'ft' | 'kt';
+  // Homework words the teacher says they went over in class today, picked
+  // from the class's most-missed list. Closes the loop for the parent.
+  reviewedWords?: string[];
 }
 
 export interface GeneratedReportOutput {
@@ -167,8 +170,8 @@ export async function generateGeneralClassSummary(
     console.warn('generate-report call fallback to deterministic template:', err);
     // Same plain-facts template as api/analyze.ts, flagged so the KT rewrites it.
     return {
-      korean: `오늘은 ${payload.textbook} 교재로 ${payload.lessonTopic} 수업을 했어요.`,
-      english: `Today's lesson: ${payload.lessonTopic} (${payload.textbook}).`,
+      korean: `오늘은 ${payload.textbook} 교재로 ${payload.lessonTopic} 수업을 했어요.${payload.reviewedWords?.length ? ` 숙제에서 많이 틀린 ${payload.reviewedWords.join(', ')}도 수업에서 다시 연습했어요.` : ''}`,
+      english: `Today's lesson: ${payload.lessonTopic} (${payload.textbook}).${payload.reviewedWords?.length ? ` We went over words missed on homework: ${payload.reviewedWords.join(', ')}.` : ''}`,
       fallback: true,
     };
   }

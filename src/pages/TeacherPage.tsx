@@ -2848,6 +2848,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                 handleLogSubmit={handleLogSubmit}
                 selectedTextbookName={selectedTextbookName}
                 ftDashboardRoster={ftDashboardRoster}
+                sortedTroubleWords={sortedTroubleWords}
                 uploadMode={uploadMode}
                 classes={classes}
                 selectedClass={selectedClass}
@@ -3010,7 +3011,11 @@ export default function TeacherPage({ isNight = true }: Props) {
                 {selectedStudentDetails.weeklyMistakes.length === 0 ? (
                   <div className="py-16 text-center text-correct text-xs flex flex-col items-center gap-2">
                     <Sparkle size={24} weight="bold" />
-                    <span>{isKo ? '모든 항목을 완벽하게 학습했습니다!' : 'Mastered all items this week! Excellent progress.'}</span>
+                    <span>
+                      {selectedStudentDetails.hasScannedThisWeek
+                        ? (isKo ? '이번 주 스캔한 숙제는 모두 맞았어요.' : 'Everything scanned this week was correct.')
+                        : (isKo ? '이번 주에 스캔한 숙제가 아직 없어요.' : 'No homework scanned this week yet.')}
+                    </span>
                   </div>
                 ) : (
                   <div className="space-y-4">

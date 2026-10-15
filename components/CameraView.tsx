@@ -1,5 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Camera, Sun, LockSimple, ArrowRight, ChatCircleText, ChalkboardTeacher, Target } from '@phosphor-icons/react';
+import { Camera, Sun, LockSimple, ArrowRight, ChatCircleText, ChalkboardTeacher, Target, ClockCounterClockwise } from '@phosphor-icons/react';
+import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
+import { dbInstance } from '../services/database';
 import { useToast } from '../contexts/ToastContext';
 import { compressImage } from '../utils/imageUtils';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -9,6 +11,8 @@ import { LoopStrip, Stop } from './metro';
 import { ParentClassLogs } from './ParentClassLogs';
 import { useMistakes } from '../contexts/MistakeContext';
 import { kstDate } from '../src/utils/localDate';
+import { kstWeekStart } from '../src/utils/weeklyMistakes';
+import { listScans, type SavedScan } from '../src/utils/scanHistory';
 
 interface Props {
   onImageSelected: (base64: string) => void;
@@ -16,12 +20,13 @@ interface Props {
   minimal?: boolean;
   onOpenHelp?: () => void;
   onOpenDashboard?: () => void;
+  onOpenScan?: (scan: SavedScan) => void;
 }
 
 // Scan home: Chekki greets the parent, one big button takes the photo.
 // Everything else stays quiet so a tired parent with a child on their lap
 // sees exactly one thing to do.
-export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, onOpenDashboard }) => {
+export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, onOpenDashboard, onOpenScan }) => {
   const { showToast } = useToast();
   const { mistakes } = useMistakes();
   const { user, isAuthenticated, openLoginModal, setShowPaywall } = useAuth();
@@ -40,6 +45,37 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
   useEffect(() => {
     setGuestUsed(localStorage.getItem('chekki_guest_scan_used') === 'true');
   }, [isAuthenticated]);
+
+  const [pastScans, setPastScans] = useState<SavedScan[]>([]);
+  useEffect(() => {
+    listScans(user?.uid || 'guest').then(setPastScans);
+  }, [user?.uid]);
+
+  // This week's real progress for academy-linked families: did we scan,
+  // did the class report arrive. Each read is the parent's own data.
+  const [week, setWeek] = useState({ scanned: false, reported: false });
+  const linkedClassId = user?.schoolId && user?.classStatus === 'active' ? user?.classId : undefined;
+  useEffect(() => {
+    if (!linkedClassId || !user?.uid) return;
+    const weekStart = kstWeekStart();
+    const weekStartDate = kstDate(new Date(weekStart));
+    let cancelled = false;
+    Promise.all([
+      getDocs(query(collection(dbInstance, 'classes', linkedClassId, 'studentScans'), where('studentUid', '==', user.uid), limit(50))),
+      getDocs(query(collection(dbInstance, 'classes', linkedClassId, 'parentReports'), where('studentUid', '==', user.uid), orderBy('date', 'desc'), limit(1))),
+    ])
+      .then(([scans, reports]) => {
+        if (cancelled) return;
+        setWeek({
+          scanned: scans.docs.some((d) => new Date(d.data().scannedAt).getTime() >= weekStart),
+          reported: reports.docs.some((d) => (d.data().date || '') >= weekStartDate),
+        });
+      })
+      .catch((err) => console.warn('This-week progress unavailable:', err));
+    return () => {
+      cancelled = true;
+    };
+  }, [linkedClassId, user?.uid]);
 
   const isLocked = !isAuthenticated && guestUsed;
 
@@ -90,16 +126,20 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
   const scansUsed = user && user.lastScanDate === today ? user.scansUsedToday || 0 : 0;
   const scansLeft = Math.max(0, (user?.maxScansPerDay || 2) - scansUsed);
 
-    // Only "숙제" is the parent's step right now. Parents can't read the
-    // class's curriculum doc, so "정답지" can't be shown as done without
-    // claiming a key we never checked.
-    const stops: Stop[] = [
-    { ko: '정답지', en: 'Key', state: 'next' },
-    { ko: '숙제', en: 'Scan', state: 'current' },
-    { ko: '설명', en: 'Explain', state: 'next' },
-    { ko: '수업', en: 'Class', state: 'next' },
-    { ko: '리포트', en: 'Report', state: 'next' },
-  ];
+  // Every stop reflects this week's real data. "정답지" was dropped:
+  // parents can't read the class's key, so it could never be shown as done.
+  // Explanations come with the scan; a class report means class happened.
+  const done = [week.scanned, week.scanned, week.reported, week.reported];
+  const firstOpen = done.indexOf(false);
+  const stops: Stop[] = [
+    { ko: '숙제', en: 'Scan' },
+    { ko: '설명', en: 'Explain' },
+    { ko: '수업', en: 'Class' },
+    { ko: '리포트', en: 'Report' },
+  ].map((s, i): Stop => ({
+    ...s,
+    state: i === (firstOpen === -1 ? done.length - 1 : firstOpen) ? 'current' : done[i] ? 'done' : 'next',
+  }));
 
   // Why this and not a chatbot: three honest differences, guests only.
   const reasons = [
@@ -338,6 +378,41 @@ export const CameraView: React.FC<Props> = ({ onImageSelected, isNight = false, 
           </span>
           <ArrowRight size={20} weight="bold" className="shrink-0 text-line-ink" aria-hidden="true" />
         </button>
+      )}
+
+      {pastScans.length > 0 && onOpenScan && (
+        <section className="mt-8">
+          <h2 className="flex items-center gap-2 text-[15px] font-bold text-ink-2">
+            <ClockCounterClockwise size={18} weight="bold" aria-hidden="true" />
+            {ko ? '지난 채점' : 'Past scans'}
+          </h2>
+          <ul className="mt-3 divide-y divide-rule rounded-md bg-surface ring-1 ring-inset ring-rule">
+            {pastScans.map((scan) => {
+              const items: any[] = scan.data?.items || [];
+              const wrong = items.filter((it) => it.is_correct === false).length;
+              const title = (ko ? scan.data?.worksheet_summary?.title_ko : scan.data?.worksheet_summary?.title_en) || (ko ? '학습지' : 'Worksheet');
+              return (
+                <li key={scan.id}>
+                  <button
+                    type="button"
+                    onClick={() => onOpenScan(scan)}
+                    className="flex min-h-14 w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-sunken"
+                  >
+                    <img src={scan.image} alt="" className="h-11 w-11 shrink-0 rounded object-cover" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[15px] font-bold text-ink">{title}</span>
+                      <span className="num block text-[13px] text-ink-3">
+                        {new Intl.DateTimeFormat(ko ? 'ko-KR' : 'en-US', { month: 'short', day: 'numeric', weekday: 'short' }).format(scan.at)}
+                        {items.length > 0 && (wrong === 0 ? (ko ? ' · 다 맞음' : ' · all correct') : ko ? ` · 틀린 문제 ${wrong}개` : ` · ${wrong} to review`)}
+                      </span>
+                    </span>
+                    <ArrowRight size={18} weight="bold" className="shrink-0 text-ink-3" aria-hidden="true" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       )}
 
       {/* this week, for families linked to an academy */}

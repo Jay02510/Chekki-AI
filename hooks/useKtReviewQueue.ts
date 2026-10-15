@@ -37,6 +37,7 @@ export interface PendingClassLog {
   energyLevel?: string;
   activities?: string[];
   generalComments?: string;
+  reviewedWords?: string[];
   exceptions?: Array<{ studentName: string; studentUid?: string | null; details: string; type?: 'praise' | 'attention' }>;
 }
 

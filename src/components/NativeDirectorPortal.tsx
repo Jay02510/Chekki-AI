@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Buildings, WarningCircle, CheckCircle, X } from '@phosphor-icons/react';
-import { collection, query, where, getCountFromServer, getDocs } from 'firebase/firestore';
+import { collection, query, where, getCountFromServer, getDocs, limit, Timestamp } from 'firebase/firestore';
 import { dbInstance } from '../../services/database';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { ActivityFeed } from './ActivityFeed';
 import { useLogCompliance, type ComplianceRow } from '../../hooks/useLogCompliance';
 import { staffUi } from './staffUi';
-import { localDate } from '../utils/localDate';
+import { localDate, kstDate } from '../utils/localDate';
+import { kstWeekStart, missLabel } from '../utils/weeklyMistakes';
 
 interface Props {
   isKo?: boolean;
@@ -131,6 +132,37 @@ export const NativeDirectorPortal: React.FC<Props> = ({
   const flaggedStudents = campusRoster.flagged;
 
   const [phoneScriptFor, setPhoneScriptFor] = useState<string | null>(null);
+  // Call notes = this child's real homework from the last two weeks, loaded
+  // when opened. Replaced a fixed three-line script that was the same for everyone.
+  const [callNotes, setCallNotes] = useState<Record<string, { scans: number; mistakes: number; words: string[] } | 'loading' | 'error'>>({});
+  const openCallNotes = async (st: any) => {
+    if (phoneScriptFor === st.uid) return setPhoneScriptFor(null);
+    setPhoneScriptFor(st.uid);
+    if (callNotes[st.uid] && callNotes[st.uid] !== 'error') return;
+    if (!st.classId) return setCallNotes((p) => ({ ...p, [st.uid]: { scans: 0, mistakes: 0, words: [] } }));
+    setCallNotes((p) => ({ ...p, [st.uid]: 'loading' }));
+    try {
+      const snap = await getDocs(query(collection(dbInstance, 'classes', st.classId, 'studentScans'), where('studentUid', '==', st.uid), limit(50)));
+      const since = Date.now() - 14 * 86_400_000;
+      const recent = snap.docs.map((d) => d.data()).filter((d) => new Date(d.scannedAt).getTime() >= since);
+      const counts = new Map<string, number>();
+      recent.forEach((d) => (d.redBorderedMistakes || []).forEach((m: any) => {
+        const w = missLabel(m, []);
+        if (w) counts.set(w, (counts.get(w) || 0) + 1);
+      }));
+      setCallNotes((p) => ({
+        ...p,
+        [st.uid]: {
+          scans: recent.length,
+          mistakes: recent.reduce((n, d) => n + (Number(d.mistakeCount) || 0), 0),
+          words: [...counts].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([w]) => w),
+        },
+      }));
+    } catch (err) {
+      console.error('Failed to load call notes:', err);
+      setCallNotes((p) => ({ ...p, [st.uid]: 'error' }));
+    }
+  };
   const [showSeatExpansionModal, setShowSeatExpansionModal] = useState(false);
   const [requestedExtraSeats, setRequestedExtraSeats] = useState(3);
   const [seatRequestSent, setSeatRequestSent] = useState(false);
@@ -187,6 +219,64 @@ export const NativeDirectorPortal: React.FC<Props> = ({
     return () => { cancelled = true; };
   }, [classes]);
 
+
+  // Is it being used: real counts only (PRODUCT.md principle 6), so a
+  // director at renewal sees use, not just whether logs went out.
+  const [usage, setUsage] = useState<{
+    scans: number;
+    students: number;
+    reportsThisMonth: number;
+    byClass: { classId: string; className: string; scans: number; mistakes: number; students: number }[];
+  } | null>(null);
+
+  useEffect(() => {
+    const real = classes.filter((c: any) => c?.id && !c.isDemo);
+    if (real.length === 0) {
+      setUsage(null);
+      return;
+    }
+    let cancelled = false;
+    const weekStartIso = new Date(kstWeekStart()).toISOString();
+    const monthStart = Timestamp.fromDate(new Date(`${kstDate().slice(0, 7)}-01T00:00:00+09:00`));
+    (async () => {
+      try {
+        const rows = await Promise.all(
+          real.map(async (cls: any) => {
+            const [scansSnap, reportsCount] = await Promise.all([
+              getDocs(query(collection(dbInstance, 'classes', cls.id, 'studentScans'), where('scannedAt', '>=', weekStartIso), limit(500))),
+              getCountFromServer(query(collection(dbInstance, 'classes', cls.id, 'parentReports'), where('sentAt', '>=', monthStart))),
+            ]);
+            const uids = new Set<string>();
+            let mistakes = 0;
+            scansSnap.forEach((d) => {
+              const data = d.data();
+              if (data.studentUid) uids.add(data.studentUid);
+              mistakes += Number(data.mistakeCount) || 0;
+            });
+            return {
+              classId: cls.id as string,
+              className: (cls.name || cls.className || 'Class') as string,
+              scans: scansSnap.size,
+              mistakes,
+              students: uids.size,
+              reports: reportsCount.data().count,
+            };
+          })
+        );
+        if (cancelled) return;
+        setUsage({
+          scans: rows.reduce((n, r) => n + r.scans, 0),
+          students: rows.reduce((n, r) => n + r.students, 0),
+          reportsThisMonth: rows.reduce((n, r) => n + r.reports, 0),
+          // Most mistakes per scan first: where the director looks next.
+          byClass: rows.sort((a, b) => b.mistakes / Math.max(1, b.scans) - a.mistakes / Math.max(1, a.scans)),
+        });
+      } catch (err) {
+        console.error('Failed to load usage stats:', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [classes]);
 
   const realClassCount = classes.filter((c: any) => !c.isDemo).length;
   const seatCount = (seatsTotal?.ft || 0) + (seatsTotal?.kt || 0);
@@ -308,6 +398,13 @@ export const NativeDirectorPortal: React.FC<Props> = ({
             <div className="px-4 py-4">
               <dt className="text-[13px] font-bold text-ink-3">{isKo ? '학생' : 'Students'}</dt>
               <dd className="mt-1 text-[28px] font-extrabold tabular-nums">{totalRosterCount}</dd>
+              {campusRoster.pendingCount > 0 && (
+                <dd className="text-[13px] text-ink-3">
+                  {isKo
+                    ? `앱 가입 ${campusRoster.activeCount} · 초대 대기 ${campusRoster.pendingCount}`
+                    : `${campusRoster.activeCount} on the app · ${campusRoster.pendingCount} invited`}
+                </dd>
+              )}
             </div>
             <div className="py-4 pl-4">
               <dt className="text-[13px] font-bold text-ink-3">{isKo ? '교사 좌석' : 'Staff seats'}</dt>
@@ -326,6 +423,45 @@ export const NativeDirectorPortal: React.FC<Props> = ({
               </dd>
             </div>
           </dl>
+
+          {usage && (
+            <section aria-labelledby="usage-title">
+              <h3 id="usage-title" className="text-[20px] font-extrabold tracking-[-0.01em]">{isKo ? '학부모 사용 현황' : 'How families are using it'}</h3>
+              <dl className="mt-3 grid grid-cols-3 divide-x divide-rule border-y border-rule">
+                <div className="py-4 pr-4">
+                  <dt className="text-[13px] font-bold text-ink-3">{isKo ? '이번 주 숙제 채점' : 'Homework scans this week'}</dt>
+                  <dd className="mt-1 text-[28px] font-extrabold tabular-nums">{usage.scans}</dd>
+                </div>
+                <div className="px-4 py-4">
+                  <dt className="text-[13px] font-bold text-ink-3">{isKo ? '이번 주 채점한 학생' : 'Students scanned this week'}</dt>
+                  <dd className="mt-1 text-[28px] font-extrabold tabular-nums">
+                    {usage.students}
+                    {campusRoster.activeCount > 0 && <span className="text-[16px] font-bold text-ink-3"> / {campusRoster.activeCount}</span>}
+                  </dd>
+                </div>
+                <div className="py-4 pl-4">
+                  <dt className="text-[13px] font-bold text-ink-3">{isKo ? '이번 달 전달된 리포트' : 'Reports delivered this month'}</dt>
+                  <dd className="mt-1 text-[28px] font-extrabold tabular-nums">{usage.reportsThisMonth}</dd>
+                </div>
+              </dl>
+              {usage.byClass.length > 1 && (
+                <ul className={`mt-3 ${staffUi.rows}`} aria-label={isKo ? '반별 이번 주 숙제' : "This week's homework by class"}>
+                  {usage.byClass.map((c) => (
+                    <li key={c.classId} className="flex items-center justify-between gap-3 py-2.5 text-[14px]">
+                      <span className="min-w-0 truncate font-bold">{c.className}</span>
+                      <span className="shrink-0 tabular-nums text-ink-2">
+                        {c.scans === 0
+                          ? (isKo ? '이번 주 채점 없음' : 'No scans this week')
+                          : isKo
+                            ? `채점 ${c.scans}건 · 학생 ${c.students}명 · 오답 평균 ${(c.mistakes / c.scans).toFixed(1)}개`
+                            : `${c.scans} ${c.scans === 1 ? 'scan' : 'scans'} · ${c.students} ${c.students === 1 ? 'student' : 'students'} · ${(c.mistakes / c.scans).toFixed(1)} misses per scan`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
 
           {/* selectedClass is never actually null — TeacherPage always falls
               back to a placeholder "Sample Class" object so the rest of the
@@ -451,18 +587,38 @@ export const NativeDirectorPortal: React.FC<Props> = ({
                     <p>{st.flaggedException?.reason}</p>
                   </div>
 
-                  {phoneScriptFor === st.uid && (
-                    <ol className="list-decimal space-y-1 rounded-md bg-sunken py-3 pl-8 pr-3 text-[14px] leading-relaxed">
-                      <li>{isKo ? '수업 노력 인정하기' : 'Acknowledge class effort'}</li>
-                      <li>{isKo ? '논의: ' : 'Address: '}{st.flaggedException?.reason}</li>
-                      <li>{isKo ? '통화 전에 학부모와 구체적인 후속 조치 하나 정하기' : 'Agree on one concrete follow-up step with the parent before ending the call.'}</li>
-                    </ol>
-                  )}
+                  {phoneScriptFor === st.uid && (() => {
+                    const n = callNotes[st.uid];
+                    return (
+                      <div className="rounded-md bg-sunken px-4 py-3 text-[14px] leading-relaxed" aria-live="polite">
+                        <p className="mb-0.5 text-[13px] font-bold text-ink-3">{isKo ? '최근 2주 숙제' : 'Homework, last 2 weeks'}</p>
+                        {n === 'loading' || !n ? (
+                          <p className="text-ink-3">{isKo ? '불러오는 중...' : 'Loading...'}</p>
+                        ) : n === 'error' ? (
+                          <p className="text-ink-3">{isKo ? '불러오지 못했어요. 다시 눌러 주세요.' : "Couldn't load it. Tap again to retry."}</p>
+                        ) : n.scans === 0 ? (
+                          <p>{isKo ? '최근 2주 동안 스캔한 숙제가 없어요.' : 'No homework scanned in the last 2 weeks.'}</p>
+                        ) : (
+                          <>
+                            <p className="tabular-nums">
+                              {isKo ? `채점 ${n.scans}회 · 틀린 문제 ${n.mistakes}개` : `${n.scans} ${n.scans === 1 ? 'scan' : 'scans'} · ${n.mistakes} ${n.mistakes === 1 ? 'mistake' : 'mistakes'}`}
+                            </p>
+                            {n.words.length > 0 && (
+                              <p>
+                                {isKo ? '자주 틀린 것: ' : 'Missed most: '}
+                                <span className="font-bold">{n.words.join(', ')}</span>
+                              </p>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   <div className="flex items-center justify-between gap-2">
                     <button
                       type="button"
-                      onClick={() => setPhoneScriptFor((prev) => (prev === st.uid ? null : st.uid))}
+                      onClick={() => openCallNotes(st)}
                       className={quietBtn}
                     >
                       {phoneScriptFor === st.uid ? (isKo ? '통화 요점 숨기기' : 'Hide call notes') : (isKo ? '통화 요점 보기' : 'Call notes')}

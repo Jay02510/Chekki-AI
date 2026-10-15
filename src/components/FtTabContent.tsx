@@ -12,7 +12,7 @@ interface Props {
   user: any;
   activeClass: any;
   selectedTextbookName: string;
-  ftDashboardRoster: { uid: string; name: string; isPending?: boolean; scannedThisWeek?: boolean; weeklyMistakes?: number }[];
+  ftDashboardRoster: { uid: string; name: string; isPending?: boolean; scannedThisWeek?: boolean; weeklyMistakes?: number; missedWords?: string[] }[];
   handleLogSubmit: (payload: any) => boolean;
   activeVocabWords: string[];
   sortedTroubleWords: { word: string; count: number }[];
