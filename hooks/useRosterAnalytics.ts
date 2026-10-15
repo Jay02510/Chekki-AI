@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { dbInstance } from '../services/database';
+import { countMissedWords, isThisKstWeek, missLabel } from '../src/utils/weeklyMistakes';
 
 // Weekly-curriculum-vs-mistakes roster analytics. Originally scoped as
 // "FT dashboard state" (Phase 3 of the buzzing-nibbling-hearth TeacherPage
@@ -31,71 +32,22 @@ export function useRosterAnalytics(
       .filter((p) => p.length > 0);
   };
 
-  const isMistakeInWeeklyCurriculum = (mistake: any) => {
-    const activeVocab = getWeeklyVocabWords();
-    const activePhonics = getWeeklyPhonicsRules();
-    const qText = (mistake.question_text || '').toLowerCase();
-    const aText = (mistake.correct_answer || '').toLowerCase();
-    const rText = (mistake.student_response || '').toLowerCase();
-
-    const matchesVocab = activeVocab.some((word) =>
-      qText.includes(word) || aText.includes(word) || rText.includes(word)
-    );
-
-    const matchesPhonics = activePhonics.some((rule) => {
-      const cleanRule = rule.replace(/-/g, '').toLowerCase();
-      if (!cleanRule) return false;
-      return qText.includes(cleanRule) || aText.includes(cleanRule) || rText.includes(cleanRule);
-    });
-
-    return matchesVocab || matchesPhonics;
-  };
-
   const activeVocabWords = getWeeklyVocabWords();
 
-  // Feeds NativeFtDashboard, which is React.memo'd. vocabMistakeCounts (and
-  // everything derived from it) was previously rebuilt as a fresh object/
-  // array on every render regardless of whether studentsData/curriculum
-  // actually changed — the sortedTroubleWords useMemo below had a dep that
-  // was itself always a new reference, so it never actually memoized
-  // anything, defeating NativeFtDashboard's memo every render (audit #6).
-  const {
-    vocabMistakeCounts,
-    completedHomeworkCount,
-    rosterWithCompletion,
-  } = useMemo(() => {
-    const counts: Record<string, number> = {};
-    activeVocabWords.forEach((word) => {
-      counts[word] = 0;
-    });
-
+  // Feeds NativeFtDashboard, which is React.memo'd, so memoized on its inputs.
+  // "This week" = the KST calendar week, and every miss counts, not just
+  // ones matching the vocab list (see src/utils/weeklyMistakes.ts).
+  const { sortedTroubleWords, completedHomeworkCount, rosterWithCompletion } = useMemo(() => {
     let completed = 0;
+    const classMisses: any[] = [];
 
     const roster = (studentsData || []).filter(Boolean).map((student) => {
-      if (!student) return null;
-      const weeklyMistakes = (student.mistakes || []).filter((m: any) => m && isMistakeInWeeklyCurriculum(m));
-      const hasScannedThisWeek = weeklyMistakes.length > 0 || (
-        student.lastScanDate &&
-        (new Date().getTime() - new Date(student.lastScanDate).getTime()) < 7 * 24 * 60 * 60 * 1000
-      );
-
-      if (hasScannedThisWeek && student.classStatus === 'active') {
-        completed++;
-      }
+      const weeklyMistakes = (student.mistakes || []).filter((m: any) => m && isThisKstWeek(m.scannedAt));
+      const hasScannedThisWeek = (student.scans || []).some((s: any) => isThisKstWeek(s?.scannedAt)) || isThisKstWeek(student.lastScanDate);
 
       if (student.classStatus === 'active') {
-        weeklyMistakes.forEach((m: any) => {
-          if (!m) return;
-          const qText = (m.question_text || '').toLowerCase();
-          const aText = (m.correct_answer || '').toLowerCase();
-          const rText = (m.student_response || '').toLowerCase();
-
-          activeVocabWords.forEach((word) => {
-            if (qText.includes(word) || aText.includes(word) || rText.includes(word)) {
-              counts[word]++;
-            }
-          });
-        });
+        if (hasScannedThisWeek) completed++;
+        classMisses.push(...weeklyMistakes);
       }
 
       return {
@@ -103,12 +55,13 @@ export function useRosterAnalytics(
         hasScannedThisWeek,
         weeklyMistakesCount: weeklyMistakes.length,
         weeklyMistakes,
+        missedWords: [...new Set(weeklyMistakes.map((m: any) => missLabel(m, activeVocabWords)).filter(Boolean))] as string[],
       };
-    }).filter(Boolean);
+    });
 
-    return { vocabMistakeCounts: counts, completedHomeworkCount: completed, rosterWithCompletion: roster };
+    return { sortedTroubleWords: countMissedWords(classMisses, activeVocabWords), completedHomeworkCount: completed, rosterWithCompletion: roster };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studentsData, curriculumVocab, curriculumPhonics]);
+  }, [studentsData, curriculumVocab]);
 
   const activeRoster = rosterWithCompletion.filter((student) => student.classStatus === 'active');
   const pendingRoster = rosterWithCompletion.filter((student) => student.classStatus === 'pending');
@@ -119,13 +72,6 @@ export function useRosterAnalytics(
     ? Math.round((completedHomeworkCount / activeStudentsCount) * 100)
     : 0;
 
-  const sortedTroubleWords = useMemo(
-    () =>
-      Object.keys(vocabMistakeCounts)
-        .map((word) => ({ word, count: vocabMistakeCounts[word] }))
-        .sort((a, b) => b.count - a.count),
-    [vocabMistakeCounts]
-  );
 
   // Students invited into this class but whose parent hasn't redeemed the
   // invite yet — no `users/{uid}` doc exists for them (see api/redeem.ts),
@@ -172,6 +118,7 @@ export function useRosterAnalytics(
           isPending: false,
           scannedThisWeek: !!s.hasScannedThisWeek,
           weeklyMistakes: s.weeklyMistakesCount as number,
+          missedWords: s.missedWords as string[],
         })),
       // isPending is a display-only flag — the stored `name` stays clean
       // (no "(pending)" text baked in) since this same name ends up saved
@@ -209,7 +156,6 @@ export function useRosterAnalytics(
   return {
     getWeeklyVocabWords,
     getWeeklyPhonicsRules,
-    isMistakeInWeeklyCurriculum,
     activeVocabWords,
     activeRoster,
     pendingRoster,

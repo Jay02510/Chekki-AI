@@ -27,7 +27,8 @@ interface Props {
   // kt_log
   handleLogSubmit: (payload: any) => boolean;
   selectedTextbookName: string | undefined;
-  ftDashboardRoster: { uid: string; name: string; isPending?: boolean }[];
+  ftDashboardRoster: { uid: string; name: string; isPending?: boolean; missedWords?: string[] }[];
+  sortedTroubleWords: { word: string; count: number }[];
 
   // homework (CurriculumEditorForm)
   uploadMode: 'syllabus' | 'worksheet';
@@ -102,6 +103,7 @@ export function KtTabContent(props: Props) {
             selectedClassName={props.activeClass?.name}
             selectedTextbookName={props.selectedTextbookName}
             roster={props.ftDashboardRoster}
+            homeworkMissedWords={props.sortedTroubleWords.filter((w) => w.count > 0).map((w) => w.word)}
             isRealClassSynced={!props.activeClass?.isDemo}
           />
         </div>

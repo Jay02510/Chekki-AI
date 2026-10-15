@@ -29,6 +29,9 @@ interface Props {
 export const ParentClassLogs: React.FC<Props> = ({ classId, studentUid, studentName, language, max = 20 }) => {
   const [logs, setLogs] = useState<ParentReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  // "New" until the newest report has been shown once on this device.
+  // ponytail: per-device; a push notification is the real fix once push exists.
+  const [isNew, setIsNew] = useState(false);
   const isKo = language === 'ko';
 
   useEffect(() => {
@@ -43,7 +46,17 @@ export const ParentClassLogs: React.FC<Props> = ({ classId, studentUid, studentN
           limit(max)
         );
         const snap = await getDocs(reportsQuery);
-        setLogs(snap.docs.map((d) => ({ id: d.id, ...d.data() } as ParentReport)));
+        const loaded = snap.docs.map((d) => ({ id: d.id, ...d.data() } as ParentReport));
+        setLogs(loaded);
+        if (loaded[0]) {
+          try {
+            const key = `chekki_seen_report_${studentUid}`;
+            setIsNew(localStorage.getItem(key) !== loaded[0].id);
+            localStorage.setItem(key, loaded[0].id);
+          } catch {
+            /* storage blocked: no badge */
+          }
+        }
       } catch (err) {
         console.error('Failed to load class reports for parent view:', err);
       } finally {
@@ -61,6 +74,7 @@ export const ParentClassLogs: React.FC<Props> = ({ classId, studentUid, studentN
       icon={<ChalkboardTeacher size={20} weight="bold" />}
       title={isKo ? '선생님 수업 리포트' : "Teacher's class report"}
       sub={isKo ? '한국인 선생님이 확인하고 보낸 수업 기록이에요.' : "Checked and sent by your child's Korean teacher."}
+      badge={isNew ? <span className="rounded-full bg-line px-2.5 py-0.5 text-[13px] font-bold text-[#2b211a]">{isKo ? '새 리포트' : 'New'}</span> : undefined}
     >
       <ol className="divide-y divide-rule">
         {logs.map((log, i) => (

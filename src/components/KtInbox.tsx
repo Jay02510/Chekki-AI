@@ -381,6 +381,8 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [copyFailed, setCopyFailed] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
+  // Parent preview: -1 = a family with no note of their own.
+  const [previewIdx, setPreviewIdx] = useState(-1);
   // English goes to parents using the app in English. Cleared when the KT
   // hand-edits the Korean so a stale translation never goes out.
   const [english, setEnglish] = useState(log.aiEnglishSummary || '');
@@ -421,6 +423,7 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
           generalComments: log.generalComments || '',
           exceptions: [],
           authorRole: log.authorRole,
+          reviewedWords: log.reviewedWords,
         }, { style, previous: summary });
         if (next.fallback) throw new Error('fallback');
         setBeforeRewrite((b) => ({ ...b, summary, summaryEn: english }));
@@ -568,13 +571,16 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
             <h4 className="text-sm font-bold">{isKo ? '카카오톡으로도 보내기 (선택)' : 'Also send on KakaoTalk (optional)'}</h4>
             <div className="flex flex-wrap gap-2">
               {copyButton('class', classMessage, isKo ? '반 단톡방용 메시지' : 'Class group chat message')}
-              {(log.aiStudentReports || []).map((r, i) =>
-                notes[i]?.trim() ? (
+              {/* Families not on the app first: KakaoTalk is their only copy. */}
+              {(log.aiStudentReports || [])
+                .map((r, i) => ({ r, i, offApp: !noteReachesApp(r.studentUid) }))
+                .filter(({ i }) => notes[i]?.trim())
+                .sort((a, b) => Number(b.offApp) - Number(a.offApp))
+                .map(({ r, i, offApp }) => (
                   <React.Fragment key={`${r.studentName}-${i}`}>
-                    {copyButton(`s${i}`, studentMessage(r.studentName, notes[i]), r.studentName)}
+                    {copyButton(`s${i}`, studentMessage(r.studentName, notes[i]), offApp ? `${r.studentName} ${isKo ? '· 앱 미가입' : '· not on app'}` : r.studentName)}
                   </React.Fragment>
-                ) : null
-              )}
+                ))}
             </div>
             {copyFailed && (
               <p role="alert" className="text-sm text-wrong">
@@ -654,6 +660,12 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
                         <div>
                           <dt className="font-bold text-ink-2">{isKo ? '활동 · 분위기' : 'Activities · energy'}</dt>
                           <dd>{[...(log.activities || []), log.energyLevel].filter(Boolean).join(', ')}</dd>
+                        </div>
+                      ) : null}
+                      {log.reviewedWords?.length ? (
+                        <div>
+                          <dt className="font-bold text-ink-2">{isKo ? '수업에서 복습한 숙제 오답' : 'Homework misses reviewed in class'}</dt>
+                          <dd>{log.reviewedWords.join(', ')}</dd>
                         </div>
                       ) : null}
                       {english && (
@@ -750,6 +762,48 @@ function KtClassReview({ isNight, isKo, log, academyName, remaining, approve, se
                 ))}
               </section>
             )}
+
+            {/* What one family will actually read in the app, before it goes out. */}
+            <details className="group rounded-md border border-rule">
+              <summary className="flex min-h-12 cursor-pointer list-none items-center gap-1 px-4 text-sm font-bold [&::-webkit-details-marker]:hidden">
+                <CaretRight size={14} weight="bold" className="transition-transform group-open:rotate-90" />
+                {isKo ? '학부모가 보는 화면 미리보기' : 'Preview what a parent sees'}
+              </summary>
+              <div className="space-y-3 px-4 pb-4">
+                {(log.aiStudentReports?.length || 0) > 0 && (
+                  <div role="radiogroup" aria-label={isKo ? '어느 가정' : 'Which family'} className="flex flex-wrap gap-2">
+                    {[{ i: -1, label: isKo ? '노트 없는 가정' : 'Family with no note' }, ...log.aiStudentReports!.map((r, i) => ({ i, label: r.studentName }))].map(({ i, label }) => (
+                      <button
+                        key={i}
+                        type="button"
+                        role="radio"
+                        aria-checked={previewIdx === i}
+                        onClick={() => setPreviewIdx(i)}
+                        className={`min-h-11 rounded-md border px-3 text-sm font-bold ${previewIdx === i ? 'border-line bg-line-soft text-line-ink' : 'border-rule bg-surface text-ink-2'}`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="rounded-lg bg-ground p-4">
+                  <p className="text-[15px] font-bold text-ink">{className}</p>
+                  <p className={`text-[13px] ${muted}`}>{[log.lessonTopic, date].filter(Boolean).join(' · ')}</p>
+                  <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-ink break-keep">{summary.trim()}</p>
+                  {previewIdx >= 0 && notes[previewIdx]?.trim() && (
+                    <div className="mt-3 rounded-md bg-line-soft px-4 py-3">
+                      <p className="text-[13px] font-bold text-line-ink">{`${log.aiStudentReports![previewIdx].studentName}에 대한 메모`}</p>
+                      <p className="mt-1 whitespace-pre-line text-[15px] leading-relaxed text-ink break-keep">{notes[previewIdx].trim()}</p>
+                    </div>
+                  )}
+                  {previewIdx >= 0 && !noteReachesApp(log.aiStudentReports![previewIdx].studentUid) && (
+                    <p className="mt-3 text-[13px] font-bold text-line-ink break-keep">
+                      {isKo ? '이 가정은 앱에 없어서 카카오톡으로 보내야 해요.' : 'This family is not on the app. Send it on KakaoTalk.'}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </details>
           </div>
 
           <footer className={`sticky bottom-0 p-4 sm:px-6 border-t rounded-b-3xl max-md:pb-[calc(env(safe-area-inset-bottom)+1rem)] ${

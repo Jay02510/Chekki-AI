@@ -3,7 +3,7 @@ import {
   ArrowRight,
   Camera,
   CaretDown,
-  ChalkboardTeacher,
+  ClockCounterClockwise,
   ChatCircleText,
   Check,
   DeviceMobile,
@@ -73,16 +73,18 @@ export default function Home() {
         { t: 'Look at it together', d: 'Praise the right answers first, then go through the misses one by one.', alt: 'App screen: a missed question with what to say to your child' },
       ];
 
-  const reasons = isKo
+  // The parent's problem in their words, then what Chekki does about it.
+  // Replaced "why not a chatbot": its points live in these answers now.
+  const pains = isKo
     ? [
-        { Icon: Camera, t: '사진 한 장이면 끝', d: '질문을 쓰거나 복사할 필요 없어요. 학습지를 그대로 찍으면 돼요.' },
-        { Icon: ChatCircleText, t: '아이에게 할 말까지', d: '정답만이 아니라, 아이에게 어떻게 설명할지 한국어로 알려 줘요.' },
-        { Icon: ChalkboardTeacher, t: '학원 정답지로 채점', d: '학원과 연결하면 선생님이 올린 정답지로 채점하고, 틀린 문제는 선생님께도 전달돼요.' },
+        { Icon: Camera, pain: '영어를 잘 몰라서 맞게 했는지 모르겠어요', fix: '학습지를 찍기만 하면 채점하고 왜 틀렸는지 한국어로 알려 줘요. 질문을 쓸 필요도 없어요.' },
+        { Icon: ChatCircleText, pain: '틀린 걸 말하다 보면 아이랑 싸우게 돼요', fix: '맞은 건 먼저 칭찬하고, 틀린 문제는 하나씩 같이 봐요. 아이에게 할 말도 한국어로 알려 줘요.' },
+        { Icon: ClockCounterClockwise, pain: '어제 틀린 문제를 다시 찾을 수가 없어요', fix: '틀린 문제는 저절로 모이고, 지난 채점도 다시 열어 볼 수 있어요. 카드로 아이와 복습해요.' },
       ]
     : [
-        { Icon: Camera, t: 'One photo, no typing', d: 'No questions to type or paste. Just snap the page.' },
-        { Icon: ChatCircleText, t: 'What to say to your child', d: 'Not just the answer: how to explain it, in Korean.' },
-        { Icon: ChalkboardTeacher, t: "Graded with the teacher's key", d: "Linked to an academy, Chekki uses the teacher's answer key, and the teacher sees what was missed." },
+        { Icon: Camera, pain: "My English isn't good enough to check it", fix: 'Snap the page and Chekki grades it and explains each miss in Korean. Nothing to type.' },
+        { Icon: ChatCircleText, pain: 'Pointing out mistakes turns into a fight', fix: 'Praise the right answers first, then go through misses one at a time, with what to say in Korean.' },
+        { Icon: ClockCounterClockwise, pain: "I can't find yesterday's mistakes again", fix: 'Misses collect on their own and past scans reopen anytime. Review them with your child as cards.' },
       ];
 
   const faqs = FAQ_DATA.filter((f) => ['p1', 'p4', 'p5'].includes(f.id));
@@ -250,6 +252,26 @@ export default function Home() {
         </div>
       </section>
 
+      {/* PAINS SOLVED: the problem first, then how it works */}
+      <section className="bg-sunken">
+        <div className="mx-auto max-w-5xl px-4 py-12 md:py-16">
+          <h2 className="text-[26px] font-extrabold tracking-[-0.02em] text-ink sm:text-[32px]">
+            {isKo ? '숙제 볼 때 이런 고민 있으셨죠' : 'Sound familiar?'}
+          </h2>
+          <ul className="mt-6 grid gap-3 md:grid-cols-3">
+            {pains.map(({ Icon, pain, fix }) => (
+              <li key={pain} className="rounded-md bg-surface p-5 ring-1 ring-inset ring-rule">
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-line-soft text-line-ink">
+                  <Icon size={22} weight="bold" aria-hidden="true" />
+                </span>
+                <p className="mt-3 text-[15px] font-semibold text-ink-3">“{pain}”</p>
+                <p className="mt-2 text-[16px] font-bold leading-relaxed text-ink">{fix}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
       {/* HOW IT WORKS */}
       <section className="mx-auto max-w-5xl px-4 py-12 md:py-16">
         <h2 className="text-[26px] font-extrabold tracking-[-0.02em] text-ink sm:text-[32px]">
@@ -282,26 +304,6 @@ export default function Home() {
         </ol>
       </section>
 
-      {/* WHY NOT A CHATBOT */}
-      <section className="bg-sunken">
-        <div className="mx-auto max-w-5xl px-4 py-12 md:py-16">
-          <h2 className="text-[26px] font-extrabold tracking-[-0.02em] text-ink sm:text-[32px]">
-            {isKo ? 'AI 챗봇에 물어보는 것과 뭐가 다를까요?' : 'Why not just ask a chatbot?'}
-          </h2>
-          <ul className="mt-6 grid gap-3 md:grid-cols-3">
-            {reasons.map(({ Icon, t, d }) => (
-              <li key={t} className="rounded-md bg-surface p-5 ring-1 ring-inset ring-rule">
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-line-soft text-line-ink">
-                  <Icon size={22} weight="bold" aria-hidden="true" />
-                </span>
-                <h3 className="mt-3 text-[18px] font-extrabold text-ink">{t}</h3>
-                <p className="mt-1 text-[15px] leading-relaxed text-ink-2">{d}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
       {/* ACADEMY */}
       <section className="mx-auto max-w-5xl px-4 py-12 md:py-16">
         <div className="grid gap-6 rounded-lg bg-surface p-6 ring-1 ring-inset ring-rule md:grid-cols-[1.3fr_1fr] md:p-8">
@@ -312,8 +314,8 @@ export default function Home() {
             </h2>
             <ul className="mt-4 space-y-2.5">
               {(isKo
-                ? ['선생님이 올린 이번 주 정답지로 채점해요', '집에서 틀린 문제가 선생님께 전달돼요', '수업 리포트를 한국어로 받아요']
-                : ["Graded with this week's answer key from the teacher", 'Misses at home reach the teacher', 'Class reports arrive in Korean']
+                ? ['선생님이 올린 이번 주 정답지로 채점해요', '집에서 틀린 문제가 선생님께 전달돼요', '수업에서 그 단어를 다시 봤는지 리포트로 알려 줘요']
+                : ["Graded with this week's answer key from the teacher", 'Misses at home reach the teacher', 'The class report tells you when those words were retaught']
               ).map((x) => (
                 <li key={x} className="flex items-start gap-2.5 text-[16px] font-semibold text-ink">
                   <Check size={18} weight="bold" className="mt-0.5 shrink-0 text-line-ink" />

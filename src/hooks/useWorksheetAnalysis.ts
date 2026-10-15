@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { saveScan, type SavedScan } from '../utils/scanHistory';
 import { AnalysisState, WorksheetAnalysis } from '../../types';
 import { analyzeWorksheet } from '../../services/geminiService';
 import { db, dbInstance } from '../../services/database';
@@ -150,6 +151,7 @@ export const useWorksheetAnalysis = () => {
         };
 
         setAnalysisState(newState);
+        saveScan({ id: idempotencyKeyRef.current || String(Date.now()), owner: user?.uid || 'guest', at: Date.now(), image: displayUrl, data: result });
         // Only store critical data in localStorage to keep it light (Omit the massive Base64 image)
         const stateToSave = { ...newState, originalImage: null };
         try {
@@ -307,6 +309,20 @@ export const useWorksheetAnalysis = () => {
     ]
   );
 
+  // Reopen a past scan from this device. No API call, no scan used.
+  const openSavedScan = useCallback((scan: SavedScan) => {
+    setLastImageData(null);
+    setAnalysisState({
+      status: 'complete',
+      data: scan.data,
+      originalImage: scan.image,
+      errorMessage: null,
+      showReward: false,
+      isSummaryLoaded: true,
+      isItemsLoaded: true,
+    });
+  }, []);
+
   const handleScanAgain = useCallback(() => {
     if (lastImageData) handleImageSelected(lastImageData);
     else executeReset();
@@ -319,5 +335,6 @@ export const useWorksheetAnalysis = () => {
     handleImageSelected,
     handleScanAgain,
     executeReset,
+    openSavedScan,
   };
 };

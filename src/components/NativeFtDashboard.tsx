@@ -16,7 +16,7 @@ interface Props {
   user: any;
   activeClass: any;
   selectedTextbookName: string;
-  roster: { uid: string; name: string; isPending?: boolean; scannedThisWeek?: boolean; weeklyMistakes?: number }[];
+  roster: { uid: string; name: string; isPending?: boolean; scannedThisWeek?: boolean; weeklyMistakes?: number; missedWords?: string[] }[];
   handleFtLogSubmit: (payload: ClassLogPayload) => boolean;
   activeVocabWords: string[];
   sortedTroubleWords: TroubleWord[];
@@ -74,6 +74,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
             vocabWords={activeVocabWords}
             troubleWords={sortedTroubleWords}
             roster={roster}
+            onUploadKey={() => setActiveTab('homework')}
           />
 
           {/* 30s Foreign Teacher Mobile Class Log Entry */}
@@ -88,6 +89,7 @@ export const NativeFtDashboard: React.FC<Props> = React.memo(function NativeFtDa
               selectedTextbookName={selectedTextbookName || submittedLogs.find((l: any) => l.textbook)?.textbook || ''}
               selectedLessonTopic={curriculumTopic}
               roster={roster}
+              homeworkMissedWords={sortedTroubleWords.filter((w) => w.count > 0).map((w) => w.word)}
               isRealClassSynced={!activeClass?.isDemo}
             />
           </div>
@@ -208,6 +210,7 @@ function WeekFocusCard({
   vocabWords,
   troubleWords,
   roster,
+  onUploadKey,
 }: {
   isNight: boolean;
   isKo: boolean;
@@ -216,6 +219,7 @@ function WeekFocusCard({
   vocabWords: string[];
   troubleWords: TroubleWord[];
   roster: Props['roster'];
+  onUploadKey: () => void;
 }) {
   const missed = troubleWords.filter((w) => w.count > 0);
   if (!topic.trim() && vocabWords.length === 0 && roster.length === 0) return null;
@@ -249,7 +253,9 @@ function WeekFocusCard({
                     : !s.scannedThisWeek
                     ? isKo ? '아직 스캔 안 함' : 'Not scanned yet'
                     : s.weeklyMistakes
-                    ? isKo ? `틀린 문제 ${s.weeklyMistakes}개` : `${s.weeklyMistakes} to review`
+                    ? s.missedWords?.length
+                      ? `${s.missedWords.slice(0, 3).join(', ')}${s.missedWords.length > 3 ? ` +${s.missedWords.length - 3}` : ''}`
+                      : isKo ? `틀린 문제 ${s.weeklyMistakes}개` : `${s.weeklyMistakes} to review`
                     : isKo ? '모두 맞음' : 'All correct'}
                 </span>
               </li>
@@ -257,7 +263,17 @@ function WeekFocusCard({
           </ul>
         </div>
       )}
-      {vocabWords.length > 0 && (
+      {vocabWords.length === 0 && (
+        <p className="rounded-md bg-line-soft px-4 py-3 text-[14px] text-ink break-keep">
+          {isKo
+            ? '이번 주 정답지가 아직 없어요. 올려 두면 숙제를 선생님 정답지로 채점해요.'
+            : "No answer key for this week yet. Upload it and homework is graded against your key."}{' '}
+          <button type="button" onClick={onUploadKey} className="min-h-11 font-bold text-line-ink underline underline-offset-2">
+            {isKo ? '정답지 올리기' : 'Upload answer key'}
+          </button>
+        </p>
+      )}
+      {(vocabWords.length > 0 || missed.length > 0) && (
         <div className="space-y-2">
           <p className={`text-[14px] ${muted}`}>
             {missed.length > 0

@@ -380,7 +380,15 @@ const CLASS_SUMMARY_SCHEMA = {
 type ClassSummaryPayload = {
   className: string; date: string; lessonTopic: string; textbook: string; energyLevel: string;
   activities: string[]; generalComments: string; authorRole?: 'ft' | 'kt'; style?: unknown; previous?: unknown;
+  reviewedWords?: unknown;
 };
+
+// Client-supplied, so whitelisted to a few short plain words before it
+// reaches a prompt or a parent-facing template.
+const cleanReviewedWords = (v: unknown): string[] =>
+  Array.isArray(v)
+    ? v.filter((w): w is string => typeof w === 'string').map((w) => w.replace(/[^\p{L}\p{N} '-]/gu, '').trim().slice(0, 30)).filter(Boolean).slice(0, 8)
+    : [];
 
 async function generateGeneralClassSummary(
   ai: GoogleGenAI,
@@ -395,6 +403,7 @@ async function generateGeneralClassSummary(
     const roleInstructions = payload.authorRole === 'kt'
       ? `The notes below were written directly by the Korean Teacher (KT) in Korean — they do NOT need translating from English. Turn them into a parent-ready update in Korean, then give a natural English translation of that same text.`
       : `The notes below were written in English by the Foreign Teacher (FT). Turn them into a parent-ready update in natural Korean, then give a natural English version of that same text.`;
+    const reviewed = cleanReviewedWords(payload.reviewedWords);
     const prompt = `System Prompt / Instructions:
 You are drafting a daily class summary for parents of 5-7 year olds in an English kindergarten program in Korea. The Korean Teacher (KT) reviews it before it is sent.
 
@@ -409,6 +418,8 @@ Do NOT open with the date, the academy/class name, or a generic greeting ("Hello
 
 Tone: calm, sincere and professional, never condescending. Word any problem constructively without hiding it; mention a next step only if the notes give one.
 
+If "Homework Words Reviewed" lists words, include exactly one plain sentence saying the class went back over those words in class today because many students missed them on homework (e.g. "숙제에서 많이 틀린 leaf, root를 오늘 수업에서 다시 연습했어요."). Keep the words in English as given. If it says None, don't mention homework.
+
 ${PARENT_VOICE_RULES}
 ${rewriteInstructions(rewriteStyle(payload.style), payload.previous)}
 Output JSON: "korean" holds the Korean paragraph, "english" the English version of the same paragraph.
@@ -422,6 +433,7 @@ Lesson Topic: ${payload.lessonTopic}
 Textbook: ${payload.textbook}
 Class Energy Level: ${payload.energyLevel || 'Not recorded'}
 Activities Covered: ${payload.activities.join(', ') || 'Not recorded'}
+Homework Words Reviewed: ${reviewed.join(', ') || 'None'}
 Teacher Notes: <teacher_notes>${payload.generalComments || 'None'}</teacher_notes>
 `;
     const response = await ai.models.generateContent({
@@ -449,14 +461,16 @@ Teacher Notes: <teacher_notes>${payload.generalComments || 'None'}</teacher_note
 // rewrite it, but it must still be safe to send as-is. Energy is left out
 // because the template can't word it honestly.
 const ACTIVITY_KO: Record<string, string> = { Reading: '읽기', Speaking: '말하기', Writing: '쓰기', Worksheet: '워크시트', Game: '게임', Test: '테스트' };
-function koreanFallback(payload: { lessonTopic: string; textbook: string; activities: string[] }): string {
-  const base = `오늘은 ${payload.textbook} 교재로 ${payload.lessonTopic} 수업을 했어요.`;
+function koreanFallback(payload: { lessonTopic: string; textbook: string; activities: string[]; reviewedWords?: unknown }): string {
+  const reviewed = cleanReviewedWords(payload.reviewedWords);
+  const base = `오늘은 ${payload.textbook} 교재로 ${payload.lessonTopic} 수업을 했어요.${reviewed.length ? ` 숙제에서 많이 틀린 ${reviewed.join(', ')}도 수업에서 다시 연습했어요.` : ''}`;
   if (payload.activities.length === 0) return base;
   return `${base} 활동: ${payload.activities.map((a) => ACTIVITY_KO[a] || a).join(', ')}.`;
 }
 
-function englishFallback(payload: { lessonTopic: string; textbook: string; activities: string[] }): string {
-  const base = `Today's lesson: ${payload.lessonTopic} (${payload.textbook}).`;
+function englishFallback(payload: { lessonTopic: string; textbook: string; activities: string[]; reviewedWords?: unknown }): string {
+  const reviewed = cleanReviewedWords(payload.reviewedWords);
+  const base = `Today's lesson: ${payload.lessonTopic} (${payload.textbook}).${reviewed.length ? ` We went over words missed on homework: ${reviewed.join(', ')}.` : ''}`;
   return payload.activities.length === 0 ? base : `${base} Activities: ${payload.activities.join(', ').toLowerCase()}.`;
 }
 

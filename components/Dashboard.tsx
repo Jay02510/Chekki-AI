@@ -492,8 +492,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
           title={language === 'ko' ? '다시 볼 문제' : 'To practice again'}
           sub={
             language === 'ko'
-              ? '채점 결과에서 저장한 문제예요. 누르면 정답이 보여요.'
-              : 'Saved from your scans. Tap one to see the answer.'
+              ? '채점에서 틀린 문제가 모여요. 누르면 정답이 보여요.'
+              : 'Misses from your scans collect here. Tap one to see the answer.'
           }
           badge={
             mistakes.length > 0 ? (
@@ -504,8 +504,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
           {mistakes.length === 0 ? (
             <p className="py-4 text-center text-[15px] text-ink-3 break-keep">
               {language === 'ko'
-                ? '아직 없어요. 채점 결과에서 ‘오답노트’를 누르면 여기에 모여요.'
-                : 'Nothing yet. Tap “Save” on a scan result to collect problems here.'}
+                ? '아직 없어요. 채점하면 틀린 문제가 여기에 저절로 모여요.'
+                : 'Nothing yet. Problems your child misses on a scan collect here automatically.'}
             </p>
           ) : (
             <>

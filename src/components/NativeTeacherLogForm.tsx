@@ -23,7 +23,10 @@ interface Props {
   /** Real, approved students in the active class, plus students invited but
    * not yet redeemed (isPending) — empty until the roster loads or has no
    * one yet. */
-  roster?: { uid: string; name: string; isPending?: boolean }[];
+  roster?: { uid: string; name: string; isPending?: boolean; missedWords?: string[] }[];
+  /** Words the class missed most on this week's homework. The teacher ticks
+   * the ones covered in class, and the parent report says so. */
+  homeworkMissedWords?: string[];
   /** False when the active class is the client-only sample/preview
    * placeholder (no real class assigned yet) — the locked class field then
    * says "Preview" instead of "Synced", since nothing is actually synced
@@ -124,7 +127,7 @@ const DEMO_LESSON_TOPIC = 'Unit 4: Photosynthesis & Plant Growth';
 const DEMO_TEXTBOOK = 'Bricks Reading 150 (Book 1)';
 const DEMO_ENERGY_LEVEL = 'High Energy and Engaged';
 const DEMO_ACTIVITIES = ['Reading', 'Speaking', 'Worksheet'];
-const DEMO_ROSTER: { uid: string; name: string; isPending?: boolean }[] = [
+const DEMO_ROSTER: { uid: string; name: string; isPending?: boolean; missedWords?: string[] }[] = [
   { uid: 'demo-jiwoo', name: 'Ji-woo (지우)' },
   { uid: 'demo-minjun', name: 'Min-jun (민준)' },
   { uid: 'demo-chloe', name: 'Chloe (클로이)' },
@@ -155,6 +158,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   selectedTextbookName,
   selectedLessonTopic,
   roster = [],
+  homeworkMissedWords = [],
   isRealClassSynced = true,
   isDemo = false,
   demoScripted = false,
@@ -185,6 +189,8 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
   }, [selectedLessonTopic]);
   const [activities, setActivities] = useState<string[]>(isDemo ? DEMO_ACTIVITIES : []);
   const [generalComments, setGeneralComments] = useState(isDemo ? DEMO_COMMENTS : '');
+  // Off by default: the report must only say a word was reviewed if the teacher says so.
+  const [reviewedWords, setReviewedWords] = useState<string[]>([]);
 
   // Offline Draft Notification State
   const [hasDraftRestored, setHasDraftRestored] = useState(false);
@@ -511,6 +517,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
       generalComments,
       exceptions,
       enrolledStudentUids: effectiveRoster.map((s) => s.uid),
+      reviewedWords,
     });
     // Queued safely — clear for the next class. Class, date and textbook
     // usually carry over, so they stay.
@@ -519,6 +526,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
       setEnergyLevel('');
       setActivities([]);
       setGeneralComments('');
+      setReviewedWords([]);
       setExceptions([]);
       setHasDraftRestored(false);
       undoSnapshotRef.current = null;
@@ -751,6 +759,36 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
           </div>
         </div>
 
+        {homeworkMissedWords.length > 0 && (
+          <div className="space-y-2">
+            <span id="log-reviewed-label" className={staffUi.label}>
+              {isKo ? '숙제에서 틀린 단어 중 오늘 복습한 것 (선택)' : 'Homework misses you went over today (optional)'}
+            </span>
+            <div role="group" aria-labelledby="log-reviewed-label" className="flex flex-wrap gap-2">
+              {homeworkMissedWords.slice(0, 8).map((w) => {
+                const active = reviewedWords.includes(w);
+                return (
+                  <button
+                    key={w}
+                    type="button"
+                    onClick={() => setReviewedWords((prev) => (active ? prev.filter((x) => x !== w) : [...prev, w]))}
+                    aria-pressed={active}
+                    className={`px-3.5 min-h-11 rounded-md border text-[14px] font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                      active ? 'bg-line-soft border-line text-line-ink' : 'bg-surface border-rule text-ink-2 hover:text-ink'
+                    }`}
+                  >
+                    <span>{w}</span>
+                    {active && <Check size={16} weight="bold" className="text-line-ink shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[13px] text-ink-3">
+              {isKo ? '고른 단어는 학부모 리포트에 "숙제에서 틀린 단어를 수업에서 다시 연습했어요"로 들어가요.' : 'Ticked words go in the parent report: "We went over the words missed on homework."'}
+            </p>
+          </div>
+        )}
+
         {/* Student Exceptions Section */}
         <div className="space-y-3 pt-2 border-t border-rule">
           <div className="flex items-center justify-between gap-3">
@@ -952,6 +990,15 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
                     ))}
                   </div>
                 )}
+                {(() => {
+                  const words = !isCustomStudentName ? effectiveRoster.find((s) => s.uid === modalStudentUid)?.missedWords : undefined;
+                  return words?.length ? (
+                    <p className="pt-1 text-[13px] text-ink-2">
+                      {isKo ? '이번 주 숙제에서 틀린 것: ' : 'Missed on homework this week: '}
+                      <span className="font-bold">{words.slice(0, 5).join(', ')}</span>
+                    </p>
+                  ) : null;
+                })()}
               </div>
 
               <div className="space-y-1">
