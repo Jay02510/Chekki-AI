@@ -203,6 +203,22 @@ const SchoolsLandingPage: React.FC = () => {
 
   const startTrial = (where: string, plan = 'trial') => () => track('schools_start_trial', { where, plan_id: plan });
 
+  // One card per person in the academy: their problem in their words, then
+  // what changes. Every line is a shipped feature, nothing promised.
+  const roles = isKo
+    ? [
+        { role: '원장님', pain: '리포트가 제때 나가는지, 학부모님이 실제로 쓰는지 모르겠어요', fixes: ['반마다 오늘 일지, 검토 대기, 전달 완료를 한 화면에서 봐요', '이번 주 숙제 채점 수와 이번 달 전달된 리포트 수를 실제 숫자로 봐요', '숙제를 가장 많이 틀리는 반이 맨 위에 와요'] },
+        { role: '원어민 선생님', pain: '한국어로 리포트를 쓸 수 없고, 집에서 누가 뭘 틀렸는지 몰라요', fixes: ['영어로 한두 문장 쓰거나 말하면 한국어 초안이 돼요', '학생마다 이번 주 숙제에서 틀린 단어가 보여요', '수업에서 다시 본 단어를 고르면 리포트에 들어가요'] },
+        { role: '한국인 선생님', pain: '리포트를 하나씩 번역하고 고치느라 시간이 다 가요', fixes: ['반 단위로 초안을 확인하고, 문제없는 건 한 번에 보내요', '보내기 전에 학부모님이 볼 화면을 미리 보고, 5초 안에 취소할 수 있어요', '앱을 안 쓰는 가정은 카카오톡 문구를 먼저 챙겨 줘요'] },
+        { role: '학부모님', pain: '영어 숙제를 봐 줄 수도 없고, 학원에서 뭘 배우는지 몰라요', fixes: ['학원 정답지로 채점하고 한국어로 설명해 줘요', '선생님이 확인한 수업 리포트를 앱으로 받아요', '학원이 쓰면 학부모님은 무료예요'] },
+      ]
+    : [
+        { role: 'Director', pain: "I can't tell if reports go out on time, or if parents even use it", fixes: ["Every class's log, review queue and sent status on one screen", "This week's homework scans and this month's delivered reports, as real counts", 'The class missing the most homework rises to the top'] },
+        { role: 'Foreign teacher', pain: "I can't write Korean, and I don't know who struggled at home", fixes: ['A sentence or two in English, typed or spoken, becomes the Korean draft', "Each student's missed homework words for the week", 'Tick the words you retaught and the report says so'] },
+        { role: 'Korean teacher', pain: 'Translating and fixing reports one by one eats my day', fixes: ['Check a whole class at once and send the clean drafts together', 'Preview what a parent sees, with 5 seconds to undo after sending', 'Families not on the app get their KakaoTalk copy first'] },
+        { role: 'Parents', pain: "I can't check English homework or see what happens in class", fixes: ["Homework graded against your answer key and explained in Korean", 'Class reports checked by a Korean teacher, in the app', "Free for parents when the academy uses Chekki"] },
+      ];
+
   const questions = SCHOOLS_QA.map((x) => (isKo ? x.qKo : x.qEn));
   const answer = (i: number) => (isKo ? SCHOOLS_QA[i].aKo : SCHOOLS_QA[i].aEn);
 
@@ -399,6 +415,24 @@ const SchoolsLandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* ROLES: what changes for each person, before the detailed questions */}
+      <section className="bg-sunken">
+        <div className="mx-auto max-w-6xl px-4 py-10 md:py-14">
+          <h2 className="text-[22px] font-extrabold leading-snug tracking-[-0.02em] text-ink sm:text-[26px]">
+            {isKo ? '학원 모두의 일이 줄어요' : 'Less work for everyone at your academy'}
+          </h2>
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {roles.map(({ role, pain, fixes }) => (
+              <li key={role} className="rounded-md bg-surface p-5 ring-1 ring-inset ring-rule">
+                <h3 className="text-[17px] font-extrabold text-ink">{role}</h3>
+                <p className="mt-2 text-[15px] font-semibold leading-relaxed text-ink-3">“{pain}”</p>
+                <Points items={fixes} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
       {/* QUESTIONS */}
       <div className="mx-auto max-w-6xl px-4 py-8 md:py-12">
         <h2 className="text-[22px] font-extrabold leading-snug tracking-[-0.02em] text-ink sm:text-[26px]">
@@ -499,8 +533,8 @@ const SchoolsLandingPage: React.FC = () => {
                 <Points
                   items={
                     isKo
-                      ? ['반 전체가 많이 틀린 것을 모아 보여 줘요. 다음 수업에서 무엇을 다시 볼지 바로 알 수 있어요.', '학부모님은 받은 링크만 누르면 연결돼요. 따로 입력할 코드가 없어요.']
-                      : ['Misses are pooled across the class, so you know what to reteach next lesson.', 'Parents just tap the link they were sent. There is no code to type.']
+                      ? ['반 전체가 많이 틀린 것을 모아 보여 줘요. 다음 수업에서 무엇을 다시 볼지 바로 알 수 있어요.', '수업에서 다시 본 단어를 고르면, 학부모 리포트에 그대로 들어가요.', '학부모님은 받은 링크만 누르면 연결돼요. 따로 입력할 코드가 없어요.']
+                      : ['Misses are pooled across the class, so you know what to reteach next lesson.', 'Tick the words you retaught and the parent report says so.', 'Parents just tap the link they were sent. There is no code to type.']
                   }
                 />
               </div>
