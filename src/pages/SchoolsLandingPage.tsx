@@ -155,7 +155,7 @@ const SchoolsLandingPage: React.FC = () => {
     io.observe(close);
     return () => io.disconnect();
   }, []);
-  const [openQs, setOpenQs] = useState<boolean[]>(() => [true, false, false, false, false, false]);
+  const [openQs, setOpenQs] = useState<boolean[]>(() => [false, false, false, false, false, false]);
   const setQ = (i: number, v: boolean) => setOpenQs((prev) => (prev[i] === v ? prev : prev.map((o, j) => (j === i ? v : o))));
   // Links to a question (header "Pricing", #q5 URLs) open it, then scroll to it.
   const openQ = (i: number) => (e?: React.MouseEvent) => {
@@ -433,6 +433,40 @@ const SchoolsLandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* REAL SCREENS: shown up front, so nobody has to open a question to see the product */}
+      <section className="mx-auto max-w-6xl px-4 pt-10 md:pt-14">
+        <h2 className="text-[22px] font-extrabold leading-snug tracking-[-0.02em] text-ink sm:text-[26px]">
+          {isKo ? '수업 기록부터 학부모 리포트까지' : 'From class log to parent report'}
+        </h2>
+        <div className="mt-6 grid items-start gap-6 lg:grid-cols-3">
+            <RealShot
+              isKo={isKo}
+              name="q3"
+              w={600}
+              h={327}
+              alt={isKo ? '원어민 선생님 화면: 이번 주 숙제 스캔 수와 이번 주 단어' : "Foreign teacher's screen: homework scanned this week and this week's words"}
+              caption={isKo ? '원어민 선생님 화면. 숙제가 들어오면 많이 틀린 단어가 여기 떠요.' : "Foreign teacher's screen. Most-missed words show here as homework comes in."}
+            />
+            <RealShot
+              isKo={isKo}
+              name="q1"
+              w={592}
+              h={825}
+              phone={{ w: 390, h: 844 }}
+              alt={isKo ? '한국인 선생님 화면: 원어민 선생님 기록으로 만든 한국어 수업 요약과 승인하고 보내기 버튼' : "Korean teacher's screen: the Korean class summary drafted from the foreign teacher's note, with an approve-and-send button"}
+              caption={isKo ? '한국인 선생님이 확인하고 보내는 화면' : 'The Korean teacher checks and sends it here'}
+            />
+            <RealShot
+              isKo={isKo}
+              name="q4"
+              w={392}
+              h={429}
+              alt={isKo ? '학부모 앱: 한국인 선생님이 확인하고 보낸 수업 리포트와 아이에 대한 메모' : 'Parent app: the class report a Korean teacher checked and sent, with a note about the child'}
+              caption={isKo ? '학부모 앱 · 무료' : 'Parent app · free for parents'}
+            />
+        </div>
+      </section>
+
       {/* QUESTIONS */}
       <div className="mx-auto max-w-6xl px-4 py-8 md:py-12">
         <h2 className="text-[22px] font-extrabold leading-snug tracking-[-0.02em] text-ink sm:text-[26px]">
@@ -443,7 +477,7 @@ const SchoolsLandingPage: React.FC = () => {
         <div className="mt-6 divide-y divide-rule border-y border-rule">
           {/* Q1: FT log, AI draft, KT sends */}
           <QFold i={0} title={questions[0]} open={openQs[0]} onToggle={(v) => setQ(0, v)}>
-            <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+            <div className="max-w-3xl">
               <div>
                 <p className="text-[17px] font-semibold leading-relaxed text-ink">{answer(0)}</p>
                 <Points
@@ -454,16 +488,6 @@ const SchoolsLandingPage: React.FC = () => {
                   }
                 />
               </div>
-
-              <RealShot
-                isKo={isKo}
-                name="q1"
-                w={592}
-                h={825}
-                phone={{ w: 390, h: 844 }}
-                alt={isKo ? '한국인 선생님 화면: 원어민 선생님 기록으로 만든 한국어 수업 요약과 승인하고 보내기 버튼' : "Korean teacher's screen: the Korean class summary drafted from the foreign teacher's note, with an approve-and-send button"}
-                caption={isKo ? '한국인 선생님이 확인하고 보내는 화면' : 'The Korean teacher checks and sends it here'}
-              />
             </div>
           </QFold>
 
@@ -527,7 +551,7 @@ const SchoolsLandingPage: React.FC = () => {
 
           {/* Q3: home homework reaches the teacher */}
           <QFold i={2} title={questions[2]} open={openQs[2]} onToggle={(v) => setQ(2, v)}>
-            <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+            <div className="max-w-3xl">
               <div>
                 <p className="text-[17px] font-semibold leading-relaxed text-ink">{answer(2)}</p>
                 <Points
@@ -538,21 +562,12 @@ const SchoolsLandingPage: React.FC = () => {
                   }
                 />
               </div>
-
-              <RealShot
-                isKo={isKo}
-                name="q3"
-                w={600}
-                h={327}
-                alt={isKo ? '원어민 선생님 화면: 이번 주 숙제 스캔 수와 이번 주 단어' : "Foreign teacher's screen: homework scanned this week and this week's words"}
-                caption={isKo ? '원어민 선생님 화면. 숙제가 들어오면 많이 틀린 단어가 여기 떠요.' : "Foreign teacher's screen. Most-missed words show here as homework comes in."}
-              />
             </div>
           </QFold>
 
           {/* Q4: what the parent sees, and what it costs them */}
           <QFold i={3} title={questions[3]} open={openQs[3]} onToggle={(v) => setQ(3, v)}>
-            <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+            <div className="max-w-3xl">
               <div>
                 <p className="text-[17px] font-semibold leading-relaxed text-ink">{answer(3)}</p>
                 <a href={langPath('/')} className="mt-3 inline-flex min-h-11 items-center gap-1.5 text-[15px] font-bold text-line-ink">
@@ -560,15 +575,6 @@ const SchoolsLandingPage: React.FC = () => {
                   <ArrowRight size={16} weight="bold" />
                 </a>
               </div>
-
-              <RealShot
-                isKo={isKo}
-                name="q4"
-                w={392}
-                h={429}
-                alt={isKo ? '학부모 앱: 한국인 선생님이 확인하고 보낸 수업 리포트와 아이에 대한 메모' : 'Parent app: the class report a Korean teacher checked and sent, with a note about the child'}
-                caption={isKo ? '학부모 앱 · 무료' : 'Parent app · free for parents'}
-              />
             </div>
           </QFold>
 
