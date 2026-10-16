@@ -212,3 +212,15 @@ body.schools-ui :is(input, textarea, select):focus-visible {
   outline: 2px solid var(--m-line-ink);
   outline-offset: 1px;
 }
+
+/* ScreenTour (src/components/ScreenTour.tsx): the screen settles in, then
+   its pins pop one after another. Uses opacity and `scale` only, so the
+   pins' Tailwind `translate` centring is untouched. */
+@keyframes tour-screen-in {
+  from { opacity: 0; scale: 0.985; }
+}
+@keyframes tour-pin-in {
+  from { opacity: 0; scale: 0.4; }
+}
+.tour-screen { animation: tour-screen-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.tour-pin { animation: tour-pin-in 360ms cubic-bezier(0.34, 1.4, 0.64, 1) 180ms both; }

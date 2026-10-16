@@ -36,6 +36,7 @@ import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { Roundel } from '../../components/metro';
 import { langPath, switchLang, urlLang } from '../lib/lang';
 import { useWarmTheme } from '../lib/theme';
+import { ScreenTour, type TourStep } from '../components/ScreenTour';
 import { track } from '../lib/track';
 import { SCHOOLS_QA } from '../data/schoolsFaq';
 
@@ -64,26 +65,6 @@ const won = (n: number) => `₩${n.toLocaleString('ko-KR')}`;
 const SampleTag: React.FC<{ isKo: boolean }> = ({ isKo }) => (
   <span className="rounded bg-sunken px-2 py-0.5 text-[12px] font-bold text-ink-3">{isKo ? '예시 화면' : 'Sample'}</span>
 );
-
-// A real dashboard capture (test data, class/student names swapped for
-// neutral ones). Images live in public/images/schools as <name>-ko/-en.webp
-// at 2x (q4, a phone capture, at 3x); w/h are the CSS size.
-const RealShot: React.FC<{ isKo: boolean; name: string; w: number; h: number; alt: string; caption: string; phone?: { w: number; h: number } }> = ({ isKo, name, w, h, alt, caption, phone }) => {
-  const lang = isKo ? 'ko' : 'en';
-  return (
-    // Never wider than the capture, so text isn't blown up past its real size.
-    <figure className="mx-auto w-full overflow-hidden rounded-md bg-surface ring-1 ring-inset ring-rule" style={{ maxWidth: w }}>
-      <picture>
-        {/* A desktop capture shrunk onto a phone is unreadable, so phones get a phone-size capture. */}
-        {phone && <source media="(max-width: 640px)" srcSet={`/images/schools/${name}m-${lang}.webp`} width={phone.w} height={phone.h} />}
-        <img src={`/images/schools/${name}-${lang}.webp`} width={w} height={h} alt={alt} loading="lazy" decoding="async" className="block h-auto w-full" />
-      </picture>
-      <figcaption className="border-t border-rule px-4 py-2.5 text-[13px] leading-snug text-ink-3">
-        {caption} <span className="whitespace-nowrap">· {isKo ? '실제 화면' : 'Real screen'}</span>
-      </figcaption>
-    </figure>
-  );
-};
 
 const Points: React.FC<{ items: string[] }> = ({ items }) => (
   <ul className="mt-4 space-y-2">
@@ -218,6 +199,87 @@ const SchoolsLandingPage: React.FC = () => {
         { role: 'Korean teacher', pain: 'Translating and fixing reports one by one eats my day', fixes: ['Check a whole class at once and send the clean drafts together', 'Preview what a parent sees, with 5 seconds to undo after sending', 'Families not on the app get their KakaoTalk copy first'] },
         { role: 'Parents', pain: "I can't check English homework or see what happens in class", fixes: ["Homework graded against your answer key and explained in Korean", 'Class reports checked by a Korean teacher, in the app', "Free for parents when the academy uses Chekki"] },
       ];
+
+  // Real dashboard captures (test data, names swapped) in work order. Pins are
+  // percentages of each image; retake and re-place them when a screen changes.
+  const shot = (name: string) => `/images/schools/${name}-${isKo ? 'ko' : 'en'}.webp`;
+  const tourSteps: TourStep[] = [
+    {
+      title: isKo ? '원어민 선생님' : 'Foreign teacher',
+      sub: isKo ? '집에서 푼 숙제가 들어오면, 수업 전에 무엇을 다시 볼지 보여요.' : 'Homework done at home shows what to go over before class.',
+      alt: isKo ? '원어민 선생님 화면: 이번 주 숙제 스캔 수, 아이별 틀린 단어, 반 전체가 많이 틀린 단어' : "Foreign teacher's screen: homework scanned this week, each child's misses, and the class's most-missed words",
+      screen: {
+        src: shot('q3'), w: 600, h: isKo ? 329 : 327,
+        pins: isKo
+          ? [
+              { x: 58, y: 34, text: '아이별로 집에서 틀린 단어가 보여요.' },
+              { x: 44, y: 46, text: '학부모님이 아직 앱에 없는 아이도 표시돼요.' },
+              { x: 90, y: 92, text: '반 전체가 많이 틀린 단어예요. 수업 시작할 때 복습해요.' },
+            ]
+          : [
+              { x: 58, y: 34, text: "Each child's misses from homework, by name." },
+              { x: 44, y: 46, text: "Shows which parents haven't joined the app yet." },
+              { x: 90, y: 92, text: 'The words the whole class missed most. Go over them first.' },
+            ],
+      },
+    },
+    {
+      title: isKo ? '한국인 선생님' : 'Korean teacher',
+      sub: isKo ? '영어 수업 기록으로 만든 한국어 리포트를 확인하고 보내요.' : 'Checks the Korean report drafted from the English class log, then sends it.',
+      alt: isKo ? '한국인 선생님 화면: 원어민 선생님 기록으로 만든 한국어 수업 요약, 아이별 메모, 승인하고 보내기 버튼' : "Korean teacher's screen: the Korean class summary drafted from the foreign teacher's note, a note per child, and an approve-and-send button",
+      screen: {
+        src: shot('q1'), w: 592, h: 907,
+        pins: isKo
+          ? [
+              { x: 96, y: 22, text: '원어민 선생님의 영어 메모로 만든 한국어 수업 요약이에요. 바로 고칠 수 있어요.' },
+              { x: 60, y: 32, text: '다시 쓰기, 더 짧게, 더 자세히. 한 번 누르면 다시 써 줘요.' },
+              { x: 96, y: 61, text: '아이별 메모는 그 가정에만 가요. 원본 영어 메모가 위에 있어요.' },
+              { x: 8, y: 89.5, text: '한국인 선생님이 승인하기 전에는 학부모님께 아무것도 가지 않아요.' },
+            ]
+          : [
+              { x: 96, y: 22, text: "A Korean class summary drafted from the foreign teacher's English note. Edit it in place." },
+              { x: 60, y: 32, text: 'Rewrite, shorten or add detail in one tap.' },
+              { x: 96, y: 61, text: "Each child's note goes only to that family, with the original English note above it." },
+              { x: 8, y: 89.5, text: 'Nothing reaches a parent until a Korean teacher approves it.' },
+            ],
+      },
+      phone: {
+        src: `/images/schools/q1m-${isKo ? 'ko' : 'en'}.webp`, w: 390, h: 844,
+        pins: isKo
+          ? [
+              { x: 92, y: 39, text: '원어민 선생님의 영어 메모로 만든 한국어 수업 요약이에요. 바로 고칠 수 있어요.' },
+              { x: 84, y: 55, text: '다시 쓰기, 더 짧게, 더 자세히. 한 번 누르면 다시 써 줘요.' },
+              { x: 90, y: 73, text: '아이별 메모는 그 가정에만 가요. 원본 영어 메모가 아래에 있어요.' },
+              { x: 92, y: 89, text: '한국인 선생님이 승인하기 전에는 학부모님께 아무것도 가지 않아요.' },
+            ]
+          : [
+              { x: 92, y: 39, text: "A Korean class summary drafted from the foreign teacher's English note. Edit it in place." },
+              { x: 84, y: 55, text: 'Rewrite, shorten or add detail in one tap.' },
+              { x: 90, y: 73, text: "Each child's note goes only to that family, with the original English note below it." },
+              { x: 92, y: 89, text: 'Nothing reaches a parent until a Korean teacher approves it.' },
+            ],
+      },
+    },
+    {
+      title: isKo ? '학부모님' : 'Parent',
+      sub: isKo ? '확인된 리포트를 무료 학부모 앱에서 받아요.' : 'Gets the checked report in the free parent app.',
+      alt: isKo ? '학부모 앱: 한국인 선생님이 확인하고 보낸 수업 리포트와 아이에 대한 메모' : 'Parent app: the class report a Korean teacher checked and sent, with a note about the child',
+      screen: {
+        src: shot('q4'), w: 408, h: isKo ? 430 : 474,
+        pins: isKo
+          ? [
+              { x: 80, y: 10, text: '무료 학부모 앱에서 받아요.' },
+              { x: 97, y: 49, text: '오늘 수업 요약이 한국어로 와요.' },
+              { x: 96, y: 77, text: '우리 아이 메모는 우리 가정에만 보여요.' },
+            ]
+          : [
+              { x: 80, y: 11, text: 'Arrives in the free parent app.' },
+              { x: 97, y: 51, text: "Today's class summary, in the parent's language." },
+              { x: 96, y: 79, text: "A child's note is seen by that family only." },
+            ],
+      },
+    },
+  ];
 
   const questions = SCHOOLS_QA.map((x) => (isKo ? x.qKo : x.qEn));
   const answer = (i: number) => (isKo ? SCHOOLS_QA[i].aKo : SCHOOLS_QA[i].aEn);
@@ -438,32 +500,11 @@ const SchoolsLandingPage: React.FC = () => {
         <h2 className="text-[22px] font-extrabold leading-snug tracking-[-0.02em] text-ink sm:text-[26px]">
           {isKo ? '수업 기록부터 학부모 리포트까지' : 'From class log to parent report'}
         </h2>
-        <div className="mt-6 grid items-start gap-6 lg:grid-cols-3">
-            <RealShot
-              isKo={isKo}
-              name="q3"
-              w={600}
-              h={327}
-              alt={isKo ? '원어민 선생님 화면: 이번 주 숙제 스캔 수와 이번 주 단어' : "Foreign teacher's screen: homework scanned this week and this week's words"}
-              caption={isKo ? '원어민 선생님 화면. 숙제가 들어오면 많이 틀린 단어가 여기 떠요.' : "Foreign teacher's screen. Most-missed words show here as homework comes in."}
-            />
-            <RealShot
-              isKo={isKo}
-              name="q1"
-              w={592}
-              h={825}
-              phone={{ w: 390, h: 844 }}
-              alt={isKo ? '한국인 선생님 화면: 원어민 선생님 기록으로 만든 한국어 수업 요약과 승인하고 보내기 버튼' : "Korean teacher's screen: the Korean class summary drafted from the foreign teacher's note, with an approve-and-send button"}
-              caption={isKo ? '한국인 선생님이 확인하고 보내는 화면' : 'The Korean teacher checks and sends it here'}
-            />
-            <RealShot
-              isKo={isKo}
-              name="q4"
-              w={392}
-              h={429}
-              alt={isKo ? '학부모 앱: 한국인 선생님이 확인하고 보낸 수업 리포트와 아이에 대한 메모' : 'Parent app: the class report a Korean teacher checked and sent, with a note about the child'}
-              caption={isKo ? '학부모 앱 · 무료' : 'Parent app · free for parents'}
-            />
+        <p className="mt-1.5 text-[15px] text-ink-3">
+          {isKo ? '번호를 누르면 화면의 각 부분을 설명해 드려요.' : 'Tap a number to see what each part of the screen does.'}
+        </p>
+        <div className="mt-6">
+          <ScreenTour isKo={isKo} name="schools" steps={tourSteps} footnote={isKo ? '실제 화면 · 테스트 학원의 이름만 바꿨어요' : 'Real screens · names changed from a test academy'} />
         </div>
       </section>
 

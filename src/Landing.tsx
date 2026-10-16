@@ -19,7 +19,7 @@ import { langPath, switchLang, urlLang } from './lib/lang';
 import { track } from './lib/track';
 import { useWarmTheme } from './lib/theme';
 import { FAQ_DATA } from './data/faq';
-import { Roundel } from '../components/metro';
+import { ScreenTour, type TourStep } from './components/ScreenTour';
 
 const APP_DOWNLOAD_URL = 'https://urlgeni.us/chekki';
 
@@ -72,6 +72,44 @@ export default function Home() {
         { t: 'Graded, explained in Korean', d: "Chekki reads your child's handwriting, grades it and explains why.", alt: 'App screen: the correct answer, habitat, marked on the worksheet photo' },
         { t: 'Look at it together', d: 'Praise the right answers first, then go through the misses one by one.', alt: 'App screen: a missed question with what to say to your child' },
       ];
+
+  // Real app screens from a sample worksheet (440px-wide phone captures at 2x).
+  // Pins are percentages of each image; re-place them when a screen changes.
+  const pins = isKo
+    ? [
+        [
+          { x: 88, y: 27, text: '채키가 아이 손글씨를 읽고 채점해요. 글자를 칠 필요 없어요.' },
+          { x: 93, y: 77, text: '기다리는 동안 아이에게 해 줄 칭찬 한마디도 알려 줘요.' },
+        ],
+        [
+          { x: 66, y: 35, text: '틀린 칸 위에 정답이 바로 떠요.' },
+          { x: 66, y: 88, text: '정답을 가리면 아이가 다시 풀어 볼 수 있어요.' },
+        ],
+        [
+          { x: 96, y: 20, text: "틀린 문제는 '같이 볼 문제'로 하나씩 봐요." },
+          { x: 96, y: 56, text: '아이에게 할 말을 알려 줘요. 한국어와 영어로 바꿔 볼 수 있어요.' },
+        ],
+      ]
+    : [
+        [
+          { x: 88, y: 25, text: "Chekki reads your child's handwriting and grades it. Nothing to type." },
+          { x: 93, y: 77, text: 'Something kind to say while you wait.' },
+        ],
+        [
+          { x: 66, y: 35, text: 'The right answer appears right on the missed blank.' },
+          { x: 66, y: 88, text: 'Hide the answers so your child can try again.' },
+        ],
+        [
+          { x: 96, y: 20, text: "Misses become 'look together' questions, one at a time." },
+          { x: 96, y: 56, text: 'What to say to your child. Switch between Korean and English.' },
+        ],
+      ];
+  const tourSteps: TourStep[] = steps.map((s, i) => ({
+    title: s.t,
+    sub: s.d,
+    alt: s.alt,
+    screen: { src: `/images/parent/step${i + 1}-${isKo ? 'ko' : 'en'}.webp`, w: 440, h: 600, pins: pins[i] },
+  }));
 
   // The parent's problem in their words, then what Chekki does about it.
   // Replaced "why not a chatbot": its points live in these answers now.
@@ -277,31 +315,12 @@ export default function Home() {
         <h2 className="text-[26px] font-extrabold tracking-[-0.02em] text-ink sm:text-[32px]">
           {isKo ? '이렇게 써요' : 'How it works'}
         </h2>
-        <ol className="mt-6 grid gap-3 md:grid-cols-3">
-          {steps.map((s, i) => (
-            <li key={s.t} className="overflow-hidden rounded-md bg-surface ring-1 ring-inset ring-rule">
-              {/* Real app screens from a sample worksheet, cropped from a 440px-wide phone capture. */}
-              <img
-                src={`/images/parent/step${i + 1}-${isKo ? 'ko' : 'en'}.webp`}
-                alt={s.alt}
-                width={440}
-                height={600}
-                loading="lazy"
-                decoding="async"
-                className="block h-auto max-h-[360px] w-full border-b border-rule object-cover object-top md:max-h-none"
-              />
-              <div className="flex gap-4 p-5 md:flex-col">
-                <Roundel state={i === 0 ? 'current' : 'next'} size={40}>
-                  {i + 1}
-                </Roundel>
-                <div>
-                  <h3 className="text-[18px] font-extrabold text-ink">{s.t}</h3>
-                  <p className="mt-1 text-[15px] leading-relaxed text-ink-2">{s.d}</p>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ol>
+        <p className="mt-1.5 text-[15px] text-ink-3">
+          {isKo ? '번호를 누르면 화면의 각 부분을 설명해 드려요.' : 'Tap a number to see what each part of the screen does.'}
+        </p>
+        <div className="mt-6">
+          <ScreenTour isKo={isKo} name="parent" steps={tourSteps} footnote={isKo ? '실제 앱 화면 · 예시 학습지' : 'Real app screens · sample worksheet'} />
+        </div>
       </section>
 
       {/* ACADEMY */}
