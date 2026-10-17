@@ -54,7 +54,11 @@
       "destination": "/schools.html"
     },
     {
-      "source": "/(terms|privacy|refund|youth|support|subscribe|admin|teacher)",
+      "source": "/privacy",
+      "destination": "/privacy.html"
+    },
+    {
+      "source": "/(terms|refund|youth|support|subscribe|admin|teacher)",
       "destination": "/index.html"
     }
   ],
