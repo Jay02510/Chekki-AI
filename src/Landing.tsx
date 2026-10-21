@@ -87,7 +87,7 @@ export default function Home() {
         ],
         [
           { x: 96, y: 20, text: "틀린 문제는 '같이 볼 문제'로 하나씩 봐요." },
-          { x: 96, y: 56, text: '아이에게 할 말을 알려 줘요. 한국어와 영어로 바꿔 볼 수 있어요.' },
+          { x: 96, y: 75, text: '아이에게 할 말을 알려 줘요. 한국어와 영어로 바꿔 볼 수 있어요.' },
         ],
       ]
     : [
@@ -101,7 +101,7 @@ export default function Home() {
         ],
         [
           { x: 96, y: 20, text: "Misses become 'look together' questions, one at a time." },
-          { x: 96, y: 56, text: 'What to say to your child. Switch between Korean and English.' },
+          { x: 96, y: 75, text: 'What to say to your child. Switch between Korean and English.' },
         ],
       ];
   const tourSteps: TourStep[] = steps.map((s, i) => ({
