@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { WorksheetItem } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ListDashes, Scan } from '@phosphor-icons/react';
 import { removeMarkdown } from '../utils/speechUtils';
+import { spreadBubbles } from '../utils/bubbleLayout';
 
 interface Props {
   imageUrl: string;
@@ -70,6 +71,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
   const pointerDownItemId = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+  const dragElRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     setItems(initialItems);
@@ -100,8 +102,11 @@ export const WorksheetOverlay: React.FC<Props> = ({
       ? item.custom_coords.left
       : ((box!.xmin + box!.xmax) / 2000) * 100;
 
+    // grab the bubble where it's drawn, collision nudge included
+    const nudge = parseFloat(target.style.getPropertyValue('--nudge')) || 0;
     const bubblePxX = (currentLeft / 100) * rect.width;
-    const bubblePxY = (currentTop / 100) * rect.height;
+    const bubblePxY = (currentTop / 100) * rect.height + nudge;
+    dragElRef.current = target;
 
     dragOffset.current = {
       x: e.clientX - rect.left - bubblePxX,
@@ -116,6 +121,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (draggingId === null || !containerRef.current) return;
+    dragElRef.current?.style.setProperty('--nudge', '0px');
     const rect = containerRef.current.getBoundingClientRect();
     const newPxX = e.clientX - rect.left - dragOffset.current.x;
     const newPxY = e.clientY - rect.top - dragOffset.current.y;
@@ -184,7 +190,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
       top: `${top}%`,
       left: `${left}%`,
       zIndex: isDragging ? 1000 : 10 + (item.id || 0),
-      transform: `translate3d(-50%, -50%, 0) scale(${bubbleScale * (isDragging ? 1.2 : 1)})`,
+      transform: `translate3d(-50%, calc(-50% + var(--nudge, 0px)), 0) scale(${bubbleScale * (isDragging ? 1.2 : 1)})`,
       // Every tap on a bubble briefly sets/clears draggingId, so this curve
       // fires on the highest-frequency interaction in the app (select, drag
       // settle) — a spring overshoot there reads as unintentional bounce, not
@@ -201,6 +207,38 @@ export const WorksheetOverlay: React.FC<Props> = ({
       animationFillMode: 'both',
     } as React.CSSProperties;
   };
+
+  // Nudge colliding bubbles apart. Sizes come from layout (offsetWidth), not
+  // getBoundingClientRect, so zoom and running transitions don't skew them.
+  useLayoutEffect(() => {
+    if (!imageLoaded || draggingId !== null) return;
+    const layers = [...document.querySelectorAll<HTMLElement>('[data-bubble-layer]')];
+    const spread = () =>
+      layers.forEach((layer) => {
+        const W = layer.offsetWidth;
+        const H = layer.offsetHeight;
+        if (!W || !H) return; // hidden panel; the observer reruns once it shows
+        const els = [...layer.querySelectorAll<HTMLElement>('[data-bubble]')];
+        const shifts = spreadBubbles(
+          els.map((el) => ({
+            id: Number(el.dataset.bubble),
+            cx: (parseFloat(el.style.left) / 100) * W,
+            cy: (parseFloat(el.style.top) / 100) * H,
+            w: el.offsetWidth * bubbleScale,
+            h: el.offsetHeight * bubbleScale,
+          })),
+          4,
+          H - 72 // keep clear of the Hide answers pill along the bottom
+        );
+        els.forEach((el) =>
+          el.style.setProperty('--nudge', `${shifts.get(Number(el.dataset.bubble)) ?? 0}px`)
+        );
+      });
+    spread();
+    const ro = new ResizeObserver(spread);
+    layers.forEach((l) => ro.observe(l));
+    return () => ro.disconnect();
+  }, [items, bubbleScale, showAnswers, focusedId, imageLoaded, isFullscreen, viewMode, draggingId]);
 
   const renderOverlayContent = (inFullscreen: boolean) => {
     const isBlankKeyMode = hasHandwriting === false;
@@ -226,6 +264,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
         {/* The precise bounding container for the image and bubbles */}
         <div
           ref={containerRef}
+          data-bubble-layer
           onPointerMove={handlePointerMove}
           className="relative inline-block max-w-full max-h-full"
         >
@@ -291,6 +330,7 @@ export const WorksheetOverlay: React.FC<Props> = ({
               return (
                 <div
                   key={item.id}
+                  data-bubble={item.id}
                   style={getStyle(item, idx)}
                   className={`absolute pointer-events-auto transform-gpu animate-[fadeIn_200ms_ease-out] before:absolute before:-inset-2 before:content-[''] ${isFocused ? 'opacity-100' : 'opacity-20 blur-[2px]'}`}
                   role="button"

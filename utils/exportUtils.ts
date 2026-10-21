@@ -3,6 +3,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { Capacitor } from '@capacitor/core';
 import { PUBLIC_APP_URL } from '../config';
+import { spreadBubbles } from './bubbleLayout';
 
 export const generateCompositeImage = async (
   imgUrl: string,
@@ -44,9 +45,10 @@ export const generateCompositeImage = async (
         const MathMax = Math.max;
         const scale = canvas.width / 1000;
 
-        items.forEach((item) => {
+        // measure every bubble first so colliding ones can be nudged apart
+        const bubbles = items.flatMap((item) => {
           const box = item.bounding_box;
-          if (!box && !item.custom_coords) return;
+          if (!box && !item.custom_coords) return [];
           const topPercent = item.custom_coords
             ? item.custom_coords.top
             : ((box!.ymin + box!.ymax) / 2000) * 100;
@@ -72,51 +74,94 @@ export const generateCompositeImage = async (
           const answerBoxWidth = answerMetrics.width + paddingX;
           const rectWidth = idBoxWidth + answerBoxWidth + paddingX * 0.5;
           const rectHeight = baseFontSize + paddingY * 2;
-
-          const rawStartX = cx - rectWidth / 2;
-          const rawStartY = cy - rectHeight / 2;
-          const startX = Math.max(8, Math.min(rawStartX, canvas.width - rectWidth - 8));
-          const startY = Math.max(8, Math.min(rawStartY, canvas.height - rectHeight - 8));
-
-          ctx.save();
-          ctx.shadowColor = 'rgba(0,0,0,0.5)';
-          ctx.shadowBlur = 12 * scale;
-          ctx.shadowOffsetY = 8 * scale;
-
-          ctx.fillStyle = '#ea580c';
-          ctx.beginPath();
-          ctx.roundRect(startX, startY, rectWidth, rectHeight, baseFontSize * 0.6);
-          ctx.fill();
-
-          ctx.shadowColor = 'transparent';
-          ctx.lineWidth = 2 * scale;
-          ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-          ctx.stroke();
-
-          ctx.fillStyle = 'rgba(255,255,255,0.2)';
-          ctx.beginPath();
-          ctx.roundRect(
-            startX + paddingX * 0.4,
-            startY + paddingY * 0.5,
-            idBoxWidth - paddingX * 0.4,
-            rectHeight - paddingY,
-            baseFontSize * 0.4
-          );
-          ctx.fill();
-
-          ctx.fillStyle = '#ffffff';
-          ctx.textBaseline = 'middle';
-
-          ctx.textAlign = 'center';
-          ctx.font = `900 ${baseFontSize * 0.85}px sans-serif`;
-          ctx.fillText(textId, startX + paddingX * 0.2 + idBoxWidth / 2, cy);
-
-          ctx.textAlign = 'left';
-          ctx.font = `900 ${baseFontSize}px 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif`;
-          ctx.fillText(textAnswer, startX + idBoxWidth + paddingX * 0.4, cy);
-
-          ctx.restore();
+          return [
+            {
+              item,
+              cx,
+              cy,
+              baseFontSize,
+              textId,
+              textAnswer,
+              paddingX,
+              paddingY,
+              idBoxWidth,
+              rectWidth,
+              rectHeight,
+            },
+          ];
         });
+        const shifts = spreadBubbles(
+          bubbles.map((b) => ({
+            id: b.item.id,
+            cx: b.cx,
+            cy: b.cy,
+            w: b.rectWidth,
+            h: b.rectHeight,
+          })),
+          4 * scale,
+          canvas.height
+        );
+
+        bubbles.forEach(
+          ({
+            item,
+            cx,
+            cy: baseCy,
+            baseFontSize,
+            textId,
+            textAnswer,
+            paddingX,
+            paddingY,
+            idBoxWidth,
+            rectWidth,
+            rectHeight,
+          }) => {
+            const rawStartX = cx - rectWidth / 2;
+            const rawStartY = baseCy + (shifts.get(item.id) ?? 0) - rectHeight / 2;
+            const startX = Math.max(8, Math.min(rawStartX, canvas.width - rectWidth - 8));
+            const startY = Math.max(8, Math.min(rawStartY, canvas.height - rectHeight - 8));
+            const cy = startY + rectHeight / 2;
+
+            ctx.save();
+            ctx.shadowColor = 'rgba(0,0,0,0.5)';
+            ctx.shadowBlur = 12 * scale;
+            ctx.shadowOffsetY = 8 * scale;
+
+            ctx.fillStyle = '#ea580c';
+            ctx.beginPath();
+            ctx.roundRect(startX, startY, rectWidth, rectHeight, baseFontSize * 0.6);
+            ctx.fill();
+
+            ctx.shadowColor = 'transparent';
+            ctx.lineWidth = 2 * scale;
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.beginPath();
+            ctx.roundRect(
+              startX + paddingX * 0.4,
+              startY + paddingY * 0.5,
+              idBoxWidth - paddingX * 0.4,
+              rectHeight - paddingY,
+              baseFontSize * 0.4
+            );
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.textBaseline = 'middle';
+
+            ctx.textAlign = 'center';
+            ctx.font = `900 ${baseFontSize * 0.85}px sans-serif`;
+            ctx.fillText(textId, startX + paddingX * 0.2 + idBoxWidth / 2, cy);
+
+            ctx.textAlign = 'left';
+            ctx.font = `900 ${baseFontSize}px 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif`;
+            ctx.fillText(textAnswer, startX + idBoxWidth + paddingX * 0.4, cy);
+
+            ctx.restore();
+          }
+        );
 
         // Add "Ritual Record" Footer
         const footerHeight = 60 * scale;
