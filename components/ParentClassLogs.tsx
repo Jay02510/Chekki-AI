@@ -17,6 +17,14 @@ interface ParentReport {
   note?: string | null;
 }
 
+// Same "10월 16일 (금)" / "Fri, Oct 16" style as past scans. date is a
+// YYYY-MM-DD string; build a local date so it never shifts a day.
+const formatLogDate = (date: string, isKo: boolean) => {
+  const [y, m, d] = date.split('-').map(Number);
+  if (!y || !m || !d) return date;
+  return new Intl.DateTimeFormat(isKo ? 'ko-KR' : 'en-US', { month: 'short', day: 'numeric', weekday: 'short' }).format(new Date(y, m - 1, d));
+};
+
 interface Props {
   classId: string;
   studentUid?: string | null;
@@ -86,7 +94,7 @@ export const ParentClassLogs: React.FC<Props> = ({ classId, studentUid, studentN
                   {log.lessonTopic && <span className="block truncate text-[13px] text-ink-3 group-open/log:whitespace-normal">{log.lessonTopic}</span>}
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
-                  <span className="num text-[13px] text-ink-3">{log.date}</span>
+                  <span className="num text-[13px] text-ink-3">{log.date && formatLogDate(log.date, isKo)}</span>
                   <CaretDown size={16} weight="bold" className="text-ink-3 transition-transform group-open/log:rotate-180" />
                 </span>
               </summary>
