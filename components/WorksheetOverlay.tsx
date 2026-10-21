@@ -257,8 +257,10 @@ export const WorksheetOverlay: React.FC<Props> = ({
           {imageLoaded &&
             items &&
             items.map((item, idx) => {
+              // "Show answers" means every bubble, full strength; the focused one
+              // still gets its ring. Hidden answers leave only the focused bubble.
               const isFocused =
-                focusedId === null || focusedId === undefined || item.id === focusedId;
+                showAnswers || focusedId === null || focusedId === undefined || item.id === focusedId;
               const isExplicitlyFocused = focusedId === item.id;
 
               // Hide the bubble if answers are hidden AND this item isn't explicitly focused

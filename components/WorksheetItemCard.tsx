@@ -76,17 +76,11 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
     index = 0,
     isSpeedMode = false,
   }) => {
+    // speed mode starts with the script folded; the answer is always shown
     const [isScriptExpanded, setIsScriptExpanded] = useState(!isSpeedMode);
-    const [isAnswerExpanded, setIsAnswerExpanded] = useState(isSpeedMode);
 
     React.useEffect(() => {
-      if (isSpeedMode) {
-        setIsAnswerExpanded(true);
-        setIsScriptExpanded(false);
-      } else {
-        setIsScriptExpanded(true);
-        setIsAnswerExpanded(false);
-      }
+      setIsScriptExpanded(!isSpeedMode);
     }, [isSpeedMode]);
 
     const scriptText = language === 'ko' ? item.teaching_script_ko : item.teaching_script_en || '';
@@ -116,16 +110,25 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
     const locked = userPlan !== 'pro' && index !== 0;
 
     const ProTag = () => (
-      <span className="ml-1 rounded bg-line-soft px-1 text-[10px] font-extrabold leading-4 text-line-ink">PRO</span>
+      <span className="ml-1 rounded bg-line-soft px-1 text-[10px] font-extrabold leading-4 text-line-ink">
+        PRO
+      </span>
     );
 
     const toolBtn =
       'relative inline-flex min-h-11 items-center gap-2 rounded-md px-3 text-[14px] font-bold ring-1 ring-inset ring-rule bg-surface text-ink-2 hover:text-ink hover:ring-ink-3 active:scale-[0.97] transition-transform';
 
     return (
-      <div onClick={(e) => e.stopPropagation()} className="relative pl-[58px] sm:pl-16" style={style}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative pl-[58px] sm:pl-16"
+        style={style}
+      >
         <span className="absolute left-[3px] top-3 sm:left-[7px]">
-          <Roundel state={isWrong ? 'wrong' : isRight ? 'right' : isActive ? 'current' : 'next'} size={44}>
+          <Roundel
+            state={isWrong ? 'wrong' : isRight ? 'right' : isActive ? 'current' : 'next'}
+            size={44}
+          >
             {item.id}
           </Roundel>
         </span>
@@ -139,7 +142,11 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
             role="button"
             tabIndex={0}
             aria-expanded={isActive}
-            aria-label={ko ? `${item.id}번 문제 ${isActive ? '접기' : '펼치기'}` : `${isActive ? 'Collapse' : 'Expand'} question ${item.id}`}
+            aria-label={
+              ko
+                ? `${item.id}번 문제 ${isActive ? '접기' : '펼치기'}`
+                : `${isActive ? 'Collapse' : 'Expand'} question ${item.id}`
+            }
             onClick={(e) => {
               e.stopPropagation();
               onToggleActive();
@@ -158,26 +165,45 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                 {item.question_text.replace(/^\d+[.)\s]+/, '')}
               </p>
               {item.question_translation && (
-                <p className="mt-0.5 text-[14px] leading-relaxed text-ink-2 break-keep">{item.question_translation}</p>
+                <p className="mt-0.5 text-[14px] leading-relaxed text-ink-2 break-keep">
+                  {item.question_translation}
+                </p>
               )}
-              <p
-                className={`mt-2 flex items-center gap-1.5 text-[13px] font-bold ${
-                  isRight ? 'text-correct' : 'text-line-ink'
-                }`}
-              >
-                {isRight ? <Check size={14} weight="bold" /> : null}
-                {isWrong
-                  ? ko
-                    ? '아이와 같이 보기'
-                    : "Let's look together"
-                  : isRight
-                    ? ko
-                      ? '맞았어요'
-                      : 'Right'
-                    : ko
-                      ? '정답 보기'
-                      : 'See the answer'}
-              </p>
+              {/* answer key, open card: the answer block below takes over */}
+              {!(isActive && !graded) && (
+                <p
+                  className={`mt-2 flex items-center gap-1.5 text-[13px] font-bold ${
+                    isRight ? 'text-correct' : 'text-line-ink'
+                  }`}
+                >
+                  {isRight ? <Check size={14} weight="bold" /> : null}
+                  {isWrong ? (
+                    ko ? (
+                      '아이와 같이 보기'
+                    ) : (
+                      "Let's look together"
+                    )
+                  ) : isRight ? (
+                    ko ? (
+                      '맞았어요'
+                    ) : (
+                      'Right'
+                    )
+                  ) : isAuthenticated || index === 0 ? (
+                    // answer key: the answer sits on the row, so the list reads as a key
+                    <span className="flex flex-wrap items-baseline gap-x-1.5">
+                      <span className="text-ink-3">{ko ? '정답' : 'Answer'}</span>
+                      <span className="text-[16px] font-extrabold text-ink break-words">
+                        {answerText}
+                      </span>
+                    </span>
+                  ) : ko ? (
+                    '정답 보기'
+                  ) : (
+                    'See the answer'
+                  )}
+                </p>
+              )}
             </div>
             <CaretDown
               size={18}
@@ -195,120 +221,131 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                       ? '로그인하면 원어민 발음 듣기, 아이 발음 체크, 전체 설명까지 볼 수 있어요.'
                       : 'Sign in for native audio, pronunciation checks and full explanations.'}
                   </p>
-                  <button onClick={openLoginModal} className="mt-3 min-h-11 w-full rounded-md bg-sign text-[15px] font-bold text-on-sign">
+                  <button
+                    onClick={openLoginModal}
+                    className="mt-3 min-h-11 w-full rounded-md bg-sign text-[15px] font-bold text-on-sign"
+                  >
                     {ko ? '로그인하기' : 'Sign in'}
                   </button>
                 </div>
               ) : (
                 <>
-                  {/* answer */}
-                  <section className="rounded-md bg-sunken">
-                    <button
-                      type="button"
-                      aria-expanded={isAnswerExpanded}
-                      onClick={() => {
-                        setIsAnswerExpanded(!isAnswerExpanded);
-                        if (!isAnswerExpanded) setIsScriptExpanded(false);
-                      }}
-                      className="flex w-full items-center justify-between px-4 py-3 text-left"
-                    >
-                      <span className="text-[15px] font-bold text-ink">{ko ? '정답' : 'Answer'}</span>
-                      <CaretDown size={16} weight="bold" className={`text-ink-3 transition-transform ${isAnswerExpanded ? 'rotate-180' : ''}`} />
-                    </button>
-                    {isAnswerExpanded && (
-                      <div className="space-y-4 px-4 pb-4">
-                        <div
-                          className={`space-y-3 ${!isAuthenticated && index !== 0 ? 'pointer-events-none select-none blur-[4px] opacity-40' : ''}`}
+                  {/* answer: always out, no extra tap */}
+                  <section className="space-y-4 rounded-md bg-sunken px-4 py-4">
+                    <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
+                      {isWrong && (
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-semibold text-ink-3">
+                            {ko ? '아이의 답' : "Child's answer"}
+                          </p>
+                          <p
+                            className={`mt-0.5 font-bold text-wrong line-through decoration-2 break-words ${isStudentResponseLong ? 'text-lg' : 'text-2xl'}`}
+                          >
+                            {item.student_response || (ko ? '(빈칸)' : '(blank)')}
+                          </p>
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-semibold text-ink-3">
+                          {!graded ? (ko ? '정답' : 'Answer') : ko ? '정답' : 'Correct answer'}
+                        </p>
+                        <p
+                          className={`mt-0.5 font-extrabold break-words ${isAnswerLong ? 'text-xl' : 'text-[28px] leading-tight'} ${
+                            speechResult?.id === item.id
+                              ? speechResult.success
+                                ? 'text-correct'
+                                : 'text-wrong'
+                              : 'text-ink'
+                          }`}
                         >
-                          {isWrong && (
-                            <div>
-                              <p className="text-[13px] font-semibold text-ink-3">{ko ? '아이의 답' : "Child's answer"}</p>
-                              <p className={`mt-0.5 font-bold text-wrong line-through decoration-2 ${isStudentResponseLong ? 'text-lg' : 'text-2xl'}`}>
-                                {item.student_response || (ko ? '(빈칸)' : '(blank)')}
-                              </p>
-                            </div>
+                          {answerText}
+                          {speechResult?.id === item.id && speechResult.success && (
+                            <span className="ml-2 align-middle text-[15px] font-bold text-correct">
+                              {ko ? '잘 말했어요!' : 'Well said!'}
+                            </span>
                           )}
-                          <div>
-                            <p className="text-[13px] font-semibold text-ink-3">
-                              {!graded ? (ko ? '정답지' : 'Answer key') : ko ? '정답' : 'Correct answer'}
-                            </p>
-                            <p
-                              className={`mt-0.5 font-extrabold break-words ${isAnswerLong ? 'text-xl' : 'text-[28px] leading-tight'} ${
-                                speechResult?.id === item.id ? (speechResult.success ? 'text-correct' : 'text-wrong') : 'text-ink'
-                              }`}
-                            >
-                              {answerText}
-                              {speechResult?.id === item.id && speechResult.success && (
-                                <span className="ml-2 align-middle text-[15px] font-bold text-correct">
-                                  {ko ? '잘 말했어요!' : 'Well said!'}
-                                </span>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (locked) setUpsellFeature('pronunciation');
-                              else onStartPronunciation(e);
-                            }}
-                            aria-label={locked ? (ko ? 'Pro: AI 발음 평가' : 'Pro: AI pronunciation check') : t('tt_pronunciation')}
-                            className={`${toolBtn} ${isListening ? '!bg-wrong !text-white !ring-wrong' : ''}`}
-                          >
-                            <Microphone size={18} weight="bold" />
-                            {isListening ? (ko ? '듣는 중…' : 'Listening…') : ko ? '따라 말하기' : 'Say it'}
-                            {locked && <ProTag />}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (locked) setUpsellFeature('audio');
-                              else onPlayAudio(cleanAnswerText(item.correct_answer || ''));
-                            }}
-                            aria-label={locked ? (ko ? 'Pro: 원어민 발음 듣기' : 'Pro: native audio') : t('tt_audio')}
-                            className={toolBtn}
-                          >
-                            <SpeakerHigh size={18} weight="bold" />
-                            {t('lbl_audio')}
-                            {locked && <ProTag />}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) =>
-                              handleActionClick(e, () => {
-                                if (locked) setShowPaywall(true);
-                                else onToggleMistake(item);
-                              })
-                            }
-                            aria-pressed={flagged}
-                            aria-label={t('tt_bookmark')}
-                            className={`${toolBtn} ${flagged ? '!text-wrong !ring-wrong' : ''}`}
-                          >
-                            <BookmarkSimple size={18} weight={flagged ? 'fill' : 'bold'} />
-                            {t('lbl_bookmark')}
-                            {locked && <ProTag />}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) =>
-                              handleActionClick(e, () => {
-                                if (locked) setShowPaywall(true);
-                                else onRefine(item);
-                              })
-                            }
-                            aria-label={t('tt_refine')}
-                            className={toolBtn}
-                          >
-                            <ChatCircleText size={18} weight="bold" />
-                            {t('lbl_refine')}
-                          </button>
-                        </div>
+                        </p>
                       </div>
-                    )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (locked) setUpsellFeature('pronunciation');
+                          else onStartPronunciation(e);
+                        }}
+                        aria-label={
+                          locked
+                            ? ko
+                              ? 'Pro: AI 발음 평가'
+                              : 'Pro: AI pronunciation check'
+                            : t('tt_pronunciation')
+                        }
+                        className={`${toolBtn} ${isListening ? '!bg-wrong !text-white !ring-wrong' : ''}`}
+                      >
+                        <Microphone size={18} weight="bold" />
+                        {isListening
+                          ? ko
+                            ? '듣는 중…'
+                            : 'Listening…'
+                          : ko
+                            ? '따라 말하기'
+                            : 'Say it'}
+                        {locked && <ProTag />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (locked) setUpsellFeature('audio');
+                          else onPlayAudio(cleanAnswerText(item.correct_answer || ''));
+                        }}
+                        aria-label={
+                          locked
+                            ? ko
+                              ? 'Pro: 원어민 발음 듣기'
+                              : 'Pro: native audio'
+                            : t('tt_audio')
+                        }
+                        className={toolBtn}
+                      >
+                        <SpeakerHigh size={18} weight="bold" />
+                        {t('lbl_audio')}
+                        {locked && <ProTag />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) =>
+                          handleActionClick(e, () => {
+                            if (locked) setShowPaywall(true);
+                            else onToggleMistake(item);
+                          })
+                        }
+                        aria-pressed={flagged}
+                        aria-label={t('tt_bookmark')}
+                        className={`${toolBtn} ${flagged ? '!text-wrong !ring-wrong' : ''}`}
+                      >
+                        <BookmarkSimple size={18} weight={flagged ? 'fill' : 'bold'} />
+                        {t('lbl_bookmark')}
+                        {locked && <ProTag />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) =>
+                          handleActionClick(e, () => {
+                            if (locked) setShowPaywall(true);
+                            else onRefine(item);
+                          })
+                        }
+                        aria-label={t('tt_refine')}
+                        className={toolBtn}
+                      >
+                        <ChatCircleText size={18} weight="bold" />
+                        {t('lbl_refine')}
+                      </button>
+                    </div>
                   </section>
 
                   {/* what to say: the guide in the parent's language */}
@@ -317,16 +354,23 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                       <button
                         type="button"
                         aria-expanded={isScriptExpanded}
-                        onClick={() => {
-                          setIsScriptExpanded(!isScriptExpanded);
-                          if (!isScriptExpanded) setIsAnswerExpanded(false);
-                        }}
+                        onClick={() => setIsScriptExpanded(!isScriptExpanded)}
                         className="flex min-h-11 flex-1 items-center gap-1.5 text-left"
                       >
-                        <span className="text-[15px] font-bold text-ink">{ko ? '아이에게 할 말' : 'What to say'}</span>
-                        <CaretDown size={16} weight="bold" className={`shrink-0 text-ink-3 transition-transform ${isScriptExpanded ? 'rotate-180' : ''}`} />
+                        <span className="text-[15px] font-bold text-ink">
+                          {ko ? '아이에게 할 말' : 'What to say'}
+                        </span>
+                        <CaretDown
+                          size={16}
+                          weight="bold"
+                          className={`shrink-0 text-ink-3 transition-transform ${isScriptExpanded ? 'rotate-180' : ''}`}
+                        />
                       </button>
-                      <div role="group" aria-label={ko ? '스크립트 언어' : 'Script language'} className="flex shrink-0 rounded bg-surface p-0.5">
+                      <div
+                        role="group"
+                        aria-label={ko ? '스크립트 언어' : 'Script language'}
+                        className="flex shrink-0 rounded bg-surface p-0.5"
+                      >
                         {(['ko', 'en'] as const).map((lng) => (
                           <button
                             key={lng}
@@ -349,10 +393,14 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                       <div className="space-y-4 px-4 pb-4">
                         <div
                           className="teaching-script-text text-[17px] font-semibold leading-relaxed text-ink break-keep"
-                          dangerouslySetInnerHTML={{ __html: renderMarkdown(`"${displayScript || ''}"`) }}
+                          dangerouslySetInnerHTML={{
+                            __html: renderMarkdown(`"${displayScript || ''}"`),
+                          }}
                         />
                         {displayGuide && (
-                          <p className="text-[14px] leading-relaxed text-ink-2 break-keep">{simplifyGuideText(displayGuide)}</p>
+                          <p className="text-[14px] leading-relaxed text-ink-2 break-keep">
+                            {simplifyGuideText(displayGuide)}
+                          </p>
                         )}
                         {currentScriptLang === 'en' && (
                           <button

@@ -119,6 +119,12 @@ export const SplitView: React.FC<SplitViewProps> = ({
   const [showAll, setShowAll] = useState(false);
   const [step, setStep] = useState(0);
   const [finished, setFinished] = useState(false);
+  // phones stack the panels, so they show one at a time behind a switch
+  const [mobileView, setMobileView] = useState<'answers' | 'page'>('answers');
+  const seeAll = () => {
+    setShowAll(true);
+    setActiveItemId(null);
+  };
   const focusMode = !showAll && !isLoadingItems && focusItems.length > 0;
   const focusItem = focusMode ? focusItems[Math.min(step, focusItems.length - 1)] : null;
 
@@ -716,7 +722,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
       <div className="flex w-full min-h-0 flex-col gap-4 lg:flex-row lg:gap-6">
         {/* the worksheet itself, marks drawn on it; under the result on phones */}
-        <div className="relative order-2 w-full shrink-0 overflow-hidden rounded-lg bg-surface ring-1 ring-inset ring-rule lg:order-1 lg:sticky lg:top-24 lg:self-start lg:h-[calc(100dvh-7rem)] lg:w-1/2">
+        <div className={`relative order-2 w-full shrink-0 overflow-hidden rounded-lg bg-surface ring-1 ring-inset ring-rule lg:order-1 lg:sticky lg:top-24 lg:self-start lg:h-[calc(100dvh-7rem)] lg:w-1/2 ${mobileView === 'page' ? '' : 'max-lg:hidden'}`}>
           <WorksheetOverlay
             imageUrl={imageUrl}
             items={localItems}
@@ -724,7 +730,16 @@ export const SplitView: React.FC<SplitViewProps> = ({
             isLoadingItems={isLoadingItems}
             isNight={isNight}
             onConfirm={onConfirm}
-            onSelect={(id) => setActiveItemId(id)}
+            onSelect={(id) => {
+              // tapping a bubble opens that question's explanation
+              setActiveItemId(id);
+              const i = focusItems.findIndex((f) => f.id === id);
+              if (focusMode && !finished) {
+                if (i >= 0) setStep(i);
+                else setShowAll(true);
+              }
+              setMobileView('answers');
+            }}
             hasHandwriting={data?.worksheet_summary?.has_handwriting}
             className="h-auto lg:h-full rounded-none"
           />
@@ -735,27 +750,29 @@ export const SplitView: React.FC<SplitViewProps> = ({
           onClick={() => !focusMode && setActiveItemId(null)}
         >
           {/* result: praise first, then how many to look at together */}
-          <section className="relative rounded-lg bg-surface px-5 py-5 ring-1 ring-inset ring-rule">
+          <section className="relative rounded-lg bg-surface px-4 py-3 ring-1 ring-inset ring-rule sm:px-5 sm:py-5">
             <div className="flex items-start gap-4">
               {!mascotError && (
                 <img
                   src={wrongItems.length === 0 && hasGrading && !isLoadingItems ? '/images/chekki-wave.webp' : '/images/chekki-thumbs.webp'}
                   alt=""
                   onError={() => setMascotError(true)}
-                  className="hidden h-14 w-14 shrink-0 object-contain min-[360px]:block sm:h-16 sm:w-16"
+                  className="hidden h-16 w-16 shrink-0 object-contain sm:block"
                 />
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate pr-20 text-[13px] font-semibold text-ink-3" title={worksheetTitle}>
+                <p className="truncate text-[13px] font-semibold text-ink-3 num" title={worksheetTitle}>
                   {worksheetTitle || (language === 'ko' ? '학습지' : 'Worksheet')}
+                  {!isLoadingItems && !hasGrading && localItems.length > 0 &&
+                    (language === 'ko' ? ` · ${localItems.length}문제` : ` · ${localItems.length} questions`)}
                 </p>
-                <h2 className="sign-ko mt-0.5 pr-20 text-[24px] sm:text-[28px] text-ink break-keep">
+                <h2 className="sign-ko mt-0.5 text-[20px] sm:text-[28px] text-ink break-keep">
                   {isLoadingItems
                     ? t('ws_scanning_header')
                     : !hasGrading
                       ? language === 'ko'
-                        ? `정답지 ${localItems.length}문제`
-                        : `Answer key · ${localItems.length} questions`
+                        ? '정답지'
+                        : 'Answer key'
                       : wrongItems.length === 0
                         ? language === 'ko'
                           ? '다 맞았어요!'
@@ -764,13 +781,17 @@ export const SplitView: React.FC<SplitViewProps> = ({
                           ? `${correctCount}개 맞았어요!`
                           : `${correctCount} right!`}
                 </h2>
-                <p className="mt-1 text-[15px] font-medium text-ink-2 break-keep num">
+                <p className={`mt-1 text-[15px] font-medium text-ink-2 break-keep num ${focusMode && !finished ? 'max-sm:hidden' : ''}`}>
                   {isLoadingItems
                     ? t('ws_scanning_detail')
                     : !hasGrading
-                      ? language === 'ko'
-                        ? '문제를 누르면 정답과 설명이 나와요.'
-                        : 'Tap a question for the answer and how to explain it.'
+                      ? focusMode
+                        ? language === 'ko'
+                          ? '아이와 한 문제씩 같이 봐요.'
+                          : 'Go through them with your child, one at a time.'
+                        : language === 'ko'
+                          ? '문제를 누르면 정답과 설명이 나와요.'
+                          : 'Tap a question for the answer and how to explain it.'
                       : wrongItems.length === 0
                         ? language === 'ko'
                           ? '아이를 꼭 칭찬해 주세요.'
@@ -780,13 +801,14 @@ export const SplitView: React.FC<SplitViewProps> = ({
                           : `${wrongItems.length} to look at together · ${localItems.length} total`}
                 </p>
               </div>
-              <div className="absolute right-3 top-3 flex items-center">
+              <div className="-mr-2 -mt-1 flex shrink-0 items-center sm:mr-0 sm:mt-0">
                 <button
                   aria-label={language === 'ko' ? '이미지 저장' : 'Save image'}
                   title={language === 'ko' ? '기록 저장' : 'Save image'}
                   onClick={handleShare}
                   disabled={isSharing}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-md text-ink-3 hover:bg-sunken hover:text-ink"
+                  // the step view has its own Save image button below
+                  className={`h-11 w-11 items-center justify-center rounded-md text-ink-3 hover:bg-sunken hover:text-ink ${focusMode && !finished ? 'hidden' : 'inline-flex'}`}
                 >
                   {isSharing ? (
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -808,8 +830,32 @@ export const SplitView: React.FC<SplitViewProps> = ({
             </div>
           </section>
 
+          {localItems.length > 0 && (
+            <div role="group" aria-label={language === 'ko' ? '보기 방식' : 'View'} className="mt-3 grid grid-cols-2 gap-1 rounded-md bg-sunken p-1 lg:hidden">
+              {(['answers', 'page'] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  aria-pressed={mobileView === v}
+                  onClick={() => setMobileView(v)}
+                  className={`min-h-11 rounded text-[15px] font-bold transition-colors ${
+                    mobileView === v ? 'bg-surface text-ink shadow-[0_1px_3px_rgba(0,0,0,0.12)]' : 'text-ink-3'
+                  }`}
+                >
+                  {v === 'answers'
+                    ? language === 'ko'
+                      ? '설명 보기'
+                      : 'Explanations'
+                    : language === 'ko'
+                      ? '종이에서 보기'
+                      : 'On the page'}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div
-            className="relative mt-4 w-full pb-8 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1"
+            className={`relative mt-4 w-full pb-8 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1 ${mobileView === 'answers' ? '' : 'max-lg:hidden'}`}
             style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' } as React.CSSProperties}
             onClick={(e) => e.stopPropagation()}
           >
@@ -846,7 +892,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                   </div>
                   <button
                     type="button"
-                    onClick={() => setShowAll(true)}
+                    onClick={seeAll}
                     className="min-h-11 rounded-md px-3 text-[14px] font-bold text-line-ink hover:bg-line-soft"
                   >
                     {language === 'ko' ? '전체 보기' : 'See all'}
@@ -912,7 +958,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                 {correctCount > 0 && (
                   <button
                     type="button"
-                    onClick={() => setShowAll(true)}
+                    onClick={seeAll}
                     className="mt-4 flex w-full items-center justify-between gap-3 rounded-md bg-right-soft px-5 py-4 text-left"
                   >
                     <span className="flex items-center gap-2 text-[15px] font-bold text-correct">
@@ -965,7 +1011,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                   <button
                     onClick={() => {
                       setFinished(false);
-                      setShowAll(true);
+                      seeAll();
                     }}
                     className="inline-flex min-h-14 items-center justify-center gap-2 rounded-md bg-surface px-4 text-[16px] font-bold text-ink ring-1 ring-inset ring-rule"
                   >
