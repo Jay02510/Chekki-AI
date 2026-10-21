@@ -104,6 +104,9 @@ export const SplitView: React.FC<SplitViewProps> = ({
   const endListenerRef = useRef<any>(null);
   const lastAudioTextRef = useRef<string | null>(null);
   const lastTranscriptRef = useRef<string>('');
+  // the web recognizer is built once per scan, so it reads the open question from here
+  const activeItemIdRef = useRef<number | null>(null);
+  activeItemIdRef.current = activeItemId;
 
   const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
@@ -178,7 +181,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
-        const activeItem = items.find((i) => i.id === activeItemId);
+        const activeItem = items.find((i) => i.id === activeItemIdRef.current);
         if (activeItem) {
           evaluateSpeechResult(transcript, activeItem);
         }
