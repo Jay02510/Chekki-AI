@@ -59,7 +59,7 @@ When drafting "Visual Idea" prompts for creative teams or social media posts, pu
 ### 2. Video Clips & Animations
 
 - **`chekki-hero.mp4` (Video Demo):** Parent holding a phone over an English workbook, snapping a photo, and immediate digital ink overlay appearing.
-- **`chekki-intro.mp4` (Interactive Voice Demo):** A child tapping the speaker icon for TTS native pronunciation, speaking into the microphone, and receiving a popping star badge reward with haptic sound.
+- **`chekki-intro.mp4` (Interactive Voice Demo):** A child tapping the speaker icon for TTS pronunciation, speaking into the microphone, and receiving a popping star badge reward with haptic sound.
 
 ### 3. Bento & Graphic Assets (`public/assets/`)
 

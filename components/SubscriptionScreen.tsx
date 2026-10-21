@@ -49,12 +49,12 @@ const getContextualCopy = (
     return {
       headline:
         language === 'ko'
-          ? '원어민 발음 & 스피킹 코치 잠금 해제'
+          ? '영어 발음 & 스피킹 코치 잠금 해제'
           : 'Unlock Speaking Coach & Audio',
       subtext:
         language === 'ko'
-          ? '원어민의 생생한 음성을 듣고, 아이가 직접 말하며 실시간 발음 피드백을 받을 수 있습니다.'
-          : 'Hear native pronunciations and let your child practice speaking with real-time feedback and rewards.',
+          ? '정답을 영어 발음으로 듣고, 아이가 직접 말하며 실시간 발음 피드백을 받을 수 있습니다.'
+          : 'Hear each answer read aloud and let your child practice speaking with real-time feedback and rewards.',
     };
   }
   if (paywallContext === 'refinement') {

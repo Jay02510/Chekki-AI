@@ -35,8 +35,8 @@ export const HelpView: React.FC<HelpViewProps> = ({ isNight, onClose }) => {
     {
       ko: '빠르게 또는 자세히',
       en: 'Quick or detailed',
-      koDesc: '빠른 채점은 정답만, 튜터 모드는 원어민 발음과 쉬운 설명까지 보여줘요.',
-      enDesc: 'Speed mode shows just the answers. Tutor mode adds native audio and a simple explanation.',
+      koDesc: '빠른 채점은 정답만, 튜터 모드는 영어 발음 듣기와 쉬운 설명까지 보여줘요.',
+      enDesc: 'Speed mode shows just the answers. Tutor mode adds read-aloud audio and a simple explanation.',
     },
     {
       ko: '틀린 문제는 대시보드에',

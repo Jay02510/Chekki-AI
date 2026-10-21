@@ -10,12 +10,12 @@ export const ROUTE_META: Record<'home' | 'faq' | 'schools', { path: string; ko: 
     ko: {
       title: '채키 AI (Chekki AI) | 영어 숙제 AI 채점 · 발음 코칭 · 학원 리포트',
       description:
-        '영어 숙제 사진 한 장으로 5초 AI 채점, 원어민 발음 코칭, 한국어 엄마표 가이드까지. 영유·어학원을 위한 정답지 기준 자동 채점과 카카오톡 학부모 리포트도 제공합니다.',
+        '영어 숙제 사진 한 장으로 5초 AI 채점, 영어 발음 코칭, 한국어 엄마표 가이드까지. 영유·어학원을 위한 정답지 기준 자동 채점과 카카오톡 학부모 리포트도 제공합니다.',
     },
     en: {
       title: 'Chekki AI | AI English Homework Checker for Korean Families & Hagwons',
       description:
-        'Snap a photo of English homework and Chekki AI grades it in seconds, with native pronunciation coaching and Korean guidance for parents. Answer-key grading and KakaoTalk parent reports for academies.',
+        'Snap a photo of English homework and Chekki AI grades it in seconds, with pronunciation coaching and Korean guidance for parents. Answer-key grading and KakaoTalk parent reports for academies.',
     },
   },
   faq: {

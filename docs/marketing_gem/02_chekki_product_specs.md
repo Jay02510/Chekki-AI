@@ -29,11 +29,11 @@ This manifesto serves as the single source of truth for Chekki AI's capabilities
   - **Korean Rule Explanation (엄마가 이해하는 핵심 원리):** A clear 1-2 sentence Korean explanation of the phonics rule, grammar concept, or vocabulary meaning (e.g., _"Silent 'e' at the end makes the preceding vowel say its long name"_).
   - **Teaching Script (엄마의 대화 스크립트):** A verbatim dialogue script in Korean/English that the parent can read aloud to guide their child toward the answer with encouraging hints rather than giving away raw answers (e.g., _"OO야, 여기서 알파벳 E는 읏! 입을 다물고 A 소리를 길게 만들어준대. 같이 읽어볼까?"_).
 
-### 3. Native Pronunciation & Interactive Speech Coach (원어민 발음 & 스피킹 코치)
+### 3. Pronunciation & Interactive Speech Coach (영어 발음 & 스피킹 코치)
 
 - **Component File:** Embedded inside [WorksheetItemCard.tsx](file:///Users/jasonbenjamin/Projects/Chekki-AI-main/components/WorksheetItemCard.tsx) & [speechUtils.ts](file:///Users/jasonbenjamin/Projects/Chekki-AI-main/utils/speechUtils.ts)
 - **How it Works:**
-  - **Text-to-Speech (TTS):** Uses native North American English speech synthesis. Children tap the audio icon to listen to standard native pronunciation of phonics blends, target words, or sentences.
+  - **Text-to-Speech (TTS):** Uses the device's North American English speech synthesis (TTS, not recordings of native speakers). Children tap the audio icon to listen to standard pronunciation of phonics blends, target words, or sentences.
   - **Speech-to-Text (STT) Pronunciation Drill:** Uses Capacitor Speech Recognition. The child holds the microphone button and pronounces the target word. If recognized correctly, the app triggers dopamine-building star badge animations with native haptic feedback.
 
 ### 4. Interactive AI Tutor (Ask Chekki / 채키에게 물어보기)
@@ -72,4 +72,4 @@ Marketing messaging MUST adhere to these explicit constraints:
 
 4. **Tiered Limits (Free Explorer vs. Pro):**
    - **Free Explorer Tier:** 3 daily worksheet scans, basic Gemini Flash answer checking, restricted TTS audio counts.
-   - **Chekki Pro Tier:** Unlimited scans (9,999/day), Gemini Pro Deep Reasoning model, unlimited native TTS audio & STT pronunciation coach, and AI Practice Sheet Generator.
+   - **Chekki Pro Tier:** Unlimited scans (9,999/day), Gemini Pro Deep Reasoning model, unlimited TTS audio & STT pronunciation coach, and AI Practice Sheet Generator.

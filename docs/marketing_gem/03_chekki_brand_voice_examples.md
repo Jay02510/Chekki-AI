@@ -54,9 +54,9 @@ Replace them with natural, conversational language:
 
   채키의 상세 카드에 있는 [엄마 가이드]를 펴면:
   "마지막 e는 읏! 입을 다물고 A 소리를 길게 만들어준단다"라는 명쾌한 대화 힌트가 준비되어 있습니다.
-  원어민 발음 버튼(TTS)을 눌러 아이와 함께 들으며 정답을 맞춰보세요.
+  영어 발음 버튼(TTS)을 눌러 아이와 함께 들으며 정답을 맞춰보세요.
 
-- **CTA:** 프로 프로필 무료 체험으로 원어민 발음 코치를 직접 경험해보세요.
+- **CTA:** 프로 프로필 무료 체험으로 영어 발음 코치를 직접 경험해보세요.
 - **Why it Works:** Provides a real, concrete scenario every EK parent faces. Shows the exact UI solution ([엄마 가이드] + TTS button) and presents Chekki as an empowering tool.
 
 ---

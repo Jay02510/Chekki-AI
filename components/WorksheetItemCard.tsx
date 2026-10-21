@@ -218,8 +218,8 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                 <div className="rounded-md bg-sunken p-5">
                   <p className="text-[15px] font-semibold leading-relaxed text-ink">
                     {ko
-                      ? '로그인하면 원어민 발음 듣기, 아이 발음 체크, 전체 설명까지 볼 수 있어요.'
-                      : 'Sign in for native audio, pronunciation checks and full explanations.'}
+                      ? '로그인하면 영어 발음 듣기, 아이 발음 체크, 전체 설명까지 볼 수 있어요.'
+                      : 'Sign in for read-aloud audio, pronunciation checks and full explanations.'}
                   </p>
                   <button
                     onClick={openLoginModal}
@@ -305,8 +305,8 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                         aria-label={
                           locked
                             ? ko
-                              ? 'Pro: 원어민 발음 듣기'
-                              : 'Pro: native audio'
+                              ? 'Pro: 영어 발음 듣기'
+                              : 'Pro: read-aloud audio'
                             : t('tt_audio')
                         }
                         className={toolBtn}

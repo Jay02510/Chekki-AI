@@ -37,10 +37,10 @@ export const PremiumUpsellModal: React.FC<Props> = ({
     },
     audio: {
       icon: SpeakerHigh,
-      title_en: 'Native Pronunciation',
-      title_ko: '원어민 발음 듣기',
+      title_en: 'Hear It Read Aloud',
+      title_ko: '영어 발음 듣기',
       desc_en: 'Hear the correct pronunciation of each answer read aloud in natural English.',
-      desc_ko: '각 답을 자연스러운 영어 원어민 발음으로 들을 수 있어요.',
+      desc_ko: '각 답을 자연스러운 영어 발음으로 들을 수 있어요.',
     },
     guide: {
       icon: BookOpenText,

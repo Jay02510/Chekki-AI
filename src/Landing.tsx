@@ -399,7 +399,7 @@ export default function Home() {
                 <span className="text-[15px] font-semibold text-ink-3">{p.per}</span>
               </p>
               <p className="mt-1 flex-1 text-[15px] text-ink-2">
-                {p.note}. {isKo ? '채점 무제한, 원어민 발음, 티칭 스크립트.' : 'Unlimited grading, native audio, teaching scripts.'}
+                {p.note}. {isKo ? '채점 무제한, 영어 발음 듣기, 티칭 스크립트.' : 'Unlimited grading, read-aloud audio, teaching scripts.'}
               </p>
               <a
                 href="/subscribe"

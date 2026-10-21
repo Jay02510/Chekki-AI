@@ -30,9 +30,9 @@ This document provides standardized, brand-aligned answers to handle these objec
 ### Objection 2: "Does the pronunciation coaching use standard American accent profiles?"
 
 - **Core Parent Concern:** Fear that AI speech models will expose their child to artificial, robotic, or non-standard accents.
-- **Brand Position:** Built on native North American speech synthesis and high-precision speech recognition.
+- **Brand Position:** Built on North American English speech synthesis (TTS) and high-precision speech recognition.
 - **Standard Response (Korean):**
-  > "네, 100% 북미 표준 원어민(Standard American English) 발음 프로필을 기반으로 작동합니다. 파닉스 단어 음소 하나하나부터 문장 전체 억양까지, 아이들이 폴리나 GATE 같은 영유에서 배우는 북미 원어민 교사의 발음과 동일한 사운드로 익힐 수 있습니다."
+  > "네, 북미 표준 영어(Standard American English) 음성 합성(TTS)으로 읽어 줘요. 실제 원어민 녹음은 아니지만, 단어 하나부터 문장 억양까지 정확한 영어 발음으로 들을 수 있어요."
 - **Key Talking Points:**
   - Standard North American accent profiles (TTS).
   - Voice recognition (STT) calibrated for children's speech pitch and cadence.
@@ -71,7 +71,7 @@ This document provides standardized, brand-aligned answers to handle these objec
 - **Core Parent Concern:** Price sensitivity vs. high tuition already paid for English Kindergartens.
 - **Brand Position:** Exceptional ROI compared to private tutors (saving tens of thousands of KRW monthly while providing daily instant help).
 - **Standard Response (Korean):**
-  > "월 몇 십만 원이 드는 과외나 학원 추가 수업에 비해, 채키 프로(Pro)는 하루 단 몇 백 원 수준으로 매일 저녁 전담 원어민 튜터와 한국어 지도 교사를 집에 모시는 것과 같은 효과를 제공합니다. 매일 3회 무료 스캔도 제공되니 부담 없이 먼저 체험해 보세요."
+  > "월 몇 십만 원이 드는 과외나 학원 추가 수업에 비해, 채키 프로(Pro)는 하루 단 몇 백 원 수준으로 매일 저녁 전담 영어 튜터와 한국어 지도 교사를 집에 모시는 것과 같은 효과를 제공합니다. 매일 3회 무료 스캔도 제공되니 부담 없이 먼저 체험해 보세요."
 - **Key Talking Points:**
   - Free Explorer tier available (3 daily scans).
   - Pro tier offers unlimited scans (9,999/day) for a fraction of private tutor costs.

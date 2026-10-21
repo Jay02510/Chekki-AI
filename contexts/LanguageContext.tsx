@@ -18,7 +18,7 @@ const translations = {
     pro_plan: 'Premium 🚀',
     feat_overlay: '🎯 Instant Answer Overlays',
     feat_script: '💌 Bilingual Teaching Scripts',
-    feat_pronounce: '🔊 Native Voice & Speaking',
+    feat_pronounce: '🔊 Pronunciation & Speaking',
     feat_practice: '🪄 AI Practice Generator',
 
     // Viral Sharing
@@ -208,7 +208,7 @@ const translations = {
     how_step1: 'Magic Scans',
     how_step1_desc: 'Snap a photo for instant overlays.',
     how_step2: 'Perfect Pronunciation',
-    how_step2_desc: 'Tap answers to hear native audio.',
+    how_step2_desc: 'Tap answers to hear them read aloud.',
     how_step3: 'Teach with Love',
     how_step3_desc: 'Use AI Tutor and Teaching Scripts to explain gently.',
 
@@ -226,7 +226,7 @@ const translations = {
     diff_title: 'Why Chekki?',
     diff_ocr: 'Magic Scans & Audio',
     diff_ocr_desc:
-      'Get instant digital answer keys directly on the worksheet. Tap any answer for native pronunciation.',
+      'Get instant digital answer keys directly on the worksheet. Tap any answer to hear it read aloud.',
     diff_script: "Mom's Teaching Scripts",
     diff_script_desc:
       'Receive bilingual step-by-step scripts and grammar guides to confidently teach your child without frustration.',
@@ -250,7 +250,7 @@ const translations = {
     // Results
     ws_results_title: 'Teaching Guide',
     ws_items_found: 'Answers Ready',
-    ws_voice_guide: '💡 Tap for native pronunciation',
+    ws_voice_guide: '💡 Tap to hear it read aloud',
     ws_gen_practice: 'Practice Sheet',
     ws_scan_again: 'Scan again',
     ws_scanning_header: 'Generating answers...',
@@ -383,7 +383,7 @@ const translations = {
     pro_plan: '프리미엄 🚀',
     feat_overlay: '🎯 실시간 정답 오버레이',
     feat_script: '💌 다정한 티칭 스크립트',
-    feat_pronounce: '🔊 원어민 발음 & 스피킹',
+    feat_pronounce: '🔊 영어 발음 & 스피킹',
     feat_practice: '🪄 연습문제 무제한 생성',
 
     // Viral Sharing
@@ -572,7 +572,7 @@ const translations = {
     how_step1: '매직 스캔',
     how_step1_desc: '사진 한 장으로 정답이 오버레이 됩니다.',
     how_step2: '완벽한 발음 듣기',
-    how_step2_desc: '정답을 탭하여 원어민 발음을 들려주세요.',
+    how_step2_desc: '정답을 탭하면 영어 발음으로 읽어 줘요.',
     how_step3: '다정한 설명',
     how_step3_desc: '맞춤 AI 튜터와 티칭 스크립트로 친절하게 알려주세요.',
 
@@ -590,7 +590,7 @@ const translations = {
     diff_title: '채키와 함께라면 다릅니다',
     diff_ocr: '매직 스캔 & 발음 듣기',
     diff_ocr_desc:
-      '문제집 위에 실시간으로 마법처럼 정답이 표시됩니다. 정답을 눌러 원어민 발음까지 완벽하게 확인하세요.',
+      '문제집 위에 실시간으로 마법처럼 정답이 표시됩니다. 정답을 누르면 영어 발음으로 읽어 줘요.',
     diff_script: '엄마의 티칭 스크립트',
     diff_script_desc:
       '아이에게 어떻게 가르쳐야 할지 고민하지 마세요. 엄마가 그대로 읽어주기만 하면 되는 한/영 대본을 제공합니다.',
@@ -614,7 +614,7 @@ const translations = {
     // Results
     ws_results_title: '티칭 가이드',
     ws_items_found: '개의 정답 완료',
-    ws_voice_guide: '💡 탭하면 원어민의 정확한 발음을 들려드려요',
+    ws_voice_guide: '💡 탭하면 영어 발음으로 읽어 드려요',
     ws_gen_practice: '복습 문제지',
     ws_scan_again: '다시 스캔하기',
     ws_scanning_header: '정답을 찾는 중...',
@@ -710,7 +710,7 @@ const translations = {
 
     // Tooltips
     tt_close: '선택 취소',
-    tt_audio: '원어민 발음 듣기',
+    tt_audio: '영어 발음 듣기',
     tt_bookmark: '대시보드에 저장',
     tt_refine: '상세 설명 보기',
     tt_home: '처음으로 돌아가기',
