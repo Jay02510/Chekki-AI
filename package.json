@@ -16,7 +16,8 @@
     "mobile": "npm run build:mobile && npx cap sync",
     "quick-mobile": "vite build --sourcemap false && mv dist/index.html dist/landing.html && cp dist/app.html dist/index.html && rm -rf dist/e1 && npx cap sync ios",
     "postinstall": "patch-package",
-    "test:e2e": "firebase emulators:exec --only auth,firestore --project demo-chekki \"playwright test\""
+    "test:e2e": "firebase emulators:exec --only auth,firestore --project demo-chekki \"playwright test\"",
+    "test:smoke": "firebase emulators:exec --only auth,firestore --project demo-chekki \"playwright test -c playwright.smoke.config.ts\""
   },
   "dependencies": {
     "@apple/app-store-server-library": "^3.1.0",

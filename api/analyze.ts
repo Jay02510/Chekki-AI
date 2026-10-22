@@ -604,6 +604,7 @@ const VOICE_LOG_FILL_SCHEMA = {
         },
         generalComments: { type: Type.STRING },
       },
+      propertyOrdering: ['lessonTopic', 'textbook', 'energyLevel', 'activities', 'generalComments'],
     },
     // Separate from updatedFields — this is additive (append to the
     // student-exceptions list) rather than an overwrite of a single value,
@@ -619,6 +620,7 @@ const VOICE_LOG_FILL_SCHEMA = {
           category: { type: Type.STRING, enum: ['praise', 'attention'] },
         },
         required: ['studentName', 'details', 'category'],
+        propertyOrdering: ['studentName', 'details', 'category'],
       },
     },
     missingRequired: { type: Type.ARRAY, items: { type: Type.STRING } },
@@ -627,6 +629,13 @@ const VOICE_LOG_FILL_SCHEMA = {
     assistantReplyForHistory: { type: Type.STRING },
   },
   required: ['transcript', 'updatedFields', 'missingRequired', 'nextQuestion', 'assistantReplyForHistory'],
+  // Without an explicit order Gemini emits keys in a different order than
+  // the prompt's example, and on this schema that sent it into a loop
+  // inside "textbook" (repeating the transcript until the output limit)
+  // on every run tested — minutes per call, billed, while the client had
+  // long since timed out. This is the root cause of the "leaked JSON in
+  // textbook" values the looksLikeLeakedJson guard below was catching.
+  propertyOrdering: ['transcript', 'updatedFields', 'newExceptions', 'missingRequired', 'nextQuestion', 'assistantReplyForHistory'],
 };
 
 async function handleVoiceLogFillTask(res: any, body: any) {
@@ -710,6 +719,10 @@ LANGUAGE STANDARD: This content is read by a Korean Teacher and then relayed to 
         // field extraction, not creative variance; a higher temperature was
         // part of why multi-field utterances only extracted 1-2 of 5 fields.
         temperature: 0.15,
+        // Backstop: a normal reply is a few hundred tokens (thinking
+        // included). If the model ever loops again, fail in seconds instead
+        // of generating for minutes.
+        maxOutputTokens: 4096,
         // Matches the safety thresholds already used for the worksheet-OCR
         // task below — this content also eventually reaches parents via the
         // KT, so it gets the same bar.
