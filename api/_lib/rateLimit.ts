@@ -12,6 +12,12 @@ const redisUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_U
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
 const redis = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisToken }) : null;
 
+// The in-memory fallback is per serverless instance, so in production it
+// limits almost nothing. Say so loudly instead of degrading silently.
+if (!redis && process.env.VERCEL_ENV === 'production') {
+  console.error('[rateLimit] Upstash Redis is not configured in production — rate limits are per-instance only.');
+}
+
 const memoryStores = new Map<string, Map<string, number[]>>();
 
 export interface RateLimitResult {
@@ -62,7 +68,11 @@ export function createRateLimiter(name: string, limit: number, windowSeconds: nu
   };
 }
 
+// x-forwarded-for can be a "client, proxy1, proxy2" list; the client is the
+// first entry. Without the split, one IP behind different proxies became
+// several rate-limit identities.
 export function clientIp(req: { headers: Record<string, any>; socket?: { remoteAddress?: string } }): string {
-  const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'anonymous';
-  return Array.isArray(ip) ? ip[0] : ip;
+  const raw = req.headers['x-forwarded-for'];
+  const first = (Array.isArray(raw) ? raw[0] : raw)?.split(',')[0].trim();
+  return first || req.headers['x-real-ip'] || req.socket?.remoteAddress || 'anonymous';
 }

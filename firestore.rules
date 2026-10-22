@@ -123,6 +123,16 @@ service cloud.firestore {
          request.resource.data.plan == 'free' &&
          request.resource.data.maxScansPerDay == 2 &&
          request.resource.data.maxQuestionsPerDay == 5 &&
+         // Counters start at zero and the generate cap at its default. A
+         // user may delete and recreate their own doc, so anything left
+         // unpinned here (e.g. scansUsedToday: -9999) used to be a free
+         // quota top-up. api/analyze.ts now meters from the server-only
+         // usage/{uid} doc, so this is defense in depth.
+         request.resource.data.get('scansUsedToday', 0) == 0 &&
+         request.resource.data.get('questionsUsedToday', 0) == 0 &&
+         request.resource.data.get('generatesUsedToday', 0) == 0 &&
+         request.resource.data.get('maxGeneratesPerDay', 5) == 5 &&
+         request.resource.data.get('flaggedException', null) == null &&
          request.resource.data.get('role', 'parent') == 'parent' &&
          request.resource.data.get('schoolId', null) == null &&
          request.resource.data.get('schoolName', null) == null &&
@@ -136,8 +146,12 @@ service cloud.firestore {
       
       allow update: if request.auth != null && (
         isAdmin() || 
-        // User updating their own profile
-        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'plan', 'schoolId', 'schoolName', 'educatorRole', 'classId', 'classStatus', 'flaggedException', 'pendingStudentId', 'subscriptionPlatform', 'scansUsedToday', 'maxScansPerDay', 'questionsUsedToday', 'maxQuestionsPerDay', 'generatesUsedToday', 'maxGeneratesPerDay', 'lastScanDate', 'lastQuestionDate', 'lastGenerateDate'])) ||
+        // User updating their own profile. Allowlisted (hasOnly): the old
+        // blocklist made every field added later self-writable by default —
+        // e.g. `email`, which the KT digest cron sends to. These are the only
+        // fields the client writes on its own doc (AuthContext.tsx,
+        // KtInbox.tsx); everything else is server-owned.
+        (request.auth.uid == userId && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'studentName', 'childAge', 'childEnglishLevel', 'parentEnglishLevel', 'isCanceled', 'notifyDigestEnabled'])) ||
         // Teacher or director updating classroom fields (roster
         // approve/decline/remove/move, flaggedException) on a student in
         // their own class/school. Allowlisted (hasOnly) rather than

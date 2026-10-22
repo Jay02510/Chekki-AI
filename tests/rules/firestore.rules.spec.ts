@@ -60,6 +60,12 @@ describe('signup: self-created user docs', () => {
     await assertFails(setDoc(doc(as('evil'), 'users/evil'), { ...freeProfile, role: 'director' }));
     await assertFails(setDoc(doc(as('evil'), 'users/evil'), { ...freeProfile, educatorRole: 'kt' }));
   });
+  it('rejects self-granted quota on (re)create', async () => {
+    await assertFails(setDoc(doc(as('evil'), 'users/evil'), { ...freeProfile, maxGeneratesPerDay: 99999 }));
+    await assertFails(setDoc(doc(as('evil'), 'users/evil'), { ...freeProfile, scansUsedToday: -9999 }));
+    await assertFails(setDoc(doc(as('evil'), 'users/evil'), { ...freeProfile, questionsUsedToday: -9999 }));
+    await assertSucceeds(setDoc(doc(as('newbie'), 'users/newbie'), { ...freeProfile, scansUsedToday: 0, questionsUsedToday: 0 }));
+  });
   it('rejects self-enrolling into a class', async () => {
     await assertFails(setDoc(doc(as('evil'), 'users/evil'), { ...freeProfile, classId: 'classA', classStatus: 'active' }));
   });
@@ -73,6 +79,15 @@ describe('self-updates', () => {
     await assertFails(updateDoc(doc(parentA(), 'users/parentA'), { classId: 'classB' }));
     await assertFails(updateDoc(doc(parentA(), 'users/parentA'), { classStatus: 'pending' }));
     await assertFails(updateDoc(doc(parentA(), 'users/parentA'), { plan: 'pro', maxScansPerDay: 9999 }));
+  });
+  it('only allowlisted profile fields are self-writable', async () => {
+    await assertSucceeds(updateDoc(doc(parentA(), 'users/parentA'), { childAge: '6', isCanceled: true }));
+    await assertFails(updateDoc(doc(parentA(), 'users/parentA'), { email: 'someone@else.com' }));
+    await assertFails(updateDoc(doc(parentA(), 'users/parentA'), { somethingNew: true }));
+  });
+  it('server-only usage counters are unreadable and unwritable', async () => {
+    await assertFails(getDoc(doc(parentA(), 'usage/parentA')));
+    await assertFails(setDoc(doc(parentA(), 'usage/parentA'), { window: 'x', scans: 0 }));
   });
 });
 

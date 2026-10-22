@@ -60,21 +60,18 @@ const apiMiddleware = ({ mode }: { mode: string }) => {
           }
 
           // Mock Vercel response object properties needed by the handler
-          const vercelRes = {
+          const vercelRes: any = {
             setHeader: (key: string, value: string) => {
               res.setHeader(key, value);
             },
+            // Chainable and exposing statusCode, like the real response —
+            // api/analyze.ts reads res.statusCode to refund quota on failure.
+            get statusCode() {
+              return res.statusCode;
+            },
             status: (code: number) => {
               res.statusCode = code;
-              return {
-                json: (data: any) => {
-                  res.setHeader('Content-Type', 'application/json');
-                  res.end(JSON.stringify(data));
-                },
-                end: () => {
-                  res.end();
-                },
-              };
+              return vercelRes;
             },
             json: (data: any) => {
               res.setHeader('Content-Type', 'application/json');
@@ -228,9 +225,10 @@ const prerenderRoutes = () => ({
   },
 });
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode, command }) => ({
   base: './',
-  plugins: [react(), noindexOnPreview(), prerenderRoutes(), ...(mode === 'development' ? [apiMiddleware({ mode })] : [])],
+  // Any dev server (`vite`, `vite --mode e2e`) serves api/ locally.
+  plugins: [react(), noindexOnPreview(), prerenderRoutes(), ...(command === 'serve' ? [apiMiddleware({ mode })] : [])],
   server: {
     port: 3000,
     host: true,

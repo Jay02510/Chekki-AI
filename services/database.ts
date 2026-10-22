@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import {
   getFirestore,
   initializeFirestore,
+  connectFirestoreEmulator,
   doc,
   getDoc,
   setDoc,
@@ -17,6 +18,7 @@ import {
 import {
   getAuth,
   initializeAuth,
+  connectAuthEmulator,
   browserLocalPersistence,
   indexedDBLocalPersistence,
 } from 'firebase/auth';
@@ -24,7 +26,13 @@ import { getAnalytics, logEvent } from 'firebase/analytics';
 import { UserProfile } from '../types';
 import { Capacitor } from '@capacitor/core';
 
-const firebaseConfig = {
+// `vite --mode e2e` (see .env.e2e) points the app at the local Firebase
+// emulators under a demo- project id, which the emulators guarantee never
+// touches a real project. Without this, local dev reads and writes
+// production Firestore.
+const useEmulators = import.meta.env.VITE_USE_EMULATORS === 'true';
+
+const prodFirebaseConfig = {
   apiKey: 'AIzaSyBU8ehL18e1y-WXMULzA9XkKFkC7BkzX8k',
   // Set VITE_FIREBASE_AUTH_DOMAIN=www.chekkiai.com (served via the /__/auth
   // rewrite in vercel.json) so the sign-in popup is same-site; Incognito and
@@ -38,6 +46,10 @@ const firebaseConfig = {
   appId: '1:123535525914:web:decc3f5b3e3ffee4a0a9a3',
   measurementId: 'G-8WK1D8YCGC',
 };
+
+const firebaseConfig = useEmulators
+  ? { apiKey: 'demo-key', authDomain: 'localhost', projectId: 'demo-chekki', appId: 'demo-app' }
+  : prodFirebaseConfig;
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
@@ -73,6 +85,7 @@ export const auth = (() => {
   }
   return getAuth(app);
 })();
+if (useEmulators) connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
 
 export const dbInstance = (() => {
   try {
@@ -86,13 +99,14 @@ export const dbInstance = (() => {
     return getFirestore(app);
   }
 })();
+if (useEmulators) connectFirestoreEmulator(dbInstance, '127.0.0.1', 8080);
 
 // Analytics may not work in Capacitor native WebView — init safely
 let analyticsInstance: ReturnType<typeof getAnalytics> | null = null;
 try {
   // Only init analytics in browser (or Android if permitted)
   const isNative = typeof window !== 'undefined' && Capacitor.isNativePlatform();
-  if (!isNative) {
+  if (!isNative && !useEmulators) {
     analyticsInstance = getAnalytics(app);
   }
 } catch (e) {

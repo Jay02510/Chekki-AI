@@ -33,14 +33,19 @@ jobs:
       - name: Firestore rules tests
         run: npm i -g firebase-tools && npm run test:rules
 
+      - name: End-to-end tests
+        # Emulators + MOCK_GEMINI (.env.e2e): no production data, no Gemini cost.
+        run: npx playwright install --with-deps chromium && npm run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: test-results/
+
       - name: Lint
-        # Report-only: repo has a pre-existing baseline of lint errors/warnings
-        # not yet triaged, so this step is informational and won't block PRs
-        # until that baseline is cleaned up. Runs the same non-mutating
-        # `npm run lint` a contributor would run locally (the old raw `npx
-        # eslint` call here had drifted from package.json's script, whose
-        # `lint` used to --fix in place — never safe for CI to run).
-        continue-on-error: true
+        # Blocks on errors; warnings (mostly no-explicit-any) are a known
+        # backlog and only reported.
         run: npm run lint
 
       - name: Build

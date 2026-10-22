@@ -16,7 +16,10 @@ function initAdmin(): void {
   if (getApps().length > 0) return;
 
   const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (serviceAccount) {
+  // Emulator runs (.env.e2e) must never pick up real credentials from .env.
+  if (process.env.FIRESTORE_EMULATOR_HOST) {
+    initializeApp({ projectId: process.env.GOOGLE_CLOUD_PROJECT || 'demo-chekki' });
+  } else if (serviceAccount) {
     try {
       const cleaned = serviceAccount.trim().replace(/\n/g, '').replace(/\r/g, '');
       const parsed = JSON.parse(cleaned);
