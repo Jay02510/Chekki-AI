@@ -53,16 +53,31 @@ export async function handleScan(ctx: TaskContext): Promise<any> {
         const activeWeek = classData?.activeWeekNumber;
 
         if (activeWeek !== undefined && activeWeek !== null) {
-          // 2. Fetch the corresponding curriculum document for this week
-          const currId1 = `${userData.classId}_week_${activeWeek}`;
-          const currId2 = `${userData.schoolId}_${userData.classId}_W${activeWeek}`;
-          let curriculumSnap = await db.collection('curriculums').doc(currId1).get();
-          if (!curriculumSnap.exists) {
-            curriculumSnap = await db.collection('curriculums').doc(currId2).get();
-          }
+          // 2. Fetch this week's curriculum doc, plus last week's for its
+          // answer key: the director advances the week by hand, so a child
+          // finishing last week's sheet, or a week change before the new key
+          // is loaded, still grades against a real key.
+          const weekDoc = async (week: number) => {
+            let snap = await db
+              .collection('curriculums')
+              .doc(`${userData.classId}_week_${week}`)
+              .get();
+            if (!snap.exists) {
+              snap = await db
+                .collection('curriculums')
+                .doc(`${userData.schoolId}_${userData.classId}_W${week}`)
+                .get();
+            }
+            return snap.exists ? snap.data() : undefined;
+          };
+          const week = Number(activeWeek);
+          const [currentWeek, previousWeek] = await Promise.all([
+            weekDoc(week),
+            week > 1 ? weekDoc(week - 1) : Promise.resolve(undefined),
+          ]);
 
-          if (curriculumSnap.exists) {
-            const curriculumData = curriculumSnap.data();
+          if (currentWeek || previousWeek) {
+            const curriculumData = currentWeek;
             const rawVocab = curriculumData?.vocabWords || curriculumData?.vocabList || [];
             const passage = curriculumData?.passage || '';
             const rawPhonics = curriculumData?.phonicsRules || [];
@@ -71,9 +86,16 @@ export async function handleScan(ctx: TaskContext): Promise<any> {
             // by the AI at upload time and discarded; grading only ever had
             // vocab/phonics/passage as loose context, never a ground-truth
             // answer to check against directly.
-            const rawAnswerKey = Array.isArray(curriculumData?.answerKey)
-              ? curriculumData.answerKey
-              : [];
+            // This week's entries win over last week's for the same question.
+            const seenQuestions = new Set<string>();
+            const rawAnswerKey = [currentWeek?.answerKey, previousWeek?.answerKey]
+              .flatMap((key) => (Array.isArray(key) ? key : []))
+              .filter((a: any) => {
+                const q = String(a?.questionText || '');
+                if (seenQuestions.has(q)) return false;
+                seenQuestions.add(q);
+                return true;
+              });
 
             const vocab = Array.isArray(rawVocab)
               ? rawVocab
@@ -85,7 +107,10 @@ export async function handleScan(ctx: TaskContext): Promise<any> {
               : typeof rawPhonics === 'string'
                 ? (rawPhonics as string).split(',').map((s) => s.trim())
                 : [];
-            answerKey = rawAnswerKey.filter((a: any) => a?.questionText && a?.answer);
+            // AI-inferred entries the teacher hasn't confirmed aren't a key.
+            answerKey = rawAnswerKey.filter(
+              (a: any) => a?.questionText && a?.answer && a?.inferred !== true
+            );
             const answerKeyLines = answerKey.map((a: any) => `- "${a.questionText}" → ${a.answer}`);
 
             curriculumContext = `\n\nB2B SCHOOL & CURRICULUM CONTEXT:
@@ -94,7 +119,7 @@ This week's active learning curriculum details (Week ${activeWeek}):
 - Target Vocabulary Words: [${vocab.join(', ')}]
 - Target Phonics Rules/Sounds: [${phonics.join(', ')}]
 ${passage ? `- Reference Reading Passage:\n"""\n${passage}\n"""` : ''}
-${answerKeyLines.length > 0 ? `- Known Answer Key for this week's worksheet (question → correct answer, from the teacher's own upload):\n${answerKeyLines.join('\n')}` : ''}
+${answerKeyLines.length > 0 ? `- Known Answer Key for this week's and last week's worksheets (question → correct answer, from the teacher's own upload):\n${answerKeyLines.join('\n')}` : ''}
 
 CRITICAL OCR & SPELLING GRADING INSTRUCTIONS:
 1. Use the vocabulary list, phonics rules, and reading passage above to guide your OCR analysis of handwritten responses. If the student's handwriting closely resembles a target vocabulary word (allowing for minor spelling mistakes or malformed characters), match it.
