@@ -145,6 +145,25 @@ export const CONSOLIDATED_SCHEMA = {
       description: 'Detailed analysis of each question found in the worksheet.',
       items: {
         type: Type.OBJECT,
+        // Gemini writes properties alphabetically unless told otherwise,
+        // which put correct_answer and is_correct before student_response:
+        // the model decided the grade before reading the child's mark, and
+        // then "read" the right answer into it. Read first, then grade.
+        propertyOrdering: [
+          'id',
+          'type',
+          'question_text',
+          'question_translation',
+          'bounding_box',
+          'student_response',
+          'correct_answer',
+          'is_correct',
+          'graded_against_key',
+          'korean_guide',
+          'english_guide',
+          'teaching_script_ko',
+          'teaching_script_en',
+        ],
         properties: {
           id: { type: Type.INTEGER },
           type: { type: Type.STRING },
@@ -293,6 +312,9 @@ export function scanGenerateConfig(systemInstruction: string): any {
     systemInstruction,
     responseMimeType: 'application/json',
     responseSchema: CONSOLIDATED_SCHEMA as any,
+    // Grading should give the same answer for the same photo; the default
+    // (1.0) let a clear circle be read differently from run to run.
+    temperature: 0.1,
     safetySettings: [
       {
         category: HarmCategory.HARM_CATEGORY_HARASSMENT,
