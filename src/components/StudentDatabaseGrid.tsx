@@ -53,11 +53,18 @@ const columnHelper = createColumnHelper<Row>();
  * (move/remove) call the same handlers TeacherPage already wires up —
  * no new Firestore writes introduced here.
  */
+// Must be a stable reference. An inline `= []` default made a new array on
+// every render, so `data` changed on every render; TanStack Table answers a
+// data change by queueing a page-index reset, which re-renders, which made a
+// new array again. The Students tab froze the browser on any re-render, such
+// as opening a student's details.
+const NO_ROWS: any[] = [];
+
 export function StudentDatabaseGrid({
   isKo,
   activeRoster,
   pendingRoster,
-  invitedOnlyRosterRows = [],
+  invitedOnlyRosterRows = NO_ROWS,
   isLoadingRoster,
   fetchRosterAndMistakes,
   classes,

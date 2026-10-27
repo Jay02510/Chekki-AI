@@ -4,10 +4,18 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToast } from '../../contexts/ToastContext';
 import { dbInstance, auth } from '../../services/database';
-import { sendPasswordResetEmail } from 'firebase/auth';
-import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, addDoc, orderBy, limit as fbLimit, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  updateDoc,
+  getDoc,
+  orderBy,
+  limit as fbLimit,
+} from 'firebase/firestore';
 import { ChekkiMascot } from '../../components/Icons';
-import { seatsForPlan, labelsForPlan } from '../../api/_lib/pricingTiers';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useResolvedRole } from '../../hooks/useResolvedRole';
 import { useKtReviewQueue } from '../../hooks/useKtReviewQueue';
@@ -24,33 +32,24 @@ import { KtTabContent } from '../components/KtTabContent';
 import { FtTabContent } from '../components/FtTabContent';
 import { useDirectorPortalState } from '../../hooks/useDirectorPortalState';
 import { useCurriculumEditorState } from '../../hooks/useCurriculumEditorState';
-import { 
-  GraduationCap,
-  Sparkle,
+import { useClassLogSubmission } from '../../hooks/useClassLogSubmission';
+import { useClassRoster, type ConfirmDialogState } from '../../hooks/useClassRoster';
+import { TeacherAuthView } from '../components/TeacherAuthView';
+import { TeacherWelcomeModal } from '../components/TeacherWelcomeModal';
+import { StudentDetailsDrawer } from '../components/StudentDetailsDrawer';
+import { CreateClassModal } from '../components/CreateClassModal';
+import { TeacherSettingsModal } from '../components/TeacherSettingsModal';
+import {
   ArrowRight,
-  ArrowLeft,
-  Eye,
-  CheckCircle,
   Plus,
   Minus,
-  Calendar,
-  Printer,
   SignOut,
   ChalkboardTeacher,
-  Warning,
-  Check,
-  Funnel,
-  ShieldCheck,
   X,
   Gear,
-  UploadSimple,
-  Image,
-  File,
   Sun,
   Moon,
-  Trash,
-  Buildings,
-  CaretDown
+  CaretDown,
 } from '@phosphor-icons/react';
 import { FeedbackModal } from '../../components/FeedbackModal';
 import { ScannedModal } from '../components/ScannedModal';
@@ -59,24 +58,13 @@ import { WeekCalendarModal } from '../components/WeekCalendarModal';
 import { ReportCardModal } from '../components/ReportCardModal';
 import { UnifiedAccountActivation } from '../components/UnifiedAccountActivation';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
-import {
-  generateGeneralClassSummary,
-  generateStudentExceptionReport,
-  clearOfflineDraft,
-  ClassLogPayload,
-  enqueuePendingLogSubmission,
-  getPendingLogQueue,
-  removePendingLogSubmission,
-  QueuedLogSubmission,
-} from '../services/aiGenerator';
-import { localDate } from '../utils/localDate';
 
 interface Props {
   isNight?: boolean;
 }
 
 export default function TeacherPage({ isNight = true }: Props) {
-  const { user, firebaseUser, signIn, signUp, logout, deleteAccount, isAuthenticated } = useAuth();
+  const { user, logout, deleteAccount, isAuthenticated } = useAuth();
   const { showToast } = useToast();
   const { language, setLanguage } = useLanguage();
   const isKo = language === 'ko';
@@ -93,13 +81,7 @@ export default function TeacherPage({ isNight = true }: Props) {
     document.body.classList.toggle('theme-light', !isThemeNight);
     return () => document.body.classList.remove('dark', 'theme-light');
   }, [isThemeNight]);
-  const [confirmDialog, setConfirmDialog] = useState<{
-    title: string;
-    onConfirm: () => void;
-    confirmText?: string;
-    cancelText?: string;
-    variant?: 'default' | 'destructive';
-  } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
   const [showWeekCalendarModal, setShowWeekCalendarModal] = useState(false);
   
   // Account Activation Wizard State for new directors
@@ -126,258 +108,11 @@ export default function TeacherPage({ isNight = true }: Props) {
   const { schoolSeatsTotal, schoolPlanId, trialStatus, handleRequestSeatExpansion, handleRequestPlanChange } = useDirectorPortalState(user, showToast, isKo);
   const [showReportCardModal, setShowReportCardModal] = useState(false);
 
-  // FT/KT first-login welcome modal state
-  const [showTeacherWelcome, setShowTeacherWelcome] = useState(false);
-  const [teacherWelcomeStep, setTeacherWelcomeStep] = useState<1 | 2>(1);
-  const [welcomeName, setWelcomeName] = useState('');
-  const [welcomeRole, setWelcomeRole] = useState<'ft' | 'kt'>('ft');
-  const [welcomeSchool, setWelcomeSchool] = useState(() => {
-    if (typeof window === 'undefined') return '';
-    // The real school name returned by /api/redeem-invite on signup — this
-    // used to title-case the raw invite ID slug itself (e.g. "inv_mssre11q")
-    // as a fallback "school name", which is what actually rendered here
-    // (Audit: invite welcome modal shows garbage, not the real school name).
-    return localStorage.getItem('chekki_invite_school_name') || '';
-  });
-  const [welcomeInviterName, setWelcomeInviterName] = useState(() => {
-    if (typeof window === 'undefined') return '';
-    return localStorage.getItem('chekki_invite_by') || '';
-  });
+  // FT/KT first-login welcome, set by the post-auth effect below for a new
+  // teacher (see TeacherWelcomeModal).
+  const [teacherWelcome, setTeacherWelcome] = useState<{ name: string; role: 'ft' | 'kt' } | null>(null);
 
-  // Auth state - Defaults to 'signup' if coming from setup CTA or invite link
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('activate') === 'true' || params.get('invite') || params.get('signup') === 'true') {
-        return 'signup';
-      }
-    }
-    return 'login';
-  });
-  const [name, setName] = useState('');
-  const [academyNameInput, setAcademyNameInput] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [authError, setAuthError] = useState('');
-  const [isSigningIn, setIsSigningIn] = useState(false);
 
-  // Queue ids of submissions being sent right now, so the drain below never
-  // sends the same log twice while a fresh submit is still in flight.
-  const inFlightLogIdsRef = useRef(new Set<string>());
-
-  // Core submit: AI generation + Firestore persist, parameterized on
-  // classId/teacherUid/authorRole (rather than reading selectedClass/user/
-  // educatorRole directly) so the offline queue drain below can replay a
-  // queued submission for whichever class/role it was originally queued
-  // under, even if the live UI has since switched classes. Returns whether
-  // it actually reached Firestore — `isQueuedRetry` only changes whether a
-  // network failure here re-queues (a fresh submission) or is left for the
-  // next drain pass (an already-queued one, to avoid an infinite retry loop
-  // spamming toasts every time `online` fires).
-  const submitClassLog = async (
-    payload: ClassLogPayload,
-    classId: string,
-    teacherUid: string,
-    authorRole: 'ft' | 'kt',
-    isQueuedRetry = false
-  ): Promise<boolean> => {
-    try {
-      // Summary and student notes are independent AI calls — run together.
-      const [summary, studentReports] = await Promise.all([
-        generateGeneralClassSummary({ ...payload, authorRole }),
-        Promise.all(payload.exceptions.map(async (ex) => {
-          const { text: updateText, failed } = await generateStudentExceptionReport({
-            studentName: ex.studentName,
-            classTopic: payload.lessonTopic,
-            textbook: payload.textbook,
-            exceptionDetails: ex.details,
-            category: ex.type,
-          });
-          // No per-exception phoneTalkingPoints call here anymore — the old
-          // same-day phone-consult drawer that displayed it was removed in
-          // favor of ReportCardModal's weekly consolidated talking points
-          // (strictly more context, same purpose), so generating this per
-          // submission was a wasted AI call with nothing left to read it.
-          return {
-            studentName: ex.studentName,
-            studentUid: ex.studentUid ?? null,
-            koreanUpdate: updateText,
-            phoneTalkingPoints: [],
-            category: ex.type,
-            failed,
-          };
-        })),
-      ]);
-      // Stay on the FT's own dashboard after submit — the kt_script tab
-      // is the KT's review workspace, not an FT-facing "success" screen.
-      // FT gets a toast confirmation below instead of being bounced there.
-
-      // Persist the log AND the AI-generated KT script so the handoff
-      // survives across accounts/devices — it used to live only in
-      // `ftLogOutput` React state, which meant a KT logging in separately
-      // never saw it (Audit: FT->KT handoff). Visible in the FT history
-      // tab, the KT review queue, and — once reviewed and sent — to
-      // parents of enrolled students. Best-effort — an AI report was
-      // already generated and shown, so a Firestore hiccup here shouldn't
-      // block the teacher.
-      const logsRef = collection(dbInstance, 'classes', classId, 'logs');
-      const docRef = await addDoc(logsRef, {
-        ...payload,
-        classId,
-        teacherUid,
-        teacherName: user?.name || '',
-        createdAt: serverTimestamp(),
-        aiKoreanSummary: summary.korean,
-        aiEnglishSummary: summary.english,
-        aiStudentReports: studentReports,
-        aiSummaryFallback: summary.fallback,
-        authorRole,
-        reviewStatus: 'pending_review',
-      });
-      const newLog = { id: docRef.id, ...payload };
-      setSubmittedLogs((prev) => [newLog, ...prev]);
-      clearOfflineDraft();
-      // Only the KT's own inbox shows pending logs — an FT's submit lands
-      // in the KT's queue on their next load.
-      if (authorRole === 'kt') {
-        setKtPendingLogs((prev) => [...prev, {
-          ...payload,
-          id: docRef.id,
-          classId,
-          aiKoreanSummary: summary.korean,
-          aiEnglishSummary: summary.english,
-          aiStudentReports: studentReports,
-          aiSummaryFallback: summary.fallback,
-          authorRole,
-        }]);
-      }
-      showToast({
-        type: 'success',
-        message: authorRole === 'kt'
-          ? (isKo ? '일지가 저장되었습니다. 학부모 리포트에서 검토 후 보내세요.' : 'Log saved. Review and send it from Parent reports.')
-          : (isKo ? '한국인 교사에게 검토 요청을 보냈습니다!' : 'Sent to your KT for review!'),
-      });
-
-      // No per-submission email to the KT here — a daily digest cron
-      // (api/create-teacher-invite.ts action=send_pending_digests)
-      // batches every pending_review log into one summary email instead
-      // of firing one email per FT submission (20 kids => 20 emails).
-      // This log is already visible in the KT's review queue above.
-      return true;
-    } catch (err) {
-      console.error('Failed to submit class log:', err);
-      // A no-signal classroom (common in academy basements) used to just
-      // fail this outright, forcing the FT to redo the whole form once back
-      // online. Queue it instead of losing it — the drain effect below
-      // retries automatically the moment connectivity returns.
-      if (typeof navigator !== 'undefined' && !navigator.onLine && !isQueuedRetry) {
-        enqueuePendingLogSubmission({ classId, teacherUid, authorRole, payload });
-        showToast({
-          type: 'success',
-          message: isKo
-            ? '오프라인 상태예요. 인터넷이 연결되면 자동으로 전송됩니다.'
-            : "You're offline — this will send automatically once you're back online.",
-        });
-        return true;
-      }
-      if (!isQueuedRetry) {
-        showToast({
-          type: 'error',
-          message: isKo
-            ? '일지 생성에 실패했습니다. 다시 제출해주세요.'
-            : "Couldn't generate the report from your log. Please try submitting again.",
-        });
-      }
-      return false;
-    }
-  };
-
-  // Retries every queued offline submission — called once on mount (covers
-  // a submission queued in a previous session/tab) and again whenever the
-  // browser regains connectivity. Left in the queue (silently) on repeat
-  // failure so it retries next time rather than dropping the log.
-  const drainingQueueRef = useRef(false);
-  const drainPendingLogQueue = async () => {
-    if (drainingQueueRef.current) return;
-    const queue = getPendingLogQueue();
-    if (queue.length === 0) return;
-    drainingQueueRef.current = true;
-    try {
-      for (const item of queue as QueuedLogSubmission[]) {
-        if (inFlightLogIdsRef.current.has(item.localId)) continue;
-        inFlightLogIdsRef.current.add(item.localId);
-        try {
-          const ok = await submitClassLog(item.payload, item.classId, item.teacherUid, item.authorRole, true);
-          if (ok) removePendingLogSubmission(item.localId);
-        } finally {
-          inFlightLogIdsRef.current.delete(item.localId);
-        }
-      }
-    } finally {
-      drainingQueueRef.current = false;
-    }
-  };
-  useEffect(() => {
-    drainPendingLogQueue();
-    window.addEventListener('online', drainPendingLogQueue);
-    return () => window.removeEventListener('online', drainPendingLogQueue);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Returns true once the log is safe (queued locally), so the form can
-  // clear right away. AI drafting (~10s) and the Firestore write continue in
-  // the background; the queue retries on the next load or reconnect if the
-  // tab closes or the network drops before it finishes.
-  const handleLogSubmit = (payload: ClassLogPayload): boolean => {
-    if (!selectedClass?.id || selectedClass.isDemo || !user?.uid) {
-      // No real class yet (demo/placeholder class, or classes still
-      // loading) — there's nothing to send to a KT.
-      showToast({
-        type: 'error',
-        message: isKo
-          ? '아직 등록된 학급이 없어 저장되지 않았습니다. 원장님께 학급 등록을 요청하세요.'
-          : "This is a preview only — you're not assigned to a real class yet, so nothing was sent. Ask your director to add you to a class.",
-      });
-      return false;
-    }
-    const item = { classId: selectedClass.id, teacherUid: user.uid, authorRole: educatorRole, payload };
-    const queued = enqueuePendingLogSubmission(item);
-    if (typeof navigator !== 'undefined' && !navigator.onLine) {
-      if (!queued) return false;
-      showToast({
-        type: 'success',
-        message: isKo
-          ? '오프라인 상태예요. 인터넷이 연결되면 자동으로 전송됩니다.'
-          : "You're offline — this will send automatically once you're back online.",
-      });
-      return true;
-    }
-    showToast({
-      type: 'success',
-      message: educatorRole === 'kt'
-        ? (isKo ? '일지를 저장하는 중입니다. 잠시 후 학부모 리포트에 나타납니다.' : 'Saving your log. It will appear in Parent reports in a moment.')
-        : (isKo ? 'KT에게 보내는 중입니다. 다른 작업을 계속하셔도 됩니다.' : 'Sending to your KT. You can keep working.'),
-    });
-    if (queued) inFlightLogIdsRef.current.add(queued.localId);
-    void submitClassLog(payload, item.classId, item.teacherUid, item.authorRole, true)
-      .then((ok) => {
-        if (ok && queued) removePendingLogSubmission(queued.localId);
-        if (!ok) {
-          showToast({
-            type: 'error',
-            message: queued
-              ? (isKo ? '아직 전송되지 않았습니다. 다시 접속하거나 인터넷이 연결되면 자동으로 다시 시도합니다.' : "Couldn't send yet. Chekki will retry automatically when you reopen this page or reconnect.")
-              : (isKo ? '일지 전송에 실패했습니다. 다시 제출해주세요.' : "Couldn't send your log. Please submit it again."),
-          });
-        }
-      })
-      .finally(() => {
-        if (queued) inFlightLogIdsRef.current.delete(queued.localId);
-      });
-    // Without local storage there's no retry copy, so keep the form filled.
-    return !!queued;
-  };
 
 
   // id used to be the bare literal 'demo', which meant curriculum saved
@@ -450,16 +185,6 @@ export default function TeacherPage({ isNight = true }: Props) {
     return 'teacher';
   });
 
-  // Direct teacher self-signup is disabled (see the Auth Mode Toggle render
-  // guard further down) — teacher accounts only exist via a director's
-  // invite link now. Without this, a bare /teacher?signup=true visit could
-  // still land in 'signup' mode for a teacher with the toggle hidden and no
-  // way back to Log In.
-  useEffect(() => {
-    if (loginRole === 'teacher' && !inviteSlug && authMode === 'signup') {
-      setAuthMode('login');
-    }
-  }, [loginRole, inviteSlug, authMode]);
   // Educator role is sourced from Firestore profile field (educatorRole) ONLY.
   // Email-substring matching ('kt' in email) is intentionally removed — it was
   // silently misclassifying FT teachers whose email happened to contain 'kt'
@@ -561,7 +286,17 @@ export default function TeacherPage({ isNight = true }: Props) {
   } = curriculumEditor;
 
   // Student roster & analytics state
-  const [studentsData, setStudentsData] = useState<any[]>([]);
+  const [selectedStudentDetails, setSelectedStudentDetails] = useState<any | null>(null);
+  const {
+    studentsData,
+    isLoadingRoster,
+    fetchRosterAndMistakes,
+    handleApproveStudent,
+    handleDeclineStudent,
+    handleRemoveStudent,
+    handleMoveStudent,
+    handleToggleFlagStudent,
+  } = useClassRoster(selectedClass, fallbackDemoClass, user, classes, showToast, isKo, setSyncWarning, setConfirmDialog, setSelectedStudentDetails);
 
   // Roster & weekly-completion analytics — extracted into a hook (Phase 3
   // of the buzzing-nibbling-hearth TeacherPage split, see the hook's own
@@ -591,6 +326,7 @@ export default function TeacherPage({ isNight = true }: Props) {
   // declared here rather than up with the rest of the per-role state because
   // it needs confirmDiscardKtDraft/setKtDraftDirty from useKtReviewQueue above.
   const { activeTab, setActiveTab } = useTeacherTabs(isDirectorUser, educatorRole, confirmDiscardKtDraft, setKtDraftDirty);
+  const handleLogSubmit = useClassLogSubmission(user, selectedClass, educatorRole, setSubmittedLogs, setKtPendingLogs, showToast, isKo);
 
   useEffect(() => {
     if (user) {
@@ -636,10 +372,6 @@ export default function TeacherPage({ isNight = true }: Props) {
       setUploadMode('worksheet');
     }
   }, [activeTab]);
-  const [isLoadingRoster, setIsLoadingRoster] = useState(false);
-  const [selectedStudentDetails, setSelectedStudentDetails] = useState<any | null>(null);
-  const [flagReasonInput, setFlagReasonInput] = useState('');
-  const [showFlagReasonInput, setShowFlagReasonInput] = useState(false);
 
   // Teacher onboarding & Academy Branding & Settings
   const [showTeacherOnboarding, setShowTeacherOnboarding] = useState(false);
@@ -682,50 +414,7 @@ export default function TeacherPage({ isNight = true }: Props) {
 
   // Teacher Settings Modal
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [resetPwStatus, setResetPwStatus] = useState<{ text: string; isError?: boolean } | null>(null);
-  const [isSendingReset, setIsSendingReset] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-
-  // Login screen: no user yet, so reset goes to whatever is typed in the
-  // email field. Same message for unknown emails (no account enumeration).
-  const handleForgotPassword = async () => {
-    const target = email.trim();
-    if (!target) {
-      setResetPwStatus({ text: isKo ? '위에 이메일을 먼저 입력해 주세요.' : 'Enter your email above first.', isError: true });
-      return;
-    }
-    setIsSendingReset(true);
-    try {
-      await sendPasswordResetEmail(auth, target);
-    } catch { /* fall through to the neutral message */ }
-    setResetPwStatus({
-      text: isKo
-        ? `${target}로 가입된 계정이 있다면 재설정 링크를 보냈어요. 메일함을 확인해 주세요.`
-        : `If ${target} has an account, we've sent a reset link. Check your inbox.`,
-    });
-    setIsSendingReset(false);
-  };
-
-  const handleSendResetPassword = async () => {
-    if (!user?.email) return;
-    setIsSendingReset(true);
-    setResetPwStatus(null);
-    try {
-      await sendPasswordResetEmail(auth, user.email);
-      setResetPwStatus({
-        text: isKo
-          ? `비밀번호 재설정 링크가 ${user.email}로 발송되었습니다.`
-          : `Password reset email sent to ${user.email}.`,
-      });
-    } catch (err: any) {
-      setResetPwStatus({
-        text: err.message || (isKo ? '비밀번호 재설정 이메일 발송 실패' : 'Failed to send password reset email'),
-        isError: true,
-      });
-    } finally {
-      setIsSendingReset(false);
-    }
-  };
 
   // Load classes if authenticated and role is teacher or director
   useEffect(() => {
@@ -818,8 +507,6 @@ export default function TeacherPage({ isNight = true }: Props) {
         (uid && localStorage.getItem(`chekki_teacher_welcome_done_${uid}`)) ||
         classes.length > 0;
       if (!welcomeDone) {
-        // Pre-fill name from user profile
-        setWelcomeName(user.name || user.email?.split('@')[0] || '');
         // Detect FT/KT from a previously stored explicit selection, falling
         // back to the resolved Firestore role — never from an email
         // substring (the last instance of that pattern, audit §20e). The
@@ -828,8 +515,11 @@ export default function TeacherPage({ isNight = true }: Props) {
         // redemption on this device (e.g. seeded directly in Firestore).
         const storedEducatorRole = localStorage.getItem(`chekki_educator_role_${uid}`) ||
           localStorage.getItem(`chekki_educator_role_${user.email}`);
-        setWelcomeRole(storedEducatorRole === 'kt' || user.educatorRole === 'kt' ? 'kt' : 'ft');
-        setShowTeacherWelcome(true);
+        setTeacherWelcome({
+          // Pre-fill name from user profile
+          name: user.name || user.email?.split('@')[0] || '',
+          role: storedEducatorRole === 'kt' || user.educatorRole === 'kt' ? 'kt' : 'ft',
+        });
       }
     }
   }, [isAuthenticated, user?.uid, isLoadingClasses, classes]);
@@ -847,18 +537,6 @@ export default function TeacherPage({ isNight = true }: Props) {
   const teacherOnboardingDialogRef = useDialogA11y<HTMLDivElement>({
     isOpen: showTeacherOnboarding,
     onClose: dismissTeacherOnboarding,
-  });
-  const studentDrawerDialogRef = useDialogA11y<HTMLDivElement>({
-    isOpen: !!selectedStudentDetails,
-    onClose: () => setSelectedStudentDetails(null),
-  });
-  const createClassDialogRef = useDialogA11y<HTMLDivElement>({
-    isOpen: showCreateClassModal,
-    onClose: () => setShowCreateClassModal(false),
-  });
-  const settingsDialogRef = useDialogA11y<HTMLDivElement>({
-    isOpen: showSettingsModal,
-    onClose: () => setShowSettingsModal(false),
   });
   // Mobile off-canvas nav drawer — on md+ the sidebar is always a static
   // column and this state is simply never set true, so it's a no-op there.
@@ -1053,166 +731,6 @@ export default function TeacherPage({ isNight = true }: Props) {
       setSelectedClass((prev: any) => prev ?? fallbackDemoClass);
     }
     setIsLoadingClasses(false);
-  };
-
-  // Redeems the current inviteSlug (a director-generated single-use invite
-  // link) against whichever account just authenticated — shared by both the
-  // signup and login paths below. Previously only the signup branch called
-  // this; a teacher whose Firebase Auth account already existed (e.g.
-  // removed from a school, then re-invited to a different one) hit
-  // "auth/email-already-in-use" on signup, was told to log in instead, but
-  // the login branch never redeemed the invite at all — they'd sign in
-  // successfully and land right back on their old, now-stale profile with
-  // no class, no matter how many times they clicked the new invite link
-  // (audit: re-invited teacher can't accept a new invite email).
-  const redeemInviteIfPresent = async () => {
-    if (!inviteSlug) return;
-    const uid = auth.currentUser?.uid || '';
-    try {
-      const idToken = await auth.currentUser?.getIdToken();
-      const response = await fetch('/api/redeem-invite', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify({ inviteId: inviteSlug }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to redeem invite');
-      }
-      if (uid) {
-        localStorage.setItem(`chekki_user_role_${uid}`, 'teacher');
-        localStorage.setItem(`chekki_educator_role_${uid}`, data.educatorRole);
-        if (data.schoolName) localStorage.setItem(`chekki_invite_school_name_${uid}`, data.schoolName);
-        if (data.invitedByName) localStorage.setItem(`chekki_invite_by_${uid}`, data.invitedByName);
-        localStorage.setItem(`chekki_invite_school_${uid}`, inviteSlug);
-      }
-      // Un-uid-keyed mirrors — read by the welcome-screen initializer, which
-      // runs on the reload below before Firebase auth has necessarily
-      // restored the uid synchronously.
-      if (data.schoolName) localStorage.setItem('chekki_invite_school_name', data.schoolName);
-      if (data.invitedByName) localStorage.setItem('chekki_invite_by', data.invitedByName);
-      localStorage.setItem('chekki_invite_school', inviteSlug);
-    } catch (inviteErr: any) {
-      throw new Error(
-        isKo
-          ? `초대 링크를 사용할 수 없습니다: ${inviteErr.message}`
-          : `This invite link couldn't be used: ${inviteErr.message}`
-      );
-    }
-
-    // The `?invite=` param never got cleared after a successful redemption,
-    // so it stuck around through the reload and every reload after that —
-    // the "you're signed in as a different account, invite wasn't applied"
-    // banner is gated on nothing but that param being present (see
-    // showInviteSessionNotice), so it kept flashing on the account that had
-    // JUST correctly redeemed the invite.
-    const url = new URL(window.location.href);
-    url.searchParams.delete('invite');
-    window.history.replaceState({}, '', url.toString());
-  };
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthError('');
-    setIsSigningIn(true);
-    try {
-      if (authMode === 'signup') {
-        if (!name.trim()) {
-          throw new Error(isKo ? '선생님 이름을 입력해 주세요.' : 'Please enter your name.');
-        }
-        if (password.length < 6) {
-          throw new Error(isKo ? '비밀번호는 최소 6자 이상이어야 합니다.' : 'Password must be at least 6 characters.');
-        }
-        if (password !== confirmPassword) {
-          throw new Error(isKo ? '비밀번호가 일치하지 않습니다.' : 'Passwords do not match.');
-        }
-
-        await signUp(name, email, password);
-
-        const newUid = auth.currentUser?.uid || '';
-
-        if (inviteSlug) {
-          // Arrived via a role-locked director invite (audit §21d) — role and
-          // educatorRole are decided by the invite document, not the signup
-          // form's Teacher/Director toggle. Redeeming is server-side via the
-          // Admin SDK, same reasoning as set-initial-role below.
-          await redeemInviteIfPresent();
-        } else {
-          // Assign the role server-side — firestore.rules blocks clients from
-          // writing their own `role` field, so a direct client updateDoc() call
-          // silently fails (audit §20b). /api/set-initial-role uses the Admin
-          // SDK and only allows a one-time assignment on a fresh account.
-          const assignedRole = loginRole === 'director' ? 'director' : 'teacher';
-          if (newUid) {
-            try {
-              const idToken = await auth.currentUser?.getIdToken();
-              const planId = typeof window !== 'undefined' ? sessionStorage.getItem('chekki_selected_plan') || undefined : undefined;
-              const response = await fetch('/api/set-initial-role', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-                body: JSON.stringify({
-                  role: assignedRole,
-                  planId,
-                  // The signup form never sent this, so every new director's
-                  // school silently fell back to the server's "New Academy"
-                  // placeholder with no way to rename it afterward (Audit:
-                  // dashboard shows "New Academy", no academy-name step).
-                  academyName: assignedRole === 'director' ? academyNameInput.trim() || undefined : undefined,
-                }),
-              });
-              if (!response.ok) {
-                const failure = await response.json().catch(() => ({}));
-                console.warn('Server-side role assignment failed, using localStorage fallback:', failure);
-                if (failure.needsEmailVerification) {
-                  window.alert(
-                    isKo
-                      ? `결제하신 학원을 연결하려면 이메일 인증이 필요합니다. ${email} 로 보낸 인증 링크를 누른 뒤 이 페이지를 새로고침해 주세요.`
-                      : `To connect your paid academy, please verify your email. Click the link we sent to ${email}, then reload this page.`
-                  );
-                }
-                // Retried automatically by the pendingRoleSync effect below
-                // on this device — the role otherwise only lives in
-                // localStorage and silently vanishes on any other
-                // device/browser.
-                localStorage.setItem(`chekki_pending_role_sync_${newUid}`, assignedRole);
-              }
-            } catch (roleErr) {
-              console.warn('Role write failed, using localStorage fallback:', roleErr);
-              localStorage.setItem(`chekki_pending_role_sync_${newUid}`, assignedRole);
-            }
-            localStorage.setItem(`chekki_user_role_${newUid}`, assignedRole);
-          }
-        }
-
-        window.location.reload();
-
-      } else {
-        await signIn(email, password);
-        // A teacher whose account already existed (removed from a school,
-        // then re-invited) never got their new invite redeemed before this
-        // fix — the signup branch above was the only one that called
-        // redeemInviteIfPresent, and "email already in use" pointed them
-        // here without ever completing the redemption. Same reload as
-        // signup: the redeemed role/schoolId need a clean re-fetch.
-        if (inviteSlug) {
-          await redeemInviteIfPresent();
-          window.location.reload();
-        }
-      }
-    } catch (err: any) {
-      let msg = err.message;
-      if (err.code === 'auth/user-not-found') msg = isKo ? '등록되지 않은 이메일입니다.' : 'No account found with this email.';
-      if (err.code === 'auth/wrong-password') msg = isKo ? '비밀번호가 올바르지 않습니다.' : 'Incorrect password.';
-      // Newer Firebase Auth SDK versions collapse both wrong-password and
-      // user-not-found into this single code — without this branch, the
-      // raw "Firebase: Error (auth/invalid-credential)." SDK string leaked
-      // straight to the login screen (Audit: unfriendly error on login).
-      if (err.code === 'auth/invalid-credential') msg = isKo ? '이메일 또는 비밀번호가 올바르지 않습니다.' : 'Incorrect email or password.';
-      if (err.code === 'auth/email-already-in-use') msg = isKo ? '이미 가입된 이메일입니다. 로그인해 주세요.' : 'Email already registered. Please log in.';
-      setAuthError(msg || (authMode === 'signup' ? 'Sign up failed.' : 'Login failed. Please check your credentials.'));
-    } finally {
-      setIsSigningIn(false);
-    }
   };
 
 
@@ -1493,526 +1011,16 @@ export default function TeacherPage({ isNight = true }: Props) {
     fetchRosterAndMistakes();
   }, [selectedClass?.id, selectedClass?.activeWeekNumber]);
 
-  const fetchRosterAndMistakes = async (retryCount = 0) => {
-    const targetClass = selectedClass || fallbackDemoClass;
-    if (!targetClass?.id) return;
-    setIsLoadingRoster(true);
-    try {
-      // Class scans + roster from Firestore — skipped for the demo/no-class
-      // placeholder, whose docs never exist server-side.
-      const allClassScans: any[] = [];
-      let rosterDocs: any[] = [];
-      if (!targetClass.isDemo) {
-        try {
-          // Newest first, capped: this used to read the class's entire scan
-          // history on every class/week switch, growing all term.
-          const scansQ = query(
-            collection(dbInstance, 'classes', targetClass.id, 'studentScans'),
-            orderBy('scannedAt', 'desc'),
-            fbLimit(500)
-          );
-          const scansSnap = await getDocs(scansQ);
-          scansSnap.forEach(sDoc => allClassScans.push({ id: sDoc.id, ...sDoc.data() }));
-        } catch (sErr) {
-          console.warn('Firestore class scans fetch failed:', sErr);
-          setSyncWarning(
-            isKo
-              ? '클라우드에서 채점 기록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.'
-              : "Couldn't load scan history from the cloud. Please try again shortly."
-          );
-        }
-
-        const q = query(
-          collection(dbInstance, 'users'),
-          where('classId', '==', targetClass.id)
-        );
-        const snap = await getDocs(q);
-        rosterDocs = snap.docs;
-      }
-
-      // 3. Build roster from fetched users
-      const students: any[] = [];
-
-      for (const userDoc of rosterDocs) {
-        const student: any = { uid: userDoc.id, ...userDoc.data() };
-        
-        // Match scans for this student
-        // By uid only — matching on name too mixed up two kids with the same name.
-        const studentScans = allClassScans.filter(s => s.studentUid === student.uid);
-        
-        // Extract all red-bordered mistakes from scan records
-        const scanMistakes: any[] = [];
-        studentScans.forEach(scan => {
-          if (Array.isArray(scan.redBorderedMistakes)) {
-            scan.redBorderedMistakes.forEach((m: any) => {
-              scanMistakes.push({
-                ...m,
-                scannedAt: scan.scannedAt,
-                scanTitle: scan.titleEn || scan.titleKo,
-                isRedBordered: true,
-              });
-            });
-          }
-        });
-
-        // Combine all mistake items
-        student.scans = studentScans;
-        student.mistakes = scanMistakes;
-        if (studentScans.length > 0) {
-          student.lastScanDate = studentScans[0].scannedAt;
-        }
-
-        students.push(student);
-      }
-
-      setStudentsData(students);
-    } catch (err: any) {
-      // users/{userId}'s read rule now depends on request.auth.token.role/
-      // schoolId (custom claims) — the SDK's cached ID token can still be
-      // missing/stale claims right after a director/teacher's account was
-      // backfilled or role-synced, even though the underlying Firestore
-      // data is already correct (audit: a just-added student never appears
-      // in the roster, no error surfaced, no retry attempted here at all).
-      if (err?.code === 'permission-denied' && retryCount < 3) {
-        const delay = 1000 * 2 ** retryCount;
-        setTimeout(() => {
-          auth.currentUser?.getIdToken(true).finally(() => fetchRosterAndMistakes(retryCount + 1));
-        }, delay);
-        return;
-      }
-      console.error('Failed to fetch roster:', err);
-    } finally {
-      setIsLoadingRoster(false);
-    }
-  };
-
-  // Roster approve/decline/remove/move used to leave zero trace of who did
-  // it or when — director asked "who approved this student" and there was
-  // genuinely no answer anywhere. Best-effort: never blocks or fails the
-  // roster action itself if the log write fails.
-  const logActivity = async (type: string, targetLabel: string) => {
-    const schoolId = user?.schoolId;
-    if (!schoolId || !user?.uid) return;
-    try {
-      await addDoc(collection(dbInstance, 'activityLog'), {
-        schoolId,
-        type,
-        targetLabel,
-        actorUid: user.uid,
-        actorName: user?.name || user?.email || 'Unknown',
-        createdAt: serverTimestamp(),
-      });
-    } catch (err) {
-      console.warn('Failed to write activity log entry:', err);
-    }
-  };
-
-  // Falls back to a generic label, never the raw UID — that UID gets written
-  // permanently into activityLog.targetLabel and rendered straight to the
-  // director in ActivityFeed; a student record with no name set (seed/test
-  // data, or a student whose profile write hasn't landed yet) shouldn't leak
-  // an internal Firebase identifier into that feed.
-  const findStudentLabel = (studentUid: string) =>
-    (studentsData || []).find((s: any) => s?.uid === studentUid)?.studentName || 'Unnamed Student';
-
-  const handleApproveStudent = async (studentUid: string) => {
-    try {
-      const userRef = doc(dbInstance, 'users', studentUid);
-      await updateDoc(userRef, { classStatus: 'active' });
-      void logActivity('student_approved', findStudentLabel(studentUid));
-      await fetchRosterAndMistakes();
-      showToast({ type: 'success', message: isKo ? '원생 승인이 완료되었습니다.' : 'Student approved successfully.' });
-    } catch (err) {
-      console.error('Failed to approve student:', err);
-      showToast({ type: 'error', message: isKo ? '원생 승인에 실패했습니다. 다시 시도해주세요.' : 'Failed to approve student. Please try again.' });
-    }
-  };
-
-  const handleDeclineStudent = async (studentUid: string) => {
-    try {
-      const label = findStudentLabel(studentUid);
-      const userRef = doc(dbInstance, 'users', studentUid);
-      await updateDoc(userRef, { classId: null, classStatus: null });
-      void logActivity('student_declined', label);
-      await fetchRosterAndMistakes();
-    } catch (err) {
-      console.error('Failed to decline student:', err);
-      showToast({ type: 'error', message: isKo ? '거절 처리에 실패했습니다. 다시 시도해주세요.' : 'Failed to decline student. Please try again.' });
-    }
-  };
-
-  const handleRemoveStudent = async (studentUid: string) => {
-    setConfirmDialog({
-      title: isKo ? '정말 이 학생을 반에서 삭제하시겠습니까?' : 'Are you sure you want to remove this student from class?',
-      confirmText: isKo ? '삭제' : 'Remove',
-      cancelText: isKo ? '취소' : 'Cancel',
-      variant: 'destructive',
-      onConfirm: () => {
-        setConfirmDialog(null);
-        void performRemoveStudent(studentUid);
-      },
-    });
-  };
-
-  const performRemoveStudent = async (studentUid: string) => {
-    try {
-      const label = findStudentLabel(studentUid);
-      const userRef = doc(dbInstance, 'users', studentUid);
-      await updateDoc(userRef, { classId: null, classStatus: null });
-      void logActivity('student_removed', label);
-      await fetchRosterAndMistakes();
-    } catch (err) {
-      console.error('Failed to remove student:', err);
-      showToast({ type: 'error', message: isKo ? '학생 삭제에 실패했습니다. 다시 시도해주세요.' : 'Failed to remove student. Please try again.' });
-    }
-  };
-
-  const handleMoveStudent = async (studentUid: string, targetClassId: string) => {
-    if (!targetClassId) return;
-    try {
-      const label = findStudentLabel(studentUid);
-      const targetClassName = classes.find((c: any) => c.id === targetClassId)?.name || targetClassId;
-      const userRef = doc(dbInstance, 'users', studentUid);
-      await updateDoc(userRef, { classId: targetClassId, classStatus: 'active' });
-      void logActivity('student_moved', `${label} → ${targetClassName}`);
-      await fetchRosterAndMistakes();
-      showToast({ type: 'success', message: isKo ? '학급 이동이 완료되었습니다.' : 'Student transferred successfully.' });
-    } catch (err) {
-      console.error('Failed to transfer student:', err);
-      showToast({ type: 'error', message: isKo ? '학급 이동에 실패했습니다. 다시 시도해주세요.' : 'Failed to transfer student. Please try again.' });
-    }
-  };
-
-  // Backs the "Flagged Exceptions" tab in NativeDirectorPortal — previously
-  // that tab read from local mock state nothing ever wrote to, because there
-  // was no real way to flag a student anywhere in the app. This is that path:
-  // written on users/{studentUid}, same write surface as approve/decline/
-  // move (already permitted by firestore.rules for the class's teacher or
-  // the school's director).
-  const handleToggleFlagStudent = async (studentUid: string, reason?: string) => {
-    try {
-      const userRef = doc(dbInstance, 'users', studentUid);
-      if (reason && reason.trim()) {
-        await updateDoc(userRef, {
-          flaggedException: {
-            date: localDate(),
-            reason: reason.trim(),
-            teacherName: user?.name || user?.email?.split('@')[0] || (isKo ? '선생님' : 'Teacher'),
-            resolved: false,
-          },
-        });
-      } else {
-        await updateDoc(userRef, { flaggedException: null });
-      }
-      await fetchRosterAndMistakes();
-      setSelectedStudentDetails((prev: any) =>
-        prev && prev.uid === studentUid
-          ? { ...prev, flaggedException: reason && reason.trim() ? { date: localDate(), reason: reason.trim(), teacherName: user?.name || user?.email?.split('@')[0] || 'Teacher', resolved: false } : null }
-          : prev
-      );
-    } catch (err) {
-      console.error('Failed to update flag status:', err);
-      showToast({ type: 'error', message: isKo ? '플래그 상태 변경에 실패했습니다.' : 'Failed to update flag status.' });
-    }
-  };
-
   // --- RENDER AUTH (LOGIN / SIGN UP) VIEW ---
   if (!isAuthenticated) {
-    // A director arriving fresh off picking a plan on /schools (?plan=... in
-    // the URL, carried into activationPlanId above) gets a dedicated signup
-    // screen instead of the shared Login/SignUp toggle — see caveman review:
-    // "no Login vs Sign Up choice for someone who just picked a plan."
-    const isPlanSignup = !!(activationPlanId && isActivateParam && loginRole === 'director' && authMode === 'signup' && !inviteSlug);
-    const planSeats = seatsForPlan(activationPlanId);
-    const planLabel = labelsForPlan(activationPlanId);
     return (
-      <div className="fixed inset-0 z-[500] overflow-y-auto bg-ground text-ink-2 flex items-start sm:items-center justify-center px-4 py-8 sm:py-4 selection:bg-line selection:text-on-line">
-        <div className="relative w-full max-w-md flex flex-col">
-          <div className="bg-surface rounded-lg p-8 sm:p-10 flex flex-col items-center ring-1 ring-inset ring-rule">
-            <div className="w-full flex justify-between items-center mb-2">
-              <button
-                type="button"
-                onClick={() => { window.location.href = '/'; }}
-                className="inline-flex items-center gap-1.5 text-xs text-ink-3 hover:text-ink transition-colors cursor-pointer"
-              >
-                <ArrowLeft size={14} weight="bold" />
-                <span>{isKo ? '메인 서비스로 돌아가기' : 'Return to Main Service'}</span>
-              </button>
-              {/* The only language switcher lived in the post-auth header
-                  (below), leaving every pre-auth screen — login, signup,
-                  and specifically an invited FT/KT arriving straight at an
-                  invite link with no prior page to set language on — stuck
-                  in whatever language the app happened to load in, with no
-                  way to change it before creating their account. */}
-              <button
-                type="button"
-                onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-                className="inline-flex items-center gap-1 text-xs text-ink-3 hover:text-ink transition-colors cursor-pointer shrink-0"
-                title="Switch Language / 언어 변경"
-              >
-                
-                <span>{language === 'ko' ? '한국어' : 'EN'}</span>
-              </button>
-            </div>
-
-            {/* Role Switcher Pill (Teacher vs Director HQ) — hidden when the
-                account is arriving via a role-locked director invite link,
-                since the role isn't a choice in that case (audit §21d), and
-                also hidden for a plan-linked director signup (picked a plan
-                on /schools) since that's already role-locked to director. */}
-            {/* Sign-in doesn't need a role choice — the account's own role
-                decides which dashboard opens. The toggle only matters for
-                creating an account. */}
-            {authMode === 'signup' && !inviteSlug && !isPlanSignup && (
-              <div className="w-full flex p-1 bg-surface border border-rule rounded-lg mb-4">
-                <button
-                  type="button"
-                  onClick={() => { setLoginRole('teacher'); setAuthError(''); if (!inviteSlug) setAuthMode('login'); }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-md transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer flex items-center justify-center gap-1.5 ${
-                    loginRole === 'teacher'
-                      ? 'bg-line text-on-line'
-                      : 'text-ink-3 hover:text-ink'
-                  }`}
-                >
-                  <ChalkboardTeacher size={14} weight="bold" />
-                  <span>{isKo ? '선생님' : 'Teacher'}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setLoginRole('director'); setAuthError(''); }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-md transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer flex items-center justify-center gap-1.5 ${
-                    loginRole === 'director'
-                      ? 'bg-line text-on-line'
-                      : 'text-ink-3 hover:text-ink'
-                  }`}
-                >
-                  <Buildings size={14} weight="bold" />
-                  <span>{isKo ? '원장님' : 'Director'}</span>
-                </button>
-              </div>
-            )}
-            {/* Invited signup gets ONE badge, not three stacked banners that
-                all said the same thing (audit: "Teacher Access Portal" pill +
-                "Joining via invite link" card + "creating account from an
-                invite" banner all rendered together, looking cluttered). */}
-            {inviteSlug && authMode === 'signup' ? (
-              <div className="w-full mb-4 p-3.5 rounded-lg bg-right-soft border border-rule flex items-center gap-2.5">
-                <Buildings size={16} className="text-correct shrink-0" />
-                <div className="text-left">
-                  <p className="text-[12px] text-correct font-bold">{isKo ? '초대받은 선생님 계정 생성' : "You're creating a teacher account from an invite"}</p>
-                  <p className="text-xs font-bold text-ink">{isKo ? '가입 후 학원명이 표시됩니다' : "You'll see your academy's name once you sign up."}</p>
-                </div>
-              </div>
-            ) : null /* role toggle + heading already name the role */}
-
-            {/* Auth Mode Toggle (Login vs Sign Up) — hidden for a plan-linked
-                director signup, replaced by a small "already have an
-                account?" link below instead. That choice belongs to
-                returning users, not someone who just picked a plan.
-                Also hidden for teacher-without-invite: this used to offer a
-                self-serve "Sign Up" that promised joining a school "via
-                their authorization code," but no code field was ever wired
-                up in this form — the account it created had no schoolId, no
-                educatorRole, and no class, a permanent dead end. Teacher
-                accounts are only ever created via a director's invite link
-                now (audit §21); direct teacher signup below is disabled. */}
-            {!isPlanSignup && !(loginRole === 'teacher' && !inviteSlug) && !inviteSlug && (
-              <div className="w-full flex bg-surface p-1 rounded-lg border border-rule mb-6">
-                <button
-                  type="button"
-                  onClick={() => { setAuthMode('login'); setAuthError(''); }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-md transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
-                    authMode === 'login'
-                      ? (loginRole === 'director' ? 'bg-line text-on-line' : 'bg-line text-on-line')
-                      : 'text-ink-3 hover:text-ink'
-                  }`}
-                >
-                  {isKo ? '로그인' : 'Log In'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setAuthMode('signup'); setAuthError(''); }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-md transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
-                    authMode === 'signup'
-                      ? (loginRole === 'director' ? 'bg-line text-on-line' : 'bg-line text-on-line')
-                      : 'text-ink-3 hover:text-ink'
-                  }`}
-                >
-                  {isKo ? '회원가입' : 'Sign Up'}
-                </button>
-              </div>
-            )}
-
-            <h2 className="text-2xl font-extrabold tracking-tight text-ink mb-2 font-display">
-              {isPlanSignup
-                ? (isKo
-                    ? `${planLabel.nameKo} 원장님 계정 생성 — FT ${planSeats.ft}석, KT ${planSeats.kt}석`
-                    : `Create your Director account for ${planLabel.nameEn} — ${planSeats.ft} FT seats, ${planSeats.kt} KT seats`)
-                : authMode === 'login'
-                ? (isKo ? '로그인' : 'Sign in')
-                : (loginRole === 'director' ? (isKo ? '원장님 계정 생성' : 'Create Director Account') : (isKo ? '교사 계정 생성' : 'Create Teacher Account'))}
-            </h2>
-            <p className={`text-ink-3 text-xs text-center leading-relaxed max-w-xs ${isPlanSignup ? 'mb-2' : 'mb-6'}`}>
-              {isPlanSignup
-                ? (activationPlanId === 'trial'
-                    ? (isKo ? '신용카드 등록 없이 7일 무료 체험이 바로 시작됩니다.' : 'Free for 7 days, no payment required now.')
-                    : (isKo ? '가입 즉시 원장님 전용 대시보드가 개설됩니다. 결제는 대시보드에서 별도로 안내드립니다.' : 'Your Director dashboard activates immediately after signup — billing is handled separately from your dashboard.'))
-                : authMode === 'login'
-                ? (isKo ? '선생님과 원장님 모두 여기에서 로그인합니다.' : 'Teachers and directors both sign in here.')
-                : (loginRole === 'director'
-                    ? (isKo ? '학원명을 등록하고 즉시 원장님 전용 대시보드를 개설하세요.' : 'Register your academy and open your director dashboard.')
-                    : inviteSlug
-                    ? (isKo ? '아래 정보를 입력해 계정을 만드세요.' : 'Fill in your details below to create your account.')
-                    : (isKo ? '가입 후 전달받으신 교사 인증 코드를 등록하여 즉시 시작하세요.' : 'Sign up to register your school authorization code.'))}
-            </p>
-            {!isPlanSignup && loginRole === 'teacher' && !inviteSlug && (
-              <p className="text-[12px] text-ink-3 text-center max-w-xs -mt-4 mb-6 leading-relaxed">
-                {isKo
-                  ? '교사 계정은 원장님의 초대 링크로만 생성됩니다. 초대 링크가 없다면 원장님께 요청해 주세요.'
-                  : "Teacher accounts are only created via your director's invite link. Ask them to send you one."}
-              </p>
-            )}
-            {isPlanSignup && (
-              <button
-                type="button"
-                onClick={() => { setAuthMode('login'); setAuthError(''); }}
-                className="text-[12px] text-ink-3 hover:text-ink-3 transition-colors cursor-pointer mb-6 underline underline-offset-2"
-              >
-                {isKo ? '이미 계정이 있으신가요? 로그인' : 'Already have an account? Log in'}
-              </button>
-            )}
-
-            <form onSubmit={handleSignIn} className="w-full space-y-4">
-              {authMode === 'signup' && (
-                <div className="space-y-1.5 text-left">
-                  <label className="text-xs font-bold text-ink-3 pl-1">
-                    {loginRole === 'director' ? (isKo ? '원장님 성함' : 'Director Name') : (isKo ? '선생님 성함' : 'Teacher Full Name')}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder={loginRole === 'director' ? (isKo ? "예: 김지원" : "e.g. Kim Ji-won") : (isKo ? "예: 김지원" : "e.g. Sarah Lee")}
-                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3/60"
-                 />
-                </div>
-              )}
-
-              {authMode === 'signup' && loginRole === 'director' && (
-                <div className="space-y-1.5 text-left">
-                  <label className="text-xs font-bold text-ink-3 pl-1">
-                    {isKo ? '학원명' : 'Academy Name'}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={academyNameInput}
-                    onChange={(e) => setAcademyNameInput(e.target.value)}
-                    placeholder={isKo ? '예: 첵키 잉글리시 아카데미' : 'e.g. Chekki English Academy'}
-                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3/60"
-                 />
-                </div>
-              )}
-
-              <div className="space-y-1.5 text-left">
-                <label className="text-xs font-bold text-ink-3 pl-1">
-                  {inviteSlug && authMode === 'signup' ? (isKo ? '이메일 확인' : 'Confirm your email') : (isKo ? '이메일' : 'Email')}
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={loginRole === 'director' ? "director@school.com" : "teacher@school.com"}
-                  className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3/60"
-               />
-              </div>
-
-              <div className="space-y-1.5 text-left">
-                <label className="text-xs font-bold text-ink-3 pl-1">
-                  {isKo ? '비밀번호' : 'Password'}
-                </label>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3/60"
-               />
-                {authMode === 'login' && (
-                  <button
-                    type="button"
-                    disabled={isSendingReset}
-                    onClick={handleForgotPassword}
-                    className="min-h-11 pl-1 text-xs text-ink-3 hover:text-ink-2 underline underline-offset-2 cursor-pointer transition-colors disabled:opacity-50"
-                  >
-                    {isKo ? '비밀번호를 잊으셨나요?' : 'Forgot password?'}
-                  </button>
-                )}
-                {authMode === 'login' && resetPwStatus && (
-                  <p role="status" className={`pl-1 text-xs break-keep ${resetPwStatus.isError ? 'text-wrong' : 'text-ink-2'}`}>
-                    {resetPwStatus.text}
-                  </p>
-                )}
-              </div>
-
-              {authMode === 'signup' && (
-                <div className="space-y-1.5 text-left">
-                  <label className="text-xs font-bold text-ink-3 pl-1">
-                    {isKo ? '비밀번호 확인' : 'Confirm Password'}
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3"
-                 />
-                </div>
-              )}
-
-
-              {authError && (
-                <div className="p-4 bg-wrong-soft border border-rule text-wrong text-xs font-semibold rounded-lg text-center flex items-center justify-center gap-2">
-                  <Warning size={16} weight="bold" />
-                  <span>{authError}</span>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isSigningIn}
-                className="group w-full py-4 mt-2 bg-line hover:bg-line disabled:opacity-50 text-on-line font-bold text-sm rounded-lg transition-[color,background-color,border-color,box-shadow,transform] duration-300 active:scale-[0.97] flex items-center justify-center gap-3"
-              >
-                {isSigningIn ? (
-                  <div className="w-5 h-5 border-2 border-rule border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <span>
-                      {authMode === 'login'
-                        ? (isKo ? '로그인' : 'Log In')
-                        : (isKo ? '1-Click 교사 가입 및 시작' : '1-Click Sign Up & Start')}
-                    </span>
-                    <ArrowRight size={16} weight="bold" aria-hidden="true" className="group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </button>
-            </form>
-            {authMode === 'login' && !inviteSlug && !isPlanSignup && loginRole === 'teacher' && (
-              <button
-                type="button"
-                onClick={() => { setLoginRole('director'); setAuthMode('signup'); setAuthError(''); }}
-                className="mt-5 min-h-11 text-xs text-ink-3 hover:text-ink-2 underline underline-offset-2 cursor-pointer transition-colors"
-              >
-                {isKo ? '새 학원이신가요? 원장님 계정 만들기' : 'New academy? Create a director account'}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      <TeacherAuthView
+        loginRole={loginRole}
+        setLoginRole={setLoginRole}
+        inviteSlug={inviteSlug}
+        activationPlanId={activationPlanId}
+        isActivateParam={isActivateParam}
+      />
     );
   }
 
@@ -2147,139 +1155,20 @@ export default function TeacherPage({ isNight = true }: Props) {
   }
 
   // --- FT/KT FIRST-LOGIN WELCOME MODAL ---
-  if (showTeacherWelcome) {
-    // Classes are director-created and teacher-assigned only (single flow,
-    // no FT/KT self-serve creation) — this just records the welcome as seen
-    // and drops the teacher onto their dashboard to wait for assignment.
-    const dismissWelcome = () => {
-      const uid = user?.uid || '';
-      if (uid) localStorage.setItem(`chekki_teacher_welcome_done_${uid}`, '1');
-      setShowTeacherWelcome(false);
-      setActiveTab(welcomeRole === 'kt' ? 'kt_script' : 'overview');
-    };
+  if (teacherWelcome) {
     return (
-      <div className={`min-h-dvh flex items-center justify-center p-4 font-sans bg-surface text-ink`}>
-        <div className={`relative w-full max-w-md rounded-lg border p-1.5 bg-surface border-rule`}>
-          <div className={`rounded-lg p-8 sm:p-10 flex flex-col items-center bg-surface`}>
-
-            {/* Mascot + Badge */}
-            <div className="w-16 h-16 mb-5 drop-shadow-[0_8px_20px_rgba(249,115,22,0.25)]">
-              <ChekkiMascot className="w-full h-full" mood="happy" />
-            </div>
-            <div className={`mb-4 inline-flex items-center gap-2 rounded-md px-3.5 py-1 text-[12px] font-bold ${
-              welcomeRole === 'kt'
-                ? 'bg-sunken border border-rule text-ink-2'
-                : 'bg-line-soft border border-rule text-line-ink'
-            }`}>
-              <ChalkboardTeacher size={12} weight="bold" />
-              <span>{welcomeRole === 'kt' ? (isKo ? 'KT 한국인 선생님 환영' : 'Korean Teacher (KT) Access') : (isKo ? 'FT 원어민 선생님 환영' : 'Foreign Teacher (FT) Access')}</span>
-            </div>
-
-            {/* Step 1 — Confirm name & role */}
-            {teacherWelcomeStep === 1 && (
-              <div className="w-full space-y-5">
-                <div className="text-center mb-2">
-                  <h2 className="text-2xl font-extrabold tracking-tight text-ink mb-1">{isKo ? '선생님, 환영합니다!' : 'Welcome, Teacher!'}</h2>
-                  <p className="text-ink-3 text-xs leading-relaxed">{isKo ? '아래 정보를 확인하고 시작해 주세요.' : 'Confirm your details to get started.'}</p>
-                </div>
-
-                <div className="space-y-1.5 text-left">
-                  <label className="text-xs font-bold text-ink-3 pl-1">{isKo ? '선생님 성함' : 'Your Name'}</label>
-                  <input
-                    type="text"
-                    value={welcomeName}
-                    onChange={(e) => setWelcomeName(e.target.value)}
-                    placeholder={isKo ? '예: 김지원' : 'e.g. Sarah Lee'}
-                    className={`w-full p-4 rounded-lg border text-sm font-bold outline-none focus:border-line transition-[color,background-color,border-color,box-shadow,transform] bg-surface border-rule text-ink`}
-                 />
-                </div>
-
-                {welcomeSchool && (
-                  <div className="p-3.5 rounded-lg bg-right-soft border border-rule flex items-center gap-2.5">
-                    <Buildings size={16} className="text-correct shrink-0" />
-                    <div>
-                      <p className="text-[12px] text-correct font-bold">{isKo ? '초대받은 학원' : 'Invited Academy'}</p>
-                      <p className="text-sm font-extrabold text-ink">{welcomeSchool}</p>
-                      {welcomeInviterName && (
-                        <p className="text-[12px] text-correct mt-0.5">
-                          {isKo ? `${welcomeInviterName} 원장님이 초대함` : `Invited by ${welcomeInviterName}`}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                <div className="space-y-1.5 text-left">
-                  <label className="text-xs font-bold text-ink-3 pl-1">{isKo ? '선생님 역할' : 'Your Role'}</label>
-                  {user?.educatorRole ? (
-                    // Role was already decided by the director's invite (audit
-                    // §21d) — this is a read-only confirmation, not a choice.
-                    <div className={`w-full py-3 rounded-md text-xs font-extrabold border text-center ${
-                      welcomeRole === 'kt' ? 'bg-sunken border-rule text-ink-2' : 'bg-line-soft border-rule text-line-ink'
-                    }`}>
-                      {welcomeRole === 'kt' ? (isKo ? '🇰🇷 KT 한국어 선생님 (초대로 지정됨)' : '🇰🇷 Korean Teacher — set by your invite') : (isKo ? 'FT 원어민 선생님 (초대로 지정됨)' : 'Foreign Teacher — set by your invite')}
-                    </div>
-                  ) : (
-                    <div className="flex gap-2">
-                      {(['ft', 'kt'] as const).map((r) => (
-                        <button
-                          key={r}
-                          type="button"
-                          onClick={() => setWelcomeRole(r)}
-                          className={`flex-1 py-3 rounded-md text-xs font-extrabold border transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
-                            welcomeRole === r
-                              ? 'bg-line border-line text-on-line'
-                              : 'bg-sunken border-rule text-ink-2'
-                          }`}
-                        >
-                          {r === 'ft' ? (isKo ? 'FT 원어민' : 'Foreign Teacher') : (isKo ? '🇰🇷 KT 한국어' : '🇰🇷 Korean Teacher')}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setTeacherWelcomeStep(2)}
-                  className="w-full py-4 bg-line hover:bg-line text-on-line font-bold text-sm rounded-lg transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
-                >
-                  <span>{isKo ? '다음: 학급 확인 →' : 'Next: Class Setup →'}</span>
-                </button>
-              </div>
-            )}
-
-            {/* Step 2 — single flow: the director creates classes and
-                assigns teachers to them (Teacher Assignments); a teacher
-                never creates their own class here. This used to branch on
-                welcomeSchool and let anyone without it type a class name,
-                which created a standalone class disconnected from the
-                director's real roster (audit: teacher ends up on a
-                different class than the one the director set up) — one
-                path now, regardless of how the account was created. */}
-            {teacherWelcomeStep === 2 && (
-              <div className="w-full space-y-5">
-                <div className="text-center mb-2">
-                  <h2 className="text-2xl font-extrabold tracking-tight text-ink mb-1">{isKo ? '거의 다 됐어요!' : "You're all set!"}</h2>
-                  <p className="text-ink-3 text-xs leading-relaxed">
-                    {isKo
-                      ? '원장님이 담당 학급을 배정하면 대시보드에 표시됩니다.'
-                      : 'Your director will assign you to a class — it\'ll show up on your dashboard once they do.'}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => dismissWelcome()}
-                  className="w-full py-4 bg-line hover:bg-line text-on-line font-bold text-sm rounded-lg transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
-                >
-                  <CheckCircle size={18} weight="bold" />
-                  <span>{isKo ? '완료 — 대시보드 입장!' : 'Done — Enter Dashboard!'}</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <TeacherWelcomeModal
+        isKo={isKo}
+        initialName={teacherWelcome.name}
+        initialRole={teacherWelcome.role}
+        roleLocked={!!user?.educatorRole}
+        onDone={(role) => {
+          const uid = user?.uid || '';
+          if (uid) localStorage.setItem(`chekki_teacher_welcome_done_${uid}`, '1');
+          setTeacherWelcome(null);
+          setActiveTab(role === 'kt' ? 'kt_script' : 'overview');
+        }}
+      />
     );
   }
 
@@ -2488,7 +1377,7 @@ export default function TeacherPage({ isNight = true }: Props) {
               {isThemeNight ? <Sun size={16} weight="bold" /> : <Moon size={16} weight="bold" />}
             </button>
             <button
-              onClick={() => { setResetPwStatus(null); setShowSettingsModal(true); }}
+              onClick={() => setShowSettingsModal(true)}
               className={`p-2 rounded-md transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.95] cursor-pointer ${
                 'text-ink-2 hover:text-ink hover:bg-sunken'
               }`}
@@ -2892,493 +1781,43 @@ export default function TeacherPage({ isNight = true }: Props) {
 
       {/* --- STUDENT MISTAKE DETAILS SLIDE-OVER DRAWER --- */}
       {selectedStudentDetails && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-end">
-          <div 
-            className="absolute inset-0 bg-[#2b211a]/55" 
-            onClick={() => setSelectedStudentDetails(null)} 
-         />
-          <div
-            ref={studentDrawerDialogRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="student-drawer-title"
-            tabIndex={-1}
-            className={`relative w-full max-w-lg h-full border-l p-6 sm:p-8 flex flex-col animate-slide-in text-left transition-colors ${
-            'bg-surface border-rule text-ink'
-          }`}>
-
-            {/* Drawer Header */}
-            <div className={`pb-6 border-b flex items-center justify-between shrink-0 ${
-              'border-rule'
-            }`}>
-              <div>
-                <h3 id="student-drawer-title" className={`text-xl font-extrabold flex items-center gap-2 text-ink`}>
-                  <span>{selectedStudentDetails.studentName || 'Unnamed'}</span>
-                  <span className="text-xs font-normal text-ink-3">{isKo ? '원생 학습 성장 기록' : "'s Growth & Practice Log"}</span>
-                </h3>
-                <p className="text-xs text-ink-3 mt-1">
-                  {selectedStudentDetails.email}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedStudentDetails(null)}
-                aria-label={isKo ? '닫기' : 'Close'}
-                className={`min-w-11 min-h-11 flex items-center justify-center rounded-md transition-[color,background-color,border-color,box-shadow,transform] text-sm font-bold active:scale-[0.95] cursor-pointer ${
-                  'text-ink-3 hover:text-ink hover:bg-sunken'
-                }`}
-              >
-                <X size={18} weight="bold" />
-              </button>
-            </div>
-
-            {/* Flag for Director/Counselor */}
-            <div className={`mt-4 p-4 rounded-lg border shrink-0 ${
-              selectedStudentDetails.flaggedException
-                ? 'bg-line-soft border-rule'
-                : 'bg-surface border-rule'
-            }`}>
-              {selectedStudentDetails.flaggedException ? (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[12px] font-bold text-line-ink">
-                      {isKo ? '원장님께 플래그됨' : 'Flagged for Director'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleToggleFlagStudent(selectedStudentDetails.uid)}
-                      className="text-[12px] font-bold text-ink-3 hover:text-ink cursor-pointer"
-                    >
-                      {isKo ? '플래그 해제' : 'Unflag'}
-                    </button>
-                  </div>
-                  <p className="text-xs text-ink-3">{selectedStudentDetails.flaggedException.reason}</p>
-                  <p className="text-[12px] text-ink-3">
-                    {selectedStudentDetails.flaggedException.teacherName} · {selectedStudentDetails.flaggedException.date}
-                  </p>
-                </div>
-              ) : showFlagReasonInput ? (
-                <div className="space-y-2">
-                  <textarea
-                    value={flagReasonInput}
-                    onChange={(e) => setFlagReasonInput(e.target.value)}
-                    placeholder={isKo ? '플래그 사유를 입력하세요 (학습/행동 이슈 등)' : 'Reason for flagging (academic or behavioral issue)...'}
-                    className={`w-full h-20 p-3 rounded-md border text-xs outline-none resize-none ${
-                      'bg-surface border-rule text-ink placeholder:text-ink-3'
-                    }`}
-                 />
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!flagReasonInput.trim()) return;
-                        handleToggleFlagStudent(selectedStudentDetails.uid, flagReasonInput);
-                        setFlagReasonInput('');
-                        setShowFlagReasonInput(false);
-                      }}
-                      className="px-4 py-2 bg-line hover:bg-line text-on-line font-bold text-xs rounded-md cursor-pointer"
-                    >
-                      {isKo ? '플래그 제출' : 'Submit Flag'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setShowFlagReasonInput(false); setFlagReasonInput(''); }}
-                      className="px-4 py-2 text-xs font-bold text-ink-3 hover:text-ink cursor-pointer"
-                    >
-                      {isKo ? '취소' : 'Cancel'}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowFlagReasonInput(true)}
-                  className={`text-xs font-bold flex items-center gap-1.5 cursor-pointer text-ink-3 hover:text-ink`}
-                >
-                  <Warning size={14} weight="bold" />
-                  <span>{isKo ? '원장님께 플래그하기' : 'Flag for Director'}</span>
-                </button>
-              )}
-            </div>
-
-            {/* Drawer Content */}
-            <div className="flex-1 overflow-y-auto py-6 space-y-6 custom-scrollbar pr-1">
-              <div>
-                <span className="text-[12px] font-bold text-ink-3 mb-4 block">
-                  {isKo ? '이번 주 도전 복습 포인트' : "This week's focus practice items"}
-                </span>
-
-                {selectedStudentDetails.weeklyMistakes.length === 0 ? (
-                  <div className="py-16 text-center text-correct text-xs flex flex-col items-center gap-2">
-                    <Sparkle size={24} weight="bold" />
-                    <span>
-                      {selectedStudentDetails.hasScannedThisWeek
-                        ? (isKo ? '이번 주 스캔한 숙제는 모두 맞았어요.' : 'Everything scanned this week was correct.')
-                        : (isKo ? '이번 주에 스캔한 숙제가 아직 없어요.' : 'No homework scanned this week yet.')}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {selectedStudentDetails.weeklyMistakes.map((m: any, idx: number) => (
-                      <div key={m.uniqueId || idx} className={`p-5 border rounded-lg flex flex-col gap-3 ${
-                        'bg-surface border-rule'
-                      }`}>
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="px-2.5 py-1 bg-line-soft border border-rule text-line-ink font-bold rounded-lg text-[12px]">
-                              {m.type || 'Phonics'}
-                            </span>
-                            {m.isResolved || m.attemptNumber > 1 ? (
-                              <span className="px-2 py-0.5 bg-right-soft border border-rule text-correct font-bold rounded-md text-[12px]">
-                                {isKo ? '2차 재도전 수정 완료' : 'Fixed on Rescan'}
-                              </span>
-                            ) : (
-                              <span className="px-2 py-0.5 bg-line-soft border border-rule text-line-ink font-bold rounded-md text-[12px]">
-                                {isKo ? '1차 스캔 기록' : '1st Scan Attempt'}
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-[12px] text-ink-3">
-                            {m.dateAdded ? m.dateAdded.split('T')[0] : ''}
-                          </span>
-                        </div>
-
-                        <div className="space-y-3 text-xs">
-                          <div>
-                            <span className="text-[12px] font-bold text-ink-3 block mb-1">
-                              Question / Word
-                            </span>
-                            <p className={`font-bold text-ink`}>{m.question_text}</p>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4 pt-1">
-                            <div>
-                              <span className="text-[12px] font-bold text-ink-3 block mb-1">
-                                Target Answer
-                              </span>
-                              <p className="font-bold text-correct">{m.correct_answer}</p>
-                            </div>
-                            <div>
-                              <span className="text-[12px] font-bold text-ink-3 block mb-1">
-                                Student Answer
-                              </span>
-                              <p className="font-bold text-wrong">{m.student_response || '(Blank)'}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Drawer Footer */}
-            <div className={`pt-6 border-t shrink-0 flex gap-3 border-rule`}>
-              <button
-                type="button"
-                onClick={() => setShowReportCardModal(true)}
-                className="w-1/2 py-4 bg-line hover:bg-line text-on-line font-bold text-xs rounded-lg transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <Printer size={16} weight="bold" />
-                <span>{isKo ? '맞춤 로고 성적표 인쇄' : 'Print Branded Report'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedStudentDetails(null)}
-                className={`w-1/2 py-4 font-bold text-xs rounded-lg transition-[color,background-color,border-color,box-shadow,transform] border active:scale-[0.98] cursor-pointer ${
-                  'bg-sunken hover:bg-sunken text-ink-2 border-rule'
-                }`}
-              >
-                {isKo ? '닫기' : 'Close'}
-              </button>
-            </div>
-          </div>
-        </div>
+        <StudentDetailsDrawer
+          student={selectedStudentDetails}
+          isKo={isKo}
+          onClose={() => setSelectedStudentDetails(null)}
+          handleToggleFlagStudent={handleToggleFlagStudent}
+          onPrintReport={() => setShowReportCardModal(true)}
+        />
       )}
 
       {/* --- CLASS CREATION MODAL --- */}
       {showCreateClassModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-[#2b211a]/55" 
-            onClick={() => setShowCreateClassModal(false)} 
-         />
-          <div
-            ref={createClassDialogRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="create-class-title"
-            tabIndex={-1}
-            className={`relative p-1 border rounded-lg flex flex-col w-full max-w-md mx-4 animate-fade-in ${
-            'bg-surface border-rule'
-          }`}>
-            <div className={`relative w-full h-full rounded-lg p-8 overflow-hidden transition-colors ${
-              'bg-surface text-ink'
-            }`}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-line-soft border border-rule text-line-ink flex items-center justify-center">
-                  <Plus size={22} weight="bold" />
-                </div>
-                <h3 id="create-class-title" className={`text-xl font-extrabold text-ink`}>
-                  {isKo ? '새 학급반 추가' : 'Add New Class'}
-                </h3>
-              </div>
-              
-              <p className="text-ink-3 text-xs mb-6 leading-relaxed">
-                {isKo 
-                  ? '관리할 학급의 이름과 대상 학년을 설정해 학급을 개설하세요.'
-                  : 'Specify the class details to expand your school roster.'}
-              </p>
-
-              <form onSubmit={handleCreateClass} className="space-y-4">
-                <div className="space-y-2 text-left">
-                  <label htmlFor="new-class-name" className="text-xs font-bold text-ink-3 pl-1">
-                    {isKo ? '반 이름' : 'Class Name'}
-                  </label>
-                  <input
-                    id="new-class-name"
-                    type="text"
-                    required
-                    value={newClassName}
-                    onChange={(e) => setNewClassName(e.target.value)}
-                    placeholder="E.g. 7-Mercury"
-                    className={`w-full border outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] ${
-                      'bg-surface border-rule focus:border-line text-ink placeholder:text-ink-3'
-                    }`}
-                 />
-                </div>
-
-                <div className="space-y-2 text-left">
-                  <label htmlFor="new-class-level" className="text-xs font-bold text-ink-3 pl-1">
-                    {isKo ? '대상 학년' : 'Class Level'}
-                  </label>
-                  <select
-                    id="new-class-level"
-                    value={newClassLevel}
-                    onChange={(e) => setNewClassLevel(e.target.value)}
-                    className={`w-full border outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
-                      'bg-surface border-rule focus:border-line text-ink'
-                    }`}
-                  >
-                    <option value="5-year-old">{isKo ? '5세반' : '5-year-old'}</option>
-                    <option value="6-year-old">{isKo ? '6세반' : '6-year-old'}</option>
-                    <option value="7-year-old">{isKo ? '7세반' : '7-year-old'}</option>
-                    <option value="Elementary Grade 1">{isKo ? '초등 1학년' : 'Elementary Grade 1'}</option>
-                    <option value="Elementary Grade 2">{isKo ? '초등 2학년' : 'Elementary Grade 2'}</option>
-                  </select>
-                </div>
-
-                <div className="pt-4 flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowCreateClassModal(false)}
-                    className={`flex-1 py-4 font-bold text-xs rounded-lg border transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] cursor-pointer ${
-                      'bg-sunken hover:bg-sunken text-ink-2 border-rule'
-                    }`}
-                  >
-                    {isKo ? '취소' : 'Cancel'}
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isCreatingClass}
-                    className="flex-1 py-4 bg-line hover:bg-line text-on-line font-bold text-xs rounded-lg transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    {isCreatingClass ? (
-                      <div className="w-4 h-4 border-2 border-rule border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <span>{isKo ? '개설하기' : 'Create Class'}</span>
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
+        <CreateClassModal
+          isKo={isKo}
+          setShowCreateClassModal={setShowCreateClassModal}
+          handleCreateClass={handleCreateClass}
+          newClassName={newClassName}
+          setNewClassName={setNewClassName}
+          newClassLevel={newClassLevel}
+          setNewClassLevel={setNewClassLevel}
+          isCreatingClass={isCreatingClass}
+        />
       )}
       {/* --- TEACHER SETTINGS MODAL --- */}
       {showSettingsModal && (
-        <div className="fixed inset-0 z-[260] flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-[#2b211a]/55" 
-            onClick={() => setShowSettingsModal(false)} 
-         />
-          <div
-            ref={settingsDialogRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="settings-modal-title"
-            tabIndex={-1}
-            className={`relative p-1 border rounded-lg flex flex-col w-full max-w-lg mx-4 animate-fade-in text-left ${
-            'bg-surface border-rule'
-          }`}>
-            <div className={`relative w-full h-full rounded-lg p-8 transition-colors ${
-              'bg-surface text-ink'
-            }`}>
-              <button
-                type="button"
-                onClick={() => setShowSettingsModal(false)}
-                aria-label={isKo ? '닫기' : 'Close'}
-                className={`absolute top-6 right-6 min-w-11 min-h-11 flex items-center justify-center rounded-md transition-[color,background-color,border-color,box-shadow,transform] cursor-pointer ${
-                  'text-ink-3 hover:text-ink bg-sunken hover:bg-sunken'
-                }`}
-              >
-                <X size={16} weight="bold" />
-              </button>
-
-              <h3 id="settings-modal-title" className="mb-6 text-[22px] font-extrabold tracking-[-0.01em] text-ink">
-                {loginRole === 'director' || user?.role === 'director'
-                  ? (isKo ? '원장님 설정' : 'Director settings')
-                  : (educatorRole === 'kt'
-                      ? (isKo ? '한국인 선생님 설정' : 'Korean teacher settings')
-                      : (isKo ? '원어민 선생님 설정' : 'Foreign teacher settings'))}
-              </h3>
-
-              <div className="space-y-6">
-                {/* Profile Info */}
-                <div className={`p-4 border rounded-lg space-y-2 ${
-                  'bg-surface border-rule'
-                }`}>
-                  <span className="text-[12px] font-bold text-ink-3 block">
-                    {isKo ? '계정 정보' : 'Account'}
-                  </span>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-ink-3">
-                      {loginRole === 'director' || user?.role === 'director' 
-                        ? (isKo ? '원장님 성함' : 'Director Name') 
-                        : (isKo ? '선생님 성함' : 'Teacher Name')}:
-                    </span>
-                    <strong className={'text-ink'}>{user?.name || 'Director Admin'}</strong>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-ink-3">{isKo ? '이메일 주소' : 'Email Address'}:</span>
-                    <strong className={` text-ink`}>{user?.email}</strong>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-ink-3">{isKo ? '소속 학원' : 'Assigned School'}:</span>
-                    <strong className="text-line-ink">{user?.schoolName || 'B2B Academy'}</strong>
-                  </div>
-                </div>
-
-                {/* Password Reset */}
-                <div className={`p-4 border rounded-lg space-y-3 ${
-                  'bg-surface border-rule'
-                }`}>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h4 className={`text-xs font-bold mb-0.5 text-ink`}>
-                        {isKo ? '비밀번호 재설정' : 'Password & Security'}
-                      </h4>
-                      <p className="text-[12px] text-ink-3">
-                        {isKo ? '이메일로 비밀번호 재설정 링크를 받습니다.' : 'Receive a password reset link via email.'}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      disabled={isSendingReset}
-                      onClick={handleSendResetPassword}
-                      className={`px-3.5 py-2 disabled:opacity-50 font-bold text-xs rounded-md border transition-[color,background-color,border-color,box-shadow,transform] whitespace-nowrap cursor-pointer ${
-                        'bg-sunken hover:bg-sunken text-ink border-rule'
-                      }`}
-                    >
-                      {isSendingReset ? (isKo ? '발송 중...' : 'Sending...') : (isKo ? '재설정 이메일 발송' : 'Reset Password')}
-                    </button>
-                  </div>
-                  {resetPwStatus && (
-                    <p className={`text-xs p-2.5 rounded-md font-medium ${resetPwStatus.isError ? 'bg-wrong-soft text-wrong border border-rule' : 'bg-right-soft text-correct border border-rule'}`}>
-                      {resetPwStatus.text}
-                    </p>
-                  )}
-                </div>
-
-                {/* Re-open Walkthrough Guide — the tour's content is FT/KT-
-                    specific (waiting on a director's class assignment), so
-                    hide this for directors rather than show them a guide
-                    written about a role they don't have (Audit: director's
-                    settings surfaced the FT/KT-worded tour). */}
-                {loginRole !== 'director' && user?.role !== 'director' && (
-                  <div className={`flex items-center justify-between p-4 border rounded-lg ${
-                    'bg-surface border-rule'
-                  }`}>
-                    <div>
-                      <h4 className={`text-xs font-bold mb-0.5 text-ink`}>
-                        {isKo ? '교사 온보딩 가이드 다시보기' : 'Onboarding Walkthrough'}
-                      </h4>
-                      <p className="text-[12px] text-ink-3">
-                        {isKo ? '학급 개설 및 학부모 6자리 코드 연결 가이드' : 'Review 3-step teacher tutorial guide.'}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowSettingsModal(false);
-                        setTeacherObStep(0);
-                        setShowTeacherOnboarding(true);
-                      }}
-                      className={`px-3.5 py-2 font-bold text-xs rounded-md border transition-[color,background-color,border-color,box-shadow,transform] whitespace-nowrap cursor-pointer ${
-                        'bg-sunken hover:bg-sunken text-ink border-rule'
-                      }`}
-                    >
-                      {isKo ? '가이드 열기' : 'Open Tutorial'}
-                    </button>
-                  </div>
-                )}
-
-                {/* Report a Bug / Send Feedback — staff dashboard had no path to
-                    reach us at all; only the parent-facing app did. */}
-                <div className={`flex items-center justify-between p-4 border rounded-lg ${
-                  'bg-surface border-rule'
-                }`}>
-                  <div>
-                    <h4 className={`text-xs font-bold mb-0.5 text-ink`}>
-                      {isKo ? '버그 신고 / 의견 보내기' : 'Report a Bug / Send Feedback'}
-                    </h4>
-                    <p className="text-[12px] text-ink-3">
-                      {isKo ? '문제를 발견하셨나요? 팀에게 바로 알려주세요.' : 'Found something broken? Let us know directly.'}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowSettingsModal(false);
-                      setShowFeedbackModal(true);
-                    }}
-                    className="px-3.5 py-2 bg-line-soft hover:bg-line-soft text-line-ink font-bold text-xs rounded-md border border-rule transition-[color,background-color,border-color,box-shadow,transform] whitespace-nowrap cursor-pointer"
-                  >
-                    {isKo ? '보내기' : 'Send'}
-                  </button>
-                </div>
-
-                {/* Account Actions: Delete Account & Log Out */}
-                <div className="pt-2 flex flex-col gap-2.5">
-                  <button
-                    type="button"
-                    onClick={handleDeleteTeacherAccount}
-                    disabled={isDeletingAccount}
-                    className="w-full py-3 bg-wrong-soft hover:bg-wrong-soft text-wrong font-bold text-xs rounded-lg border border-rule transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] disabled:opacity-50"
-                  >
-                    <Trash size={16} weight="bold" />
-                    <span>{isDeletingAccount ? (isKo ? '계정 삭제 중...' : 'Deleting Account...') : (isKo ? '선생님 계정 영구 삭제' : 'Permanently Delete Account')}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowSettingsModal(false);
-                      logout();
-                    }}
-                    className={`w-full py-3 font-bold text-xs rounded-lg border transition-[color,background-color,border-color,box-shadow,transform] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] ${
-                      'bg-sunken hover:bg-sunken text-ink-2 border-rule'
-                    }`}
-                  >
-                    <SignOut size={16} weight="bold" />
-                    <span>{isKo ? '교사 계정 로그아웃' : 'Log Out of Teacher Account'}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <TeacherSettingsModal
+          isKo={isKo}
+          user={user}
+          loginRole={loginRole}
+          educatorRole={educatorRole}
+          setShowSettingsModal={setShowSettingsModal}
+          setTeacherObStep={setTeacherObStep}
+          setShowTeacherOnboarding={setShowTeacherOnboarding}
+          setShowFeedbackModal={setShowFeedbackModal}
+          handleDeleteTeacherAccount={handleDeleteTeacherAccount}
+          isDeletingAccount={isDeletingAccount}
+          logout={logout}
+        />
       )}
 
       {showFeedbackModal && (
