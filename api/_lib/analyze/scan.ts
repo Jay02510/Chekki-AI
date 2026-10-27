@@ -2,7 +2,7 @@ import { HarmCategory, HarmBlockThreshold } from '@google/genai';
 import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb } from '../firebaseAdmin.js';
 import { logUsage } from './gemini.js';
-import { SYSTEM_PROMPT, CONSOLIDATED_SCHEMA } from './scanPrompt.js';
+import { SYSTEM_PROMPT, CONSOLIDATED_SCHEMA, verifyKeyGrounding } from './scanPrompt.js';
 import type { TaskContext } from './context.js';
 
 // Worksheet scan: grade the photo, grounded in the class answer key for enrolled students.
@@ -24,11 +24,15 @@ export async function handleScan(ctx: TaskContext): Promise<any> {
     isNewDay,
     firebaseAdminAvailable,
     cacheKey,
+    decodedToken,
   } = ctx;
   if (!image || typeof image !== 'string')
     return res.status(400).json({ error: 'INVALID_IMAGE_DATA' });
 
   let curriculumContext = '';
+  let answerKey: { questionText?: string; answer?: string }[] = [];
+  // Set when the scan should be copied to the class for the teacher dashboard.
+  let classScanTarget: string | null = null;
 
   if (
     userData?.schoolId &&
@@ -44,6 +48,7 @@ export async function handleScan(ctx: TaskContext): Promise<any> {
       const classSnap = await classRef.get();
 
       if (classSnap.exists) {
+        classScanTarget = userData.classId;
         const classData = classSnap.data();
         const activeWeek = classData?.activeWeekNumber;
 
@@ -80,9 +85,8 @@ export async function handleScan(ctx: TaskContext): Promise<any> {
               : typeof rawPhonics === 'string'
                 ? (rawPhonics as string).split(',').map((s) => s.trim())
                 : [];
-            const answerKeyLines = rawAnswerKey
-              .filter((a: any) => a?.questionText && a?.answer)
-              .map((a: any) => `- "${a.questionText}" → ${a.answer}`);
+            answerKey = rawAnswerKey.filter((a: any) => a?.questionText && a?.answer);
+            const answerKeyLines = answerKey.map((a: any) => `- "${a.questionText}" → ${a.answer}`);
 
             curriculumContext = `\n\nB2B SCHOOL & CURRICULUM CONTEXT:
 The student belongs to the partner school "${userData.schoolName || userData.schoolId}" and is enrolled in the class "${classData?.name || 'Active Class'}".
@@ -95,7 +99,7 @@ ${answerKeyLines.length > 0 ? `- Known Answer Key for this week's worksheet (que
 CRITICAL OCR & SPELLING GRADING INSTRUCTIONS:
 1. Use the vocabulary list, phonics rules, and reading passage above to guide your OCR analysis of handwritten responses. If the student's handwriting closely resembles a target vocabulary word (allowing for minor spelling mistakes or malformed characters), match it.
 2. Cross-reference answers with the provided reading passage to evaluate reading comprehension accuracy.
-${answerKeyLines.length > 0 ? "2a. ANSWER KEY PRIORITY: If a question on the scanned worksheet matches (or closely matches) one of the questions in the Known Answer Key above, use that key's answer as ground truth instead of inferring the correct answer yourself — the teacher already confirmed it. Only fall back to your own judgment for questions not covered by the key." : ''}
+${answerKeyLines.length > 0 ? "2a. ANSWER KEY PRIORITY: If a question on the scanned worksheet matches (or closely matches) one of the questions in the Known Answer Key above, use that key's answer as ground truth instead of inferring the correct answer yourself — the teacher already confirmed it — and set graded_against_key to true for that item. Only fall back to your own judgment for questions not covered by the key." : ''}
 3. BLANK / UNANSWERED WORKSHEET DETECTION: If the scanned image contains no handwritten student responses in the designated answer areas (i.e., an unattempted or blank worksheet page), do NOT score it as 100% correct or 0 mistakes. Mark unanswered items clearly so that scanning a blank sheet does not pollute the teacher's error-tracking statistics.
 4. ENCOURAGING RESCAN PROMPT FOR MOMS: If any student mistakes are found, include a warm, encouraging Korean rescan callout encouraging mom to have the child fix the answer on the paper and rescan: "아이가 틀린 단어를 종이에 다시 고쳐 쓴 뒤 2차 재도전 스캔을 올려주시면 바로 2차 채점 및 완벽 마스터로 업데이트됩니다!";`;
           }
@@ -225,7 +229,53 @@ ${answerKeyLines.length > 0 ? "2a. ANSWER KEY PRIORITY: If a question on the sca
     }
   }
 
-  const finalItems = result.items || [];
+  const finalItems = verifyKeyGrounding(result.items || [], answerKey);
+
+  // Copy the result to the class so the teacher dashboard sees it. Written
+  // here rather than by the client so the score can't be edited on the way
+  // and a failed write shows up in server logs instead of a console.warn.
+  if (classScanTarget && decodedToken?.uid) {
+    const mistakes = finalItems.filter((item: any) => item.is_correct === false);
+    const id = `scan_${Date.now()}_${crypto.randomUUID().slice(0, 6)}`;
+    try {
+      await adminDb
+        .collection('classes')
+        .doc(classScanTarget)
+        .collection('studentScans')
+        .doc(id)
+        .set({
+          id,
+          classId: classScanTarget,
+          studentUid: decodedToken.uid,
+          studentName:
+            userData?.studentName || userData?.name || (language === 'ko' ? '학생' : 'Student'),
+          scannedAt: new Date().toISOString(),
+          titleEn: result.worksheet_summary?.title_en || 'Worksheet Scan',
+          titleKo: result.worksheet_summary?.title_ko || '워크시트 분석',
+          totalItems: finalItems.length,
+          correctCount: finalItems.length - mistakes.length,
+          mistakeCount: mistakes.length,
+          keyGradedCount: finalItems.filter((item: any) => item.graded_against_key).length,
+          totalScore: Math.round(
+            ((finalItems.length - mistakes.length) / Math.max(1, finalItems.length)) * 100
+          ),
+          redBorderedMistakes: mistakes.map((item: any) => ({
+            id: item.id,
+            type: item.type || 'other',
+            question_text: item.question_text || '',
+            correct_answer: item.correct_answer || '',
+            student_response: item.student_response || '',
+            korean_guide: item.korean_guide || '',
+            teaching_script_ko: item.teaching_script_ko || '',
+            graded_against_key: item.graded_against_key,
+          })),
+          hasHandwriting: result.worksheet_summary?.has_handwriting || false,
+          isLegible: result.worksheet_summary?.is_handwriting_legible !== false,
+        });
+    } catch (err: any) {
+      console.error('[scan] Failed to copy scan to class', classScanTarget, err?.message);
+    }
+  }
 
   // --- WRITE TO DETERMINISTIC IMAGE CACHE ---
   if (cacheKey && firebaseAdminAvailable) {

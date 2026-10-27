@@ -538,8 +538,11 @@ service cloud.firestore {
         // OR'd the studentUid-match on its own, which let anyone write into
         // a class they don't belong to as long as they set studentUid to
         // themselves. Both conditions are now required together.
+        // Students no longer write here: api/_lib/analyze/scan.ts copies each
+        // graded scan in with the Admin SDK, so a client can't post its own
+        // score (and older app builds that still try get a harmless denial
+        // instead of writing a duplicate).
         allow create, update: if request.auth != null && (
-          (userBelongsToClass(classId) && request.resource.data.studentUid == request.auth.uid) ||
           isClassTeacher(classId) ||
           isAdmin()
         );

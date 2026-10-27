@@ -167,6 +167,11 @@ export const CONSOLIDATED_SCHEMA = {
             description:
               "True if the student's answer matches the correct answer contextually, false otherwise.",
           },
+          graded_against_key: {
+            type: Type.BOOLEAN,
+            description:
+              "True ONLY if this question matched an entry in the teacher's Known Answer Key and correct_answer was taken from it. False otherwise, including when no answer key was provided.",
+          },
           korean_guide: { type: Type.STRING },
           english_guide: { type: Type.STRING },
           teaching_script_ko: { type: Type.STRING },
@@ -190,6 +195,7 @@ export const CONSOLIDATED_SCHEMA = {
           'correct_answer',
           'student_response',
           'is_correct',
+          'graded_against_key',
           'korean_guide',
           'english_guide',
           'teaching_script_ko',
@@ -201,6 +207,25 @@ export const CONSOLIDATED_SCHEMA = {
   },
   required: ['worksheet_summary', 'items'],
 };
+
+const normalizeAnswer = (s: unknown) =>
+  String(s ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣]/g, '');
+
+// The model's graded_against_key claim is kept only when its correct_answer
+// actually contains one of the teacher's key answers. Parents and teachers
+// read this flag as "checked against the real key", so an unverified claim
+// is dropped rather than shown.
+export function verifyKeyGrounding(items: any[], answerKey: { answer?: string }[]): any[] {
+  const answers = answerKey.map((a) => normalizeAnswer(a.answer)).filter(Boolean);
+  for (const item of items) {
+    const answer = normalizeAnswer(item.correct_answer);
+    item.graded_against_key =
+      item.graded_against_key === true && answers.some((a) => answer.includes(a));
+  }
+  return items;
+}
 
 // --- Teacher-log -> bilingual parent report generation (task: 'generate_report') ---
 // Folded in from api/generate-report.ts (was its own file) when the Vercel

@@ -31,6 +31,7 @@ export interface WorksheetItem {
   custom_coords?: { top: number; left: number };
   student_response?: string;
   is_correct?: boolean;
+  graded_against_key?: boolean;
 }
 
 export interface UserProfile {

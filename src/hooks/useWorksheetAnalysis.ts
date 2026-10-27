@@ -2,8 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { saveScan, type SavedScan } from '../utils/scanHistory';
 import { AnalysisState, WorksheetAnalysis } from '../../types';
 import { analyzeWorksheet } from '../../services/geminiService';
-import { db, dbInstance } from '../../services/database';
-import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../../services/database';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { generateUUID } from '../../utils/uuid';
@@ -171,48 +170,8 @@ export const useWorksheetAnalysis = () => {
           }
         }
 
-        // Auto-sync scan data & red-bordered mistakes to Teacher Class Roster (if user belongs to a class)
-        const activeClassId = user?.classId || localStorage.getItem('chekki_user_class_id');
-        if (activeClassId && result.items) {
-          try {
-            const studentUid = user?.uid || `guest_${Date.now()}`;
-            const studentName = user?.studentName || user?.name || (language === 'ko' ? '학생' : 'Student');
-            const redBorderedItems = result.items.filter((item: any) => item.is_correct === false);
-            
-            const scanPayload = {
-              id: `scan_${Date.now()}_${generateUUID().slice(0, 6)}`,
-              classId: activeClassId,
-              studentUid,
-              studentName,
-              scannedAt: new Date().toISOString(),
-              titleEn: result.worksheet_summary?.title_en || 'Worksheet Scan',
-              titleKo: result.worksheet_summary?.title_ko || '워크시트 분석',
-              totalItems: result.items.length,
-              correctCount: result.items.length - redBorderedItems.length,
-              mistakeCount: redBorderedItems.length,
-              totalScore: result.worksheet_summary?.total_score ?? Math.round(((result.items.length - redBorderedItems.length) / Math.max(1, result.items.length)) * 100),
-              redBorderedMistakes: redBorderedItems.map((item: any) => ({
-                id: item.id,
-                type: item.type || 'other',
-                question_text: item.question_text || '',
-                correct_answer: item.correct_answer || '',
-                student_response: item.student_response || '',
-                korean_guide: item.korean_guide || '',
-                teaching_script_ko: item.teaching_script_ko || '',
-              })),
-              hasHandwriting: result.worksheet_summary?.has_handwriting || false,
-              isLegible: result.worksheet_summary?.is_handwriting_legible !== false,
-            };
-
-            // Background sync to the class so the teacher dashboard sees it.
-            if (dbInstance) {
-              const scanDocRef = doc(dbInstance, 'classes', activeClassId, 'studentScans', scanPayload.id);
-              setDoc(scanDocRef, scanPayload).catch(err => console.warn('Background scan sync warning:', err));
-            }
-          } catch (syncErr) {
-            console.warn('Class scan auto-sync error:', syncErr);
-          }
-        }
+        // The class copy (classes/{classId}/studentScans) is written by the
+        // server in api/_lib/analyze/scan.ts, not here.
 
         // Log Analytics
         db.logUserEvent('scan_completed', {
