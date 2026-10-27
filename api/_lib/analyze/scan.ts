@@ -1,8 +1,13 @@
-import { HarmCategory, HarmBlockThreshold } from '@google/genai';
 import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb } from '../firebaseAdmin.js';
 import { logUsage } from './gemini.js';
-import { SYSTEM_PROMPT, CONSOLIDATED_SCHEMA, verifyKeyGrounding } from './scanPrompt.js';
+import {
+  buildCurriculumContext,
+  buildScanSystemPrompt,
+  scanGenerateConfig,
+  SCAN_USER_TEXT,
+  verifyKeyGrounding,
+} from './scanPrompt.js';
 import type { TaskContext } from './context.js';
 
 // Worksheet scan: grade the photo, grounded in the class answer key for enrolled students.
@@ -111,22 +116,15 @@ export async function handleScan(ctx: TaskContext): Promise<any> {
             answerKey = rawAnswerKey.filter(
               (a: any) => a?.questionText && a?.answer && a?.inferred !== true
             );
-            const answerKeyLines = answerKey.map((a: any) => `- "${a.questionText}" → ${a.answer}`);
-
-            curriculumContext = `\n\nB2B SCHOOL & CURRICULUM CONTEXT:
-The student belongs to the partner school "${userData.schoolName || userData.schoolId}" and is enrolled in the class "${classData?.name || 'Active Class'}".
-This week's active learning curriculum details (Week ${activeWeek}):
-- Target Vocabulary Words: [${vocab.join(', ')}]
-- Target Phonics Rules/Sounds: [${phonics.join(', ')}]
-${passage ? `- Reference Reading Passage:\n"""\n${passage}\n"""` : ''}
-${answerKeyLines.length > 0 ? `- Known Answer Key for this week's and last week's worksheets (question → correct answer, from the teacher's own upload):\n${answerKeyLines.join('\n')}` : ''}
-
-CRITICAL OCR & SPELLING GRADING INSTRUCTIONS:
-1. Use the vocabulary list, phonics rules, and reading passage above to guide your OCR analysis of handwritten responses. If the student's handwriting closely resembles a target vocabulary word (allowing for minor spelling mistakes or malformed characters), match it.
-2. Cross-reference answers with the provided reading passage to evaluate reading comprehension accuracy.
-${answerKeyLines.length > 0 ? "2a. ANSWER KEY PRIORITY: If a question on the scanned worksheet matches (or closely matches) one of the questions in the Known Answer Key above, use that key's answer as ground truth instead of inferring the correct answer yourself — the teacher already confirmed it — and set graded_against_key to true for that item. Only fall back to your own judgment for questions not covered by the key." : ''}
-3. BLANK / UNANSWERED WORKSHEET DETECTION: If the scanned image contains no handwritten student responses in the designated answer areas (i.e., an unattempted or blank worksheet page), do NOT score it as 100% correct or 0 mistakes. Mark unanswered items clearly so that scanning a blank sheet does not pollute the teacher's error-tracking statistics.
-4. ENCOURAGING RESCAN PROMPT FOR MOMS: If any student mistakes are found, include a warm, encouraging Korean rescan callout encouraging mom to have the child fix the answer on the paper and rescan: "아이가 틀린 단어를 종이에 다시 고쳐 쓴 뒤 2차 재도전 스캔을 올려주시면 바로 2차 채점 및 완벽 마스터로 업데이트됩니다!";`;
+            curriculumContext = buildCurriculumContext({
+              schoolName: userData.schoolName || userData.schoolId,
+              className: classData?.name || 'Active Class',
+              week: activeWeek,
+              vocab,
+              phonics,
+              passage,
+              answerKey,
+            });
           }
         }
       }
@@ -139,46 +137,15 @@ ${answerKeyLines.length > 0 ? "2a. ANSWER KEY PRIORITY: If a question on the sca
   }
 
   const performAnalysis = async (useThinking: boolean) => {
-    let currentSystemPrompt = SYSTEM_PROMPT;
-    if (curriculumContext) {
-      currentSystemPrompt += curriculumContext;
-    }
-    if (childAge && childEnglishLevel) {
-      currentSystemPrompt += `\n\nCRITICAL CONTEXT: The student is ${childAge} years old and has an English experience level of "${childEnglishLevel}". Strictly tailor your teaching scripts, vocabulary, and pedagogy to match this child's development stage. Use simpler terms and explanations for younger or beginner students.`;
-    }
-    if (parentEnglishLevel) {
-      currentSystemPrompt += `\nAdditionally, the PARENT's English level is "${parentEnglishLevel}". Tailor the complexity of the korean_guide and english_guide to suit the parent's understanding.`;
-    }
-
-    if (language === 'ko') {
-      currentSystemPrompt += `\n\nPRIMARY LANGUAGE: Korean. You must focus your pedagogical explanations and overviews in Korean. Provide rich, detailed Korean guides (korean_guide, teaching_script_ko). The English fields can be brief literal translations.`;
-    } else {
-      currentSystemPrompt += `\n\nPRIMARY LANGUAGE: English. You must focus your pedagogical explanations exclusively in English. Write the 'overview_ko' field entirely in English. Provide rich, detailed English guides (english_guide, teaching_script_en), while the Korean fields can be brief literal translations.`;
-    }
-
-    const configOpts: any = {
-      systemInstruction: currentSystemPrompt,
-      responseMimeType: 'application/json',
-      responseSchema: CONSOLIDATED_SCHEMA as any,
-      safetySettings: [
-        {
-          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-      ],
-    };
+    const configOpts: any = scanGenerateConfig(
+      buildScanSystemPrompt({
+        curriculumContext,
+        childAge,
+        childEnglishLevel,
+        parentEnglishLevel,
+        language,
+      })
+    );
 
     // Determine model based on the SECURE pass tier
     let currentModel = 'gemini-2.5-flash'; // Verified working stable model
@@ -196,7 +163,7 @@ ${answerKeyLines.length > 0 ? "2a. ANSWER KEY PRIORITY: If a question on the sca
           parts: [
             { inlineData: { mimeType: 'image/jpeg', data: image } },
             {
-              text: "Analyze this worksheet for summary and answer key. IMPORTANT: All 'correct_answer' fields must be the FULL text of the answer, including choice letters (e.g. 'A. Text content'). NEVER provide just a letter.",
+              text: SCAN_USER_TEXT,
             },
           ],
         },
