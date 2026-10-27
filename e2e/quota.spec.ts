@@ -100,3 +100,36 @@ test('guest burst limit holds under parallel requests', async ({ request }) => {
   expect(statuses.filter((s) => s === 200)).toHaveLength(5);
   expect(statuses.filter((s) => s === 429)).toHaveLength(1);
 });
+
+test('a retried scan with the same idempotency key runs once', async ({ request }) => {
+  const { uid, idToken } = await signUp(request);
+  await seedDoc(request, `users/${uid}`, freeProfile());
+  const ip = freshIp();
+  const body = { task: 'analyze', image: fakeImage(1) };
+  const idempotencyKey = `e2e-${Math.random()}`;
+
+  // Both arrive before either finishes: one runs, the other waits for it.
+  const [a, b] = await Promise.all([
+    analyze(request, body, { idToken, ip, idempotencyKey }),
+    analyze(request, body, { idToken, ip, idempotencyKey }),
+  ]);
+  expect([a.status(), b.status()]).toEqual([200, 200]);
+  expect(await a.json()).toEqual(await b.json());
+
+  // Only one of the two scans was charged, so a second real scan still fits.
+  expect((await scan(request, idToken, ip, 2)).status()).toBe(200);
+  expect((await scan(request, idToken, ip, 3)).status()).toBe(403);
+});
+
+test("another user's idempotency key is not served back", async ({ request }) => {
+  const owner = await signUp(request);
+  const other = await signUp(request);
+  const idempotencyKey = `e2e-${Math.random()}`;
+  const ip = freshIp();
+
+  expect((await analyze(request, { task: 'analyze', image: fakeImage(1) }, { idToken: owner.idToken, ip, idempotencyKey })).status()).toBe(200);
+  // The other user runs their own scan under the same key and is charged for it.
+  expect((await analyze(request, { task: 'analyze', image: fakeImage(2) }, { idToken: other.idToken, ip, idempotencyKey })).status()).toBe(200);
+  expect((await scan(request, other.idToken, ip, 3)).status()).toBe(200);
+  expect((await scan(request, other.idToken, ip, 4)).status()).toBe(403);
+});

@@ -70,10 +70,20 @@ export async function userWrite(request: APIRequestContext, idToken: string, pat
 export function analyze(
   request: APIRequestContext,
   body: Record<string, unknown>,
-  opts: { idToken?: string; ip?: string } = {}
+  opts: { idToken?: string; ip?: string; idempotencyKey?: string } = {}
 ) {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (opts.idToken) headers.Authorization = `Bearer ${opts.idToken}`;
   if (opts.ip) headers['x-forwarded-for'] = opts.ip;
+  if (opts.idempotencyKey) headers['X-Idempotency-Key'] = opts.idempotencyKey;
   return request.post('/api/analyze', { headers, data: body });
+}
+
+// Sets Auth custom claims the way api/_lib/firebaseAdmin.ts syncAuthClaims does.
+export async function setClaims(request: APIRequestContext, uid: string, claims: Record<string, unknown>) {
+  const res = await request.post(`${AUTH}/identitytoolkit.googleapis.com/v1/projects/${PROJECT}/accounts:update`, {
+    headers: OWNER,
+    data: { localId: uid, customAttributes: JSON.stringify(claims) },
+  });
+  if (!res.ok()) throw new Error(`claims ${uid}: ${res.status()} ${await res.text()}`);
 }

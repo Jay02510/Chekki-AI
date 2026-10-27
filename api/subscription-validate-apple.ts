@@ -14,6 +14,8 @@ const APPLE_SANDBOX_URL = 'https://sandbox.itunes.apple.com/verifyReceipt';
 // app (audit: Medium finding — no rate limit on subscription-validate-apple).
 const checkValidateLimit = createRateLimiter('validate_apple', 10, 60);
 
+class ReceiptOwnedElsewhere extends Error {}
+
 // Your Apple App-Specific Shared Secret
 const APPLE_SHARED_SECRET = process.env.APPLE_SHARED_SECRET;
 
@@ -140,32 +142,51 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       created_at: now,
     };
 
-    // Use an atomic batch write to ensure database integrity
-    const batch = adminDb.batch();
     const subRef = adminDb.collection('subscriptions').doc(user_id);
     const userRef = adminDb.collection('users').doc(user_id);
+    // The query check above can't stop two accounts posting the same receipt
+    // at the same moment: both see no owner, both write. A claim doc keyed by
+    // the transaction id is a single-document read, so concurrent
+    // transactions on it conflict and the loser retries and sees the winner.
+    const claimRef = originalTransactionId
+      ? adminDb.collection('appleTransactionOwners').doc(String(originalTransactionId))
+      : null;
 
-    batch.set(subRef, subData, { merge: true });
+    try {
+      await adminDb.runTransaction(async (t) => {
+        if (claimRef) {
+          const claim = await t.get(claimRef);
+          const owner = claim.data()?.user_id;
+          if (owner && owner !== user_id) throw new ReceiptOwnedElsewhere();
+          if (!owner) t.set(claimRef, { user_id, claimed_at: now });
+        }
 
-    if (isActive) {
-      batch.update(userRef, {
-        plan: 'pro',
-        maxScansPerDay: 9999,
-        maxQuestionsPerDay: 9999,
+        t.set(subRef, subData, { merge: true });
+
+        if (isActive) {
+          t.update(userRef, {
+            plan: 'pro',
+            maxScansPerDay: 9999,
+            maxQuestionsPerDay: 9999,
+          });
+        } else {
+          // Mirrors subscription-webhook-apple.ts's downgrade — without this, a
+          // user granted 'pro' here (or by the webhook) stayed stuck at
+          // unlimited quota forever if this endpoint was ever called again
+          // after their subscription lapsed and the webhook was missed/delayed.
+          t.update(userRef, {
+            plan: 'free',
+            maxScansPerDay: 3,
+            maxQuestionsPerDay: 5,
+          });
+        }
       });
-    } else {
-      // Mirrors subscription-webhook-apple.ts's downgrade — without this, a
-      // user granted 'pro' here (or by the webhook) stayed stuck at
-      // unlimited quota forever if this endpoint was ever called again
-      // after their subscription lapsed and the webhook was missed/delayed.
-      batch.update(userRef, {
-        plan: 'free',
-        maxScansPerDay: 3,
-        maxQuestionsPerDay: 5,
-      });
+    } catch (e) {
+      if (e instanceof ReceiptOwnedElsewhere) {
+        return res.status(409).json({ error: 'This purchase is already linked to a different account' });
+      }
+      throw e;
     }
-
-    await batch.commit();
 
     return res.status(200).json({
       success: true,
