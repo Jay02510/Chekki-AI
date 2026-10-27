@@ -468,6 +468,7 @@ export default function Home() {
           <div className="flex flex-wrap gap-x-5 gap-y-2 font-semibold text-ink-2">
             <a href={langPath('/faq')} className="hover:text-ink">FAQ</a>
             <a href={langPath('/schools')} className="hover:text-ink">{isKo ? '학원·교사' : 'For schools'}</a>
+            <a href="/books/english-1" className="hover:text-ink">{isKo ? '체키 영어 워크북' : 'Chekki English workbook'}</a>
             <a href="https://blog.naver.com/chekkiai" target="_blank" rel="noopener noreferrer" className="hover:text-ink">
               {isKo ? '블로그' : 'Blog'}
             </a>

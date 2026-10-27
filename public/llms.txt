@@ -25,6 +25,7 @@ Korean pages are at the root; English versions are under /en.
 - Homepage (families): https://www.chekkiai.com/ (English: https://www.chekkiai.com/en)
 - FAQ: https://www.chekkiai.com/faq (English: https://www.chekkiai.com/en/faq)
 - Academies / B2B: https://www.chekkiai.com/schools (English: https://www.chekkiai.com/en/schools)
+- Workbook "Chekki English 1: My First English Sentences" (ages 4-7, PDF with QR audio): https://www.chekkiai.com/books/english-1
 - Teacher & Director portal: https://www.chekkiai.com/teacher
 - Privacy policy: https://www.chekkiai.com/privacy
 - Terms of use: https://www.chekkiai.com/terms
