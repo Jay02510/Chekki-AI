@@ -6,6 +6,19 @@ Lightweight decision records — context, decision, status, consequences. Newest
 
 ---
 
+## 025 — Split analyze.ts and TeacherPage.tsx; atomic idempotency; rules deploy from CI
+
+**Date:** 2026-10-27
+**Status:** Resolved (App Check deferred)
+
+**Context:** A senior-dev review flagged the two largest files (`api/analyze.ts` 1,880 lines, `src/pages/TeacherPage.tsx` 3,464) as the main maintenance risk, plus a few smaller issues: the idempotency claim in `analyze.ts` was get-then-set (two simultaneous first requests both ran and both charged quota) and settled its record in a fire-and-forget write after the response, which Vercel can freeze; the `/teacher` login still distinguished "no account" from "wrong password" (#020 only fixed the parent app); Firestore rules were deployed by hand; `docs/SECURITY_RUNBOOK.md` quoted a leaked key; and the CSP allowed `'unsafe-eval'` plus two unused script hosts.
+
+**Decision:** `analyze.ts` stays one Vercel function (the 12-function cap still applies) but is now a dispatcher: auth, rate limit, idempotency, quota and cache stay in it, and each task lives in `api/_lib/analyze/` (`scan`, `askQuestion`, `practice`, `curriculumOcr`, `staffReports`, `voiceLogFill`, shared `gemini` and `scanPrompt`), moved without changing any prompt or schema text. Idempotency moved to `api/_lib/idempotency.ts`: the claim is decided in a transaction and settled after the handler finishes, in the same place quota refunds run. `TeacherPage.tsx` lost its sign-in view, welcome modal, student drawer, settings and create-class modals (now components in `src/components/`) and its log-submission and roster logic (now `hooks/useClassLogSubmission.ts`, `hooks/useClassRoster.ts`), each owning the state only it used. Staff login now returns one generic error. CI deploys `firestore:rules,firestore:indexes` after all checks pass on `main`, but only once a `FIREBASE_DEPLOY_SA` secret exists. The CSP dropped `'unsafe-eval'`, `cdn.tailwindcss.com` and `esm.sh`; `'unsafe-inline'` stays because `index.html`/`app.html` have inline scripts.
+
+**Consequences:** New E2E coverage for the Schools dashboard (`e2e/staff-dashboard.spec.ts`) found and fixed a freeze: `StudentDatabaseGrid`'s inline `= []` default made TanStack Table re-render forever on any parent re-render (e.g. opening a student's details). Firebase App Check was not added: it needs reCAPTCHA Enterprise plus App Attest/Play Integrity set up in the console and a store build before enforcement, or the native app would be locked out. The leaked historical keys still need rotating (runbook §1). `TeacherPage.tsx` is still ~1,900 lines; the class list and class CRUD (`fetchClasses` and friends) and the dashboard shell JSX are the next candidates.
+
+---
+
 ## 024 — KT reviews once per class, and parents read their own per-student report
 
 **Date:** 2026-10-03

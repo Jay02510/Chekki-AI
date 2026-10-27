@@ -50,3 +50,29 @@ jobs:
 
       - name: Build
         run: npx vite build
+
+  deploy-firestore-rules:
+    # Rules and indexes used to be deployed by hand, so a committed rules fix
+    # could sit undeployed. This ships them from main once every check passes.
+    # It stays a no-op until the FIREBASE_DEPLOY_SA secret (a service account
+    # JSON key with the Firebase Rules Admin and Cloud Datastore Index Admin
+    # roles) is added in GitHub → Settings → Secrets and variables → Actions.
+    needs: checks
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      FIREBASE_DEPLOY_SA: ${{ secrets.FIREBASE_DEPLOY_SA }}
+    steps:
+      - uses: actions/checkout@v4
+        if: env.FIREBASE_DEPLOY_SA != ''
+
+      - name: Deploy Firestore rules and indexes
+        if: env.FIREBASE_DEPLOY_SA != ''
+        run: |
+          printf '%s' "$FIREBASE_DEPLOY_SA" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          npx --yes firebase-tools@15 deploy --only firestore:rules,firestore:indexes --project homework-assistant-c00b9 --non-interactive
+
+      - name: Skip (no deploy credentials)
+        if: env.FIREBASE_DEPLOY_SA == ''
+        run: echo "FIREBASE_DEPLOY_SA is not set; deploy rules by hand with firebase deploy --only firestore."

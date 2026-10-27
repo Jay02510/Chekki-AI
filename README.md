@@ -73,7 +73,7 @@ npm run lint
 npx tsc --noEmit
 ```
 
-GitHub Actions ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs typecheck, unit tests, rules tests, lint (report-only) and a production build on every push and pull request to `main`.
+GitHub Actions ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs typecheck, unit tests, rules tests, Playwright end-to-end tests (emulators, mocked Gemini), lint (errors block, warnings are reported) and a production build on every push and pull request to `main`.
 
 Unit tests cover the logic where a bug costs money or exposes data: seat limits, pricing tiers and invoices, join codes, roster validation, Apple receipt validation, AI JSON parsing, the curriculum grading guardrail, and parent-report rules.
 

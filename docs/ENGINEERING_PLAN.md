@@ -1,5 +1,7 @@
 # 🏗️ Chekki AI - Engineering Master Plan
 
+> **Outdated (2026-10-27):** this describes an early plan, not the shipped system. It mentions Gemini 3, Cloudinary uploads, React 18, CSS Modules, a headless-Chromium PDF engine and an offline IndexedDB queue, none of which the code uses. For the real architecture read `README.md`, `docs/DECISIONS.md`, `firestore.rules` and `api/`.
+
 **Document Version:** 2.0  
 **Status:** Approved / Active  
 **Lead Author:** Vice President of Engineering / Tech Lead  
