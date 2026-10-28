@@ -148,6 +148,8 @@ section.tint{background:var(--sunken)}
 .sampler{background:var(--line-soft);border-radius:20px;padding:26px;display:grid;gap:20px;align-items:center}
 .sampler ul{list-style:none;margin-top:12px;display:grid;gap:6px}
 .sampler li{padding-left:28px;position:relative;font-size:15px}
+.trial{margin-top:16px;border-radius:20px;padding:22px 26px;box-shadow:inset 0 0 0 1px var(--rule);display:grid;gap:14px;align-items:center}.trial p{font-size:15px;color:var(--ink-2);margin-top:4px}
+@media(min-width:768px){.trial{grid-template-columns:1fr auto}}
 .sampler li:before{content:"";position:absolute;left:4px;top:6px;width:14px;height:14px;border-radius:50%;background:var(--line)}
 @media(min-width:768px){.sampler{grid-template-columns:1.4fr 1fr;padding:36px}}
 
@@ -381,10 +383,13 @@ footer a{color:var(--ink-2);font-weight:700}
       <div style="display:flex;flex-direction:column;gap:10px;align-items:stretch">
         <img src="/books/english-1/img/chekki-point.webp" width="360" height="492" alt="" style="width:84px;margin:0 auto" loading="lazy">
         <a class="btn pri ko" data-link="sampler_ko" href="#">무료 샘플 받기</a>
-        <a class="btn out ko" data-link="sample_form" href="#">신청서로 받기</a>
         <a class="btn pri en" data-link="sampler_en" href="#">Get the free sampler</a>
         <p class="consent"><span class="ko">샘플 발송을 위해 이메일 주소만 받아요. 새 책 소식은 따로 동의하신 분께만 보내고, 언제든 수신 거부할 수 있어요. 만 14세 이상 보호자만 신청해 주세요. <a href="/privacy#books-ko">개인정보 처리방침</a></span><span class="en">We only ask for your email to send the sampler. News about new books goes only to people who opt in, and you can unsubscribe at any time. <a href="/privacy#books">Privacy policy</a></span></p>
       </div>
+    </div>
+    <div class="ko trial">
+      <div><b>체험단 모집 · 가족 30팀</b><p>PDF 전체를 무료로 받고 2주 동안 써 본 뒤 솔직한 후기를 남겨 주세요. 신청 10월 29일 ~ 11월 5일, 발표 11월 6일.</p></div>
+      <a class="btn out" data-link="sample_form" href="#">체험단 신청하기</a>
     </div>
   </div>
 </section>
@@ -455,7 +460,7 @@ footer a{color:var(--ink-2);font-weight:700}
 /* Store links: paste each URL when the store goes live. Empty = button shows "Coming soon". */
 var LINKS = {
   sampler_ko: 'https://chekkiai.gumroad.com/l/chekki-english-sampler-ko',  // Korean sampler: Gumroad $0 product
-  sample_form: 'https://forms.gle/VbWutTLVCyU4FFiq6',  // Google Form: parents apply for free samples (Instagram "프로필 링크에서 신청")
+  sample_form: 'https://forms.gle/VbWutTLVCyU4FFiq6',  // Google Form: 체험단 (30 families, closes 5 Nov). Remove the .trial box after 6 Nov (Instagram "프로필 링크에서 신청")
   sampler_en: 'https://chekkiai.gumroad.com/l/chekki-english-sampler',  // English sampler: Gumroad $0 product
   smartstore: 'https://chekkiai.gumroad.com/l/chekki-english-1-ko',  // Korean edition (Gumroad, KRW); key name kept
   gumroad: 'https://chekkiai.gumroad.com/l/chekki-english-1',
