@@ -45,7 +45,8 @@ export async function callVoiceLogFill(
   audioBlob: Blob,
   history: VoiceFillTurn[],
   currentFields: VoiceFillFields,
-  language: 'ko' | 'en' = 'ko'
+  language: 'ko' | 'en' = 'ko',
+  studentNames: string[] = []
 ): Promise<VoiceFillResponse> {
   const idToken = await auth.currentUser?.getIdToken();
   if (!idToken) throw new Error('Not authenticated');
@@ -69,6 +70,7 @@ export async function callVoiceLogFill(
         mimeType: audioBlob.type || 'audio/webm',
         history,
         currentFields,
+        studentNames,
         language,
       }),
     });

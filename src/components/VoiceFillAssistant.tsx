@@ -12,6 +12,8 @@ const PRIVACY_BANNER_DISMISSED_KEY = 'chekki_voice_privacy_banner_dismissed';
 interface Props {
   isNight?: boolean;
   currentFields: VoiceFillFields;
+  /** Class roster names, so the model spells spoken names as the roster does. */
+  studentNames?: string[];
   /** Applies a turn's result straight into the form — the form below is the
    * review screen, so there's no separate confirm step. */
   onApply: (fields: VoiceFillFields, exceptions: VoiceFillException[]) => void;
@@ -32,7 +34,7 @@ const FIELD_LABELS: Record<string, { ko: string; en: string }> = {
 
 // One recording covers the whole log — class details and any students to
 // mention. A follow-up only happens if a required field is still missing.
-export const VoiceFillAssistant: React.FC<Props> = ({ isNight = true, currentFields, onApply, onUndo, onClose }) => {
+export const VoiceFillAssistant: React.FC<Props> = ({ isNight = true, currentFields, studentNames = [], onApply, onUndo, onClose }) => {
   const { language } = useLanguage();
   const isKo = language === 'ko';
   const openPrompt = isKo
@@ -92,7 +94,7 @@ export const VoiceFillAssistant: React.FC<Props> = ({ isNight = true, currentFie
 
   const processTurn = async (blob: Blob) => {
     try {
-      const result = await callVoiceLogFill(blob, history, fieldsRef.current, language);
+      const result = await callVoiceLogFill(blob, history, fieldsRef.current, language, studentNames);
       // Backend guarantees an object here, but this crosses a network
       // boundary from an external LLM call — defensive fallbacks.
       onApply(result.updatedFields || {}, result.newExceptions || []);

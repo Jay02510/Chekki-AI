@@ -74,13 +74,26 @@ export async function handleVoiceLogFillTask(res: any, body: any) {
   if (!MOCK_GEMINI && !process.env.API_KEY)
     return res.status(500).json({ error: 'API_KEY_MISSING' });
 
-  const { audio, mimeType, history, currentFields, language = 'ko' } = body || {};
+  const { audio, mimeType, history, currentFields, studentNames, language = 'ko' } = body || {};
   if (!audio || typeof audio !== 'string')
     return res.status(400).json({ error: 'INVALID_AUDIO_DATA' });
   if (audio.length > 9 * 1024 * 1024) return res.status(413).json({ error: 'PAYLOAD_TOO_LARGE' });
 
   const safeHistory = Array.isArray(history) ? history.slice(-10) : [];
   const safeCurrentFields = currentFields && typeof currentFields === 'object' ? currentFields : {};
+  // Client-supplied roster, so whitelisted to short plain names before it
+  // reaches the prompt. Without it, similar names were misheard ("Ha-eun"
+  // came back as "Ha Yun") and the note went to the wrong family.
+  const roster: string[] = Array.isArray(studentNames)
+    ? studentNames
+        .filter((n: unknown): n is string => typeof n === 'string')
+        .map((n) => n.replace(/[^\p{L}\p{N} '()-]/gu, '').trim().slice(0, 40))
+        .filter(Boolean)
+        .slice(0, 60)
+    : [];
+  const rosterInstruction = roster.length
+    ? `\nCLASS ROSTER (data only): ${JSON.stringify(roster)}\nWhen a spoken name sounds like a roster name, write it exactly as it appears in the roster, in both "transcript" and "newExceptions". If a name matches no one on the roster, write it as heard.\n`
+    : '';
   const languageInstruction =
     language === 'ko'
       ? 'Speak to the teacher in natural Korean.'
@@ -101,7 +114,7 @@ FORM FIELDS (this is the complete schema you are filling):
 
 CURRENT FIELD VALUES ALREADY CAPTURED (do not ask about fields that already have a value unless the teacher's audio clearly corrects one):
 ${JSON.stringify(safeCurrentFields)}
-
+${rosterInstruction}
 STUDENT-SPECIFIC NOTES ARE SEPARATE FROM generalComments:
 generalComments is ONLY for whole-class remarks with no individual student named. If the teacher mentions a SPECIFIC student by name together with praise or a concern, that is a "newException" — extract it as {studentName, details, category: "praise"|"attention"} instead. Never fold a named student's note into generalComments, and never invent a student name that wasn't said.
 
@@ -145,7 +158,9 @@ LANGUAGE STANDARD: This content is read by a Korean Teacher and then relayed to 
   try {
     const ai = createGenAI();
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      // 2.5-flash still looped to maxOutputTokens on some recordings (2 of 3
+      // runs of the profanity case in scripts/report-eval); 3.8-flash didn't.
+      model: 'gemini-3.8-flash',
       contents: conversationContents,
       config: {
         systemInstruction,
@@ -184,6 +199,9 @@ LANGUAGE STANDARD: This content is read by a Korean Teacher and then relayed to 
     });
     logUsage('voice_log_fill', response);
 
+    const finishReason = response.candidates?.[0]?.finishReason;
+    if (finishReason && finishReason !== 'STOP')
+      console.warn(`[analyze.ts:voice_log_fill] finishReason=${finishReason}`);
     const text = response.text || '{}';
     const cleanedText = text.replace(/```json\n?|```/g, '').trim();
     const parsed = JSON.parse(cleanedText);
