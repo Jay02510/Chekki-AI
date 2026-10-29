@@ -148,7 +148,9 @@ export async function handleScan(ctx: TaskContext): Promise<any> {
     );
 
     // Determine model based on the SECURE pass tier
-    let currentModel = 'gemini-2.5-flash'; // Verified working stable model
+    // 3.8-flash caught 100% of mistakes vs 88.9% for 2.5-flash on the grading
+    // eval (scripts/grading-eval), about 5s slower per scan.
+    let currentModel = 'gemini-3.8-flash';
 
     if (useThinking && realUserPlan === 'pro') {
       currentModel = 'gemini-2.5-pro';
