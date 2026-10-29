@@ -20,8 +20,8 @@ export const FAQ_DATA: FaqItem[] = [
     tagEn: "Mom's English",
     questionKo: '영어 발음이나 문법에 자신 없는 엄마도 아이 숙제를 도울 수 있나요?',
     questionEn: 'Can moms who lack confidence in English pronunciation help with homework?',
-    answerKo: '네, 완벽히 가능합니다! 채키 AI는 엄마가 영어 선생님 역할을 직접 맡을 필요가 없도록 설계되었습니다. 숙제 사진을 찍으면 몇 초 안에 AI가 채점하고, 엄마가 아이에게 들려줄 한국어 칭찬 가이드("엄마, 이렇게 알려주세요")와 정확한 원어민 음성을 제공합니다.',
-    answerEn: 'Yes, absolutely! Chekki AI eliminates the pressure for moms to act as English teachers. Simply snap a photo, and Chekki grades it in seconds, with warm Korean coaching tips, and native pronunciation audio.'
+    answerKo: '네, 완벽히 가능합니다! 채키 AI는 엄마가 영어 선생님 역할을 직접 맡을 필요가 없도록 설계되었습니다. 숙제 사진을 찍으면 AI가 채점하고, 엄마가 아이에게 들려줄 한국어 칭찬 가이드("엄마, 이렇게 알려주세요")와 정확한 원어민 음성을 제공합니다.',
+    answerEn: 'Yes, absolutely! Chekki AI eliminates the pressure for moms to act as English teachers. Simply snap a photo, and Chekki grades it, with warm Korean coaching tips, and native pronunciation audio.'
   },
   {
     id: 'p2',

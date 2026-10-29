@@ -6,6 +6,19 @@ Lightweight decision records — context, decision, status, consequences. Newest
 
 ---
 
+## 026 — Scans and voice fill on gemini-3.8-flash; no speed numbers in copy; concern notes fact-checked
+
+**Date:** 2026-10-29
+**Status:** Resolved
+
+**Context:** The grading eval (`npm run eval:grading`) and report eval (`npm run eval:reports`) gave the first measured numbers. On the same 10 handwritten pages with the answer key, 2.5-flash caught 88.9% of mistakes in ~12s; 3.8-flash caught 100% in ~17s, with no false alarms on either. Voice fill on 2.5-flash looped to its output cap on some recordings (~20s against a 25s client timeout). Report drafts invented details the notes didn't give, most in needs-attention notes. Site copy promised "5초" / "in seconds" / "under 5 seconds", the target from #013, which no scan now meets.
+
+**Decision:** Scans and voice fill use `gemini-3.8-flash`; drafts stay on 2.5-flash (3.8 invented just as often and took twice as long). Accuracy over speed: speed numbers are removed from copy rather than replaced with a new one. Voice fill gets the class roster so names come back as spelled there. Needs-attention notes get a second fact-check pass, are left out of "send all as drafted", and phone-call prep reads teacher notes instead of earlier AI drafts.
+
+**Consequences:** Scans are ~5s slower. Class summaries can still add mild manner/mood phrases (4 sentences in 7 drafts in the last eval); extending the fact-check to them costs ~3s per report and waits for KT feedback. 3.8-flash pricing must be checked before relying on the ~$0.007/scan figure measured on 2.5-flash.
+
+---
+
 ## 025 — Split analyze.ts and TeacherPage.tsx; atomic idempotency; rules deploy from CI
 
 **Date:** 2026-10-27
