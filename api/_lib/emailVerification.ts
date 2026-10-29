@@ -19,10 +19,10 @@ export async function sendVerificationEmail(email: string): Promise<boolean> {
     to: email,
     subject: '[Chekki AI] 이메일 인증 후 원장님 계정이 연결됩니다',
     html: emailLayout(`
-      <p style="font-size: 15px; color: #e4e4e7;">결제하신 학원 계정을 연결하려면 이메일 인증이 필요합니다.</p>
-      <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">아래 버튼을 눌러 인증한 뒤 Chekki 페이지를 새로고침하면 원장님 계정이 자동으로 연결됩니다.</p>
+      <p style="font-size: 15px; color: #2b211a;">결제하신 학원 계정을 연결하려면 이메일 인증이 필요합니다.</p>
+      <p style="font-size: 14px; color: #5b4b3f; line-height: 1.6;">아래 버튼을 눌러 인증한 뒤 Chekki 페이지를 새로고침하면 원장님 계정이 자동으로 연결됩니다.</p>
       ${emailButton(link, '이메일 인증하기')}
-      <p style="font-size: 12px; color: #71717a; text-align: center;">Verify your email, then reload Chekki to connect your academy.</p>
+      <p style="font-size: 12px; color: #76665a; text-align: center;">Verify your email, then reload Chekki to connect your academy.</p>
     `),
   });
 }

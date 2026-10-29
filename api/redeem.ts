@@ -438,7 +438,7 @@ async function leaveClassroom(res: VercelResponse, uid: string) {
     schoolName: null,
     pendingStudentId: FieldValue.delete(),
     plan: hasStoreSub ? 'pro' : 'free',
-    maxScansPerDay: hasStoreSub ? 9999 : 2,
+    maxScansPerDay: hasStoreSub ? 9999 : 3,
     maxQuestionsPerDay: hasStoreSub ? 9999 : 5,
     ...(hasStoreSub ? {} : { subscriptionPlatform: FieldValue.delete() }),
   });

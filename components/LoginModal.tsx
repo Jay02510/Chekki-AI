@@ -271,8 +271,8 @@ export const LoginModal: React.FC<Props> = ({ isNight = true }) => {
               {pendingClassCode && (
                 <div className="bg-right-soft px-4 py-3 rounded-md text-correct text-[14px] mb-5 font-semibold break-keep text-center">
                   {isKo
-                    ? '선생님이 초대한 이메일로 가입/로그인하면 학급에 자동으로 연결됩니다.'
-                    : 'Use the email your teacher invited — you’ll join the class automatically.'}
+                    ? '초대 메일을 받은 이메일로 가입하면 학급에 자동으로 연결돼요. 카카오·Apple은 이메일이 달라 연결이 안 될 수 있어요.'
+                    : 'Sign up with the email the invite was sent to and you’ll join the class automatically. Kakao or Apple may use a different email.'}
                 </div>
               )}
 

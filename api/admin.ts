@@ -626,13 +626,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
             html: emailLayout(
               upgradedExisting
                 ? `
-              <p style="font-size: 15px; color: #e4e4e7;">안녕하세요 <strong>${contactName}</strong> 님,</p>
-              <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">입금이 확인되어 <strong>${academyName}</strong>의 플랜이 업그레이드되었습니다. 대시보드에서 바로 선생님을 추가로 초대하실 수 있습니다.</p>
+              <p style="font-size: 15px; color: #2b211a;">안녕하세요 <strong>${contactName}</strong> 님,</p>
+              <p style="font-size: 14px; color: #5b4b3f; line-height: 1.6;">입금이 확인되어 <strong>${academyName}</strong>의 플랜이 업그레이드되었습니다. 대시보드에서 바로 선생님을 추가로 초대하실 수 있습니다.</p>
               ${emailButton('https://www.chekkiai.com/teacher', '대시보드 열기')}`
                 : `
-              <p style="font-size: 15px; color: #e4e4e7;">안녕하세요 <strong>${contactName}</strong> 님,</p>
-              <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">입금이 확인되어 <strong>${academyName}</strong> 학원 계정이 준비되었습니다.</p>
-              <ol style="font-size: 14px; color: #a1a1aa; line-height: 1.8; padding-left: 20px;">
+              <p style="font-size: 15px; color: #2b211a;">안녕하세요 <strong>${contactName}</strong> 님,</p>
+              <p style="font-size: 14px; color: #5b4b3f; line-height: 1.6;">입금이 확인되어 <strong>${academyName}</strong> 학원 계정이 준비되었습니다.</p>
+              <ol style="font-size: 14px; color: #5b4b3f; line-height: 1.8; padding-left: 20px;">
                 <li>아래 버튼으로 접속해 <strong>원장(Director)</strong>으로 가입해 주세요. 반드시 이 이메일(<strong>${ownerEmail}</strong>)로 가입해야 학원이 자동 연결됩니다.</li>
                 <li>이메일 인증 링크가 오면 눌러주세요.</li>
                 <li>대시보드에서 반을 만들고 선생님과 학생(학부모)을 초대하세요. 학부모님께는 개별 초대 메일이 발송됩니다.</li>

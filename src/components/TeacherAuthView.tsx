@@ -254,11 +254,11 @@ export function TeacherAuthView({ loginRole, setLoginRole, inviteSlug, activatio
           <div className="w-full flex justify-between items-center mb-2">
             <button
               type="button"
-              onClick={() => { window.location.href = '/'; }}
+              onClick={() => { window.location.href = loginRole === 'director' ? '/schools' : '/'; }}
               className="inline-flex items-center gap-1.5 text-xs text-ink-3 hover:text-ink transition-colors cursor-pointer"
             >
               <ArrowLeft size={14} weight="bold" />
-              <span>{isKo ? '메인 서비스로 돌아가기' : 'Return to Main Service'}</span>
+              <span>{loginRole === 'director' ? (isKo ? '학원용 소개로 돌아가기' : 'Back to Chekki for Schools') : (isKo ? '메인 서비스로 돌아가기' : 'Return to Main Service')}</span>
             </button>
             {/* The only language switcher lived in the post-auth header
                 (below), leaving every pre-auth screen — login, signup,
@@ -368,8 +368,8 @@ export function TeacherAuthView({ loginRole, setLoginRole, inviteSlug, activatio
           <h2 className="text-2xl font-extrabold tracking-tight text-ink mb-2 font-display">
             {isPlanSignup
               ? (isKo
-                  ? `${planLabel.nameKo} 원장님 계정 생성 — FT ${planSeats.ft}석, KT ${planSeats.kt}석`
-                  : `Create your Director account for ${planLabel.nameEn} — ${planSeats.ft} FT seats, ${planSeats.kt} KT seats`)
+                  ? `${planLabel.nameKo} 원장님 계정 만들기 — 원어민 선생님 ${planSeats.ft}명, 한국인 선생님 ${planSeats.kt}명`
+                  : `Create your director account for ${planLabel.nameEn}: ${planSeats.ft} foreign teacher and ${planSeats.kt} Korean teacher seats`)
               : authMode === 'login'
               ? (isKo ? '로그인' : 'Sign in')
               : (loginRole === 'director' ? (isKo ? '원장님 계정 생성' : 'Create Director Account') : (isKo ? '교사 계정 생성' : 'Create Teacher Account'))}
@@ -377,7 +377,7 @@ export function TeacherAuthView({ loginRole, setLoginRole, inviteSlug, activatio
           <p className={`text-ink-3 text-xs text-center leading-relaxed max-w-xs ${isPlanSignup ? 'mb-2' : 'mb-6'}`}>
             {isPlanSignup
               ? (activationPlanId === 'trial'
-                  ? (isKo ? '신용카드 등록 없이 7일 무료 체험이 바로 시작됩니다.' : 'Free for 7 days, no payment required now.')
+                  ? (isKo ? '신용카드 등록 없이 14일 무료 체험이 바로 시작됩니다.' : 'Free for 14 days, no payment required now.')
                   : (isKo ? '가입 즉시 원장님 전용 대시보드가 개설됩니다. 결제는 대시보드에서 별도로 안내드립니다.' : 'Your Director dashboard activates immediately after signup — billing is handled separately from your dashboard.'))
               : authMode === 'login'
               ? (isKo ? '선생님과 원장님 모두 여기에서 로그인합니다.' : 'Teachers and directors both sign in here.')
@@ -431,7 +431,7 @@ export function TeacherAuthView({ loginRole, setLoginRole, inviteSlug, activatio
                   required
                   value={academyNameInput}
                   onChange={(e) => setAcademyNameInput(e.target.value)}
-                  placeholder={isKo ? '예: 첵키 잉글리시 아카데미' : 'e.g. Chekki English Academy'}
+                  placeholder={isKo ? '예: 해피 잉글리시 어학원' : 'e.g. Happy English Academy'}
                   className="w-full bg-surface border border-rule focus:border-line outline-none text-sm p-4 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] text-ink placeholder:text-ink-3/60"
                />
               </div>
@@ -516,7 +516,7 @@ export function TeacherAuthView({ loginRole, setLoginRole, inviteSlug, activatio
                   <span>
                     {authMode === 'login'
                       ? (isKo ? '로그인' : 'Log In')
-                      : (isKo ? '1-Click 교사 가입 및 시작' : '1-Click Sign Up & Start')}
+                      : (loginRole === 'director' ? (isKo ? '무료 체험 시작하기' : 'Start free trial') : (isKo ? '가입하고 시작하기' : 'Sign up and start'))}
                   </span>
                   <ArrowRight size={16} weight="bold" aria-hidden="true" className="group-hover:translate-x-1 transition-transform" />
                 </>

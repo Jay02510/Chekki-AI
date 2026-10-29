@@ -18,7 +18,7 @@
 - Korean Teacher (KT) reviews an AI-drafted Korean KakaoTalk parent update before it's sent — human-in-the-loop, no auto-send.
 - Printable review sheets from each student's wrong answers.
 - Directors get an aggregate dashboard across classes and teachers.
-- Plans: 7-day free academy trial, solo tutor / study room, starter academy, School Pro, large academy and franchise.
+- Plans: 14-day free academy trial, solo tutor / study room, starter academy, School Pro, large academy and franchise.
 
 ## Key pages
 Korean pages are at the root; English versions are under /en.

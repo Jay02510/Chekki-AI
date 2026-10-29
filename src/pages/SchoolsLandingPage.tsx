@@ -8,8 +8,8 @@
  *   roundels), set denser for staff: 15-16px body, tables, two columns.
  * STORY: a director learns grading uses their own answer key, FTs never write
  *   Korean, a KT checks every parent report, parents pay nothing, and what it
- *   costs; then starts the 7-day trial.
- * FIRST VIEWPORT: headline, one line, orange "start 7-day free trial" left;
+ *   costs; then starts the 14-day trial.
+ * FIRST VIEWPORT: headline, one line, orange "start 14-day free trial" left;
  *   right, Chekki holding a laptop.
  * FORM: dealt structure 7 of 7 (objection ledger), locked by the user.
  *   Signature: the open question carries the orange line down its edge.
@@ -40,7 +40,7 @@ import { ScreenTour, type TourStep } from '../components/ScreenTour';
 import { track } from '../lib/track';
 import { SCHOOLS_QA } from '../data/schoolsFaq';
 
-// Every new school starts as a 7-day trial (api/set-initial-role.ts); the
+// Every new school starts as a 14-day trial (api/set-initial-role.ts); the
 // plan param only labels which plan the director was looking at.
 const trialHref = (plan = 'trial') => `/teacher?activate=true&role=director&plan=${plan}`;
 
@@ -410,7 +410,7 @@ const SchoolsLandingPage: React.FC = () => {
           </div>
           <nav className="mt-6 flex flex-col gap-1 text-[20px] font-bold">
             <a href={trialHref()} onClick={startTrial('menu')} className="rounded-md px-3 py-3 text-line-ink hover:bg-sunken">
-              {isKo ? '7일 무료로 시작하기' : 'Start 7-day free trial'}
+              {isKo ? '14일 무료로 시작하기' : 'Start 14-day free trial'}
             </a>
             <a href="/teacher" className="rounded-md px-3 py-3 hover:bg-sunken">
               {isKo ? '선생님·원장님 로그인' : 'Teacher and director log in'}
@@ -457,7 +457,7 @@ const SchoolsLandingPage: React.FC = () => {
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
               <a id="hero-cta" href={trialHref()} onClick={startTrial('hero')} className={`${primaryBtn} min-h-14 px-7 text-[17px]`}>
-                {isKo ? '7일 무료로 시작하기' : 'Start 7-day free trial'}
+                {isKo ? '14일 무료로 시작하기' : 'Start 14-day free trial'}
                 <ArrowRight size={20} weight="bold" />
               </a>
               <p className="text-[14px] font-semibold text-ink-3 sm:max-w-[14rem]">
@@ -689,8 +689,8 @@ const SchoolsLandingPage: React.FC = () => {
             <div className="mt-4 space-y-1.5 text-[14px] leading-relaxed text-ink-2">
               <p>
                 {isKo
-                  ? '모든 학원은 7일 무료 체험(원어민 1 · 한국인 1 좌석)으로 시작해요. 체험 후 원장님 화면에서 요금제를 고르면 청구서를 보내 드려요. 계좌이체와 전자세금계산서로 결제해요.'
-                  : 'Every academy starts with a 7-day free trial (1 FT and 1 KT seat). After the trial, pick a plan from the director dashboard and we send an invoice, paid by bank transfer with a tax invoice.'}
+                  ? '모든 학원은 14일 무료 체험(원어민 1 · 한국인 1 좌석)으로 시작해요. 체험 후 원장님 화면에서 요금제를 고르면 청구서를 보내 드려요. 계좌이체와 전자세금계산서로 결제해요.'
+                  : 'Every academy starts with a 14-day free trial (1 FT and 1 KT seat). After the trial, pick a plan from the director dashboard and we send an invoice, paid by bank transfer with a tax invoice.'}
               </p>
               <p>
                 {isKo ? '학부모님 앱은 무료예요. 환불은 ' : 'The parent app is free. Refunds follow our '}
@@ -708,13 +708,13 @@ const SchoolsLandingPage: React.FC = () => {
             <ol className="relative mt-2 grid gap-6 before:absolute before:bottom-4 before:left-[14px] before:top-4 before:w-1 before:rounded-full before:bg-line sm:grid-cols-4 sm:gap-4 sm:before:bottom-auto sm:before:left-[12.5%] sm:before:right-[12.5%] sm:before:top-[14px] sm:before:h-1 sm:before:w-auto">
               {(isKo
                 ? [
-                    ['가입하기', '학원명과 원장님 이메일로 가입해요. 7일 체험이 바로 시작돼요.'],
+                    ['가입하기', '학원명과 원장님 이메일로 가입해요. 14일 체험이 바로 시작돼요.'],
                     ['선생님 초대', '반을 만들고 선생님을 초대해요. 이메일 링크로 들어와요.'],
                     ['학부모 초대', '아이마다 초대 링크를 보내요. 누르면 앱과 연결돼요.'],
                     ['정답지 올리기', '이번 주 숙제와 정답지를 사진이나 PDF로 올려요.'],
                   ]
                 : [
-                    ['Sign up', 'Use your academy name and email. The 7-day trial starts right away.'],
+                    ['Sign up', 'Use your academy name and email. The 14-day trial starts right away.'],
                     ['Invite teachers', 'Create classes and invite teachers by email link.'],
                     ['Invite parents', 'Send each child an invite link. One tap links the app.'],
                     ['Upload the key', "Add this week's homework and answer key as photos or PDF."],
@@ -733,7 +733,7 @@ const SchoolsLandingPage: React.FC = () => {
             </ol>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
               <a href={trialHref()} onClick={startTrial('steps')} className={primaryBtn}>
-                {isKo ? '7일 무료로 시작하기' : 'Start 7-day free trial'}
+                {isKo ? '14일 무료로 시작하기' : 'Start 14-day free trial'}
                 <ArrowRight size={18} weight="bold" />
               </a>
               <a href={langPath('/faq')} className="inline-flex min-h-11 items-center gap-1.5 px-1 text-[15px] font-bold text-line-ink">
@@ -818,7 +818,7 @@ const SchoolsLandingPage: React.FC = () => {
           </div>
           <div className="flex flex-col gap-2.5 sm:flex-row md:flex-col">
             <a href={trialHref()} onClick={startTrial('close')} className={primaryBtn}>
-              {isKo ? '7일 무료로 시작하기' : 'Start 7-day free trial'}
+              {isKo ? '14일 무료로 시작하기' : 'Start 14-day free trial'}
             </a>
             <button
               type="button"
@@ -865,7 +865,7 @@ const SchoolsLandingPage: React.FC = () => {
         }`}
       >
         <a href={trialHref()} onClick={startTrial('sticky')} tabIndex={showBar ? undefined : -1} className={`${primaryBtn} w-full`}>
-          {isKo ? '7일 무료로 시작하기' : 'Start 7-day free trial'}
+          {isKo ? '14일 무료로 시작하기' : 'Start 14-day free trial'}
           <ArrowRight size={18} weight="bold" />
         </a>
       </div>

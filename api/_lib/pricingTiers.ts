@@ -35,7 +35,7 @@ export function seatsForPlan(planId: string | undefined | null): { ft: number; k
  * to import from client code too.
  */
 export const PLAN_LABELS: Record<string, { nameEn: string; nameKo: string }> = {
-  trial: { nameEn: '7-Day Free Teacher Trial', nameKo: '7일 무료 학원 체험' },
+  trial: { nameEn: '14-Day Free Academy Trial', nameKo: '14일 무료 학원 체험' },
   solo: { nameEn: 'Solo Tutor & Study Room (1 Seat)', nameKo: '공부방 / 개인 교습소 (1석 단독)' },
   starter: { nameEn: 'Starter Academy Pack', nameKo: '스타터 학원 패키지' },
   school_pro: { nameEn: 'Chekki Master School Pro (All-in-One Bundle)', nameKo: '체키 마스터 스쿨 프로 (완전 통합 패키지)' },

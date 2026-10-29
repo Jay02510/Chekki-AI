@@ -1,7 +1,7 @@
 # 🏫 Chekki AI — B2B Academy Outreach & Sales Collateral Guide
 
 > **Target Audience**: Academy Directors (원장님), Academic Deans (부원장님), & Foreign Faculty Leads  
-> **Primary Goal**: Secure a 15-minute product demo or a 14-day 1-class free trial.  
+> **Primary Goal**: Secure a 15-minute product demo or a director starting the 14-day free trial (1 foreign teacher + 1 Korean teacher seat, no card or business number).  
 > **Official Domains**: `chekkiai.com` | `chekkiai.com/teacher` | `chekkiai.com/schools`
 
 ---
@@ -10,7 +10,9 @@
 
 ### Template 1: Korean Outreach (원장님 / 부원장님 대상)
 
-**제목**: `[Chekki AI] 원장님, 학원 정답지로 숙제를 채점하고 학부모 리포트까지 이어 드립니다 (14일 무료 체험 제안)`
+**제목**: `(광고) [Chekki AI] 원장님, 학원 정답지로 숙제를 채점하고 학부모 리포트까지 이어 드립니다 (14일 무료 체험)`
+
+정보통신망법: 제목의 (광고), 보내는 사람 정보, 수신 거부 방법을 빼지 마세요.
 
 > **원장님 안녕하십니까,**
 > 
@@ -25,7 +27,7 @@
 > 2. **가정 오답이 수업으로**: 학부모가 초대 링크로 가입하면, 집에서 틀린 문제가 수업 전에 선생님 대시보드에 모입니다.
 > 3. **한국인 선생님이 확인하는 학부모 리포트**: 원어민 선생님이 글이나 말로 남긴 수업 일지로 AI가 한국어 리포트 초안을 만들고, 한국인 선생님이 확인한 뒤 반 단위로 한 번에 보냅니다.
 > 
-> **학원의 기존 교재 및 수업 방식을 100% 유지**하면서 1개 반 대상 **14일간 비용 없이 무료 체험**을 진행해보실 수 있습니다.
+> **학원의 기존 교재 및 수업 방식을 100% 유지**하면서 **14일 무료 체험**(원어민 선생님 1명·한국인 선생님 1명, 카드·사업자번호 없이)을 바로 시작하실 수 있습니다.
 > 
 > 이번 주 혹은 다음 주 중 **15분 내외의 짧은 시연(온라인 Zoom 또는 현장 방문)** 일정을 잡으실 수 있을지 여쭙고자 합니다.
 > 
@@ -35,7 +37,9 @@
 > 
 > **Chekki AI 팀 드림**  
 > 🌐 Website: [https://chekkiai.com/schools](https://chekkiai.com/schools)  
-> 📞 문의: support@chekkiai.com / 010-5371-9266
+> 📞 문의: support@chekkiai.com / 010-5371-9266  
+> 채키 AI (Chekki AI) · 사업자등록번호 814-14-03096  
+> 더 이상 메일을 원하지 않으시면 이 메일에 "수신거부"라고 회신해 주세요.
 
 ---
 
@@ -56,7 +60,7 @@
 > • **Automatic Home-to-Class Sync:** Parents join via a one-tap invite link sent from your dashboard. Home scan mistake patterns sync directly to your teacher dashboard before class starts.
 > • **Parent Reports a Korean Teacher Approves:** Foreign teachers log the day by typing or talking; AI drafts the Korean report, and your Korean teacher checks a whole class at once before it goes out.
 > 
-> We would love to offer your academy a **14-day zero-risk trial for 1 pilot class**, keeping your existing curriculum 100% intact.
+> Your academy can start a **14-day free trial** (1 foreign teacher and 1 Korean teacher seat, no card needed), keeping your existing curriculum intact.
 > 
 > Would you be open to a brief **15-minute live demo** this week?
 > 
@@ -73,6 +77,6 @@
 When presenting Chekki AI to an academy, bring these **4 essential documents**:
 
 1. **1-Page School Product Profile (PDF / Print One-Pager)**: `https://chekkiai.com/schools`
-2. **Sample 1-Click Parent Progress Report (PDF Sample)**
-3. **14-Day Pilot Activation Card**: `https://chekkiai.com/teacher`
-4. **Data Security & Fact Sheet**: `https://chekkiai.com/privacy`
+2. **Sample parent report**: `docs/CHEKKI_SAMPLE_PARENT_REPORT.md`
+3. **Director quick-start card**: `docs/CHEKKI_PILOT_ACTIVATION_CARD.md`
+4. **Data security fact sheet**: `docs/CHEKKI_SECURITY_AND_PRIVACY_FACTSHEET.md` and `https://chekkiai.com/privacy`

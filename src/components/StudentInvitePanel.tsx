@@ -1,15 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
-import { UserPlus, UploadSimple, X, PaperPlaneTilt, Trash } from '@phosphor-icons/react';
+import { UserPlus, UploadSimple, X, PaperPlaneTilt, Trash, ChatCircle } from '@phosphor-icons/react';
 import { auth, dbInstance } from '../../services/database';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { staffUi, msgTone } from './staffUi';
+import { copyToClipboard } from '../../utils/clipboard';
 
 interface PendingStudent {
   id: string;
   name: string;
   parentEmail: string;
   inviteCode?: string;
+  classId?: string;
   status: 'invited' | 'redeemed';
   addedAt?: Timestamp;
   redeemedAt?: Timestamp;
@@ -158,8 +160,8 @@ export const StudentInvitePanel: React.FC<Props> = ({
       if (data.addedWithoutEmail > 0 && withEmail === 0) {
         setMessage({
           text: isKo
-            ? `${data.added}명이 학급 명단에 추가되었습니다. 이메일이 없어 초대는 발송되지 않았습니다 — 나중에 이메일을 추가하거나 코드를 직접 전달하세요.`
-            : `${data.added} ${data.added === 1 ? 'student' : 'students'} added to the class roster. No email on file, so no invite was sent — add one later or share the code directly.`,
+            ? `${data.added}명이 학급 명단에 추가되었습니다. 아래 명단에서 '카톡 초대'를 눌러 초대 문구를 복사해 카카오톡으로 보내세요.`
+            : `${data.added} ${data.added === 1 ? 'student' : 'students'} added to the class roster. Press 'Kakao invite' on their row below to copy an invite for KakaoTalk.`,
           type: 'success',
         });
       } else if (!data.resendConfigured && withEmail > 0) {
@@ -280,13 +282,29 @@ export const StudentInvitePanel: React.FC<Props> = ({
     }
   };
 
+  // Roster-only invites (no parent email) redeem for whichever account opens
+  // the link (api/redeem.ts only checks email when one is on file), so staff
+  // can send them by KakaoTalk — how most academies reach parents.
+  const copyKakaoInvite = async (s: PendingStudent) => {
+    if (!s.inviteCode) return;
+    const link = `https://www.chekkiai.com/?classCode=${s.inviteCode}`;
+    const className = classes.find((c) => c.id === s.classId)?.name;
+    const text = isKo
+      ? `[Chekki AI] ${s.name} 학부모님, 아래 링크를 눌러 가입하시면 ${className ? `${className} 반에 ` : ''}바로 연결돼요. 카카오·Apple·이메일 어느 방법으로 가입해도 돼요. 학원 숙제 채점과 선생님 리포트를 무료로 받으실 수 있어요.\n${link}`
+      : `[Chekki AI] Hi, this link connects ${s.name}'s parent to ${className || 'the class'}. Sign up any way you like (Kakao, Apple or email). Homework grading and teacher reports are free.\n${link}`;
+    const ok = await copyToClipboard(text);
+    setMessage(ok
+      ? { text: isKo ? `${s.name} 초대 문구를 복사했어요. 카카오톡에 붙여 넣어 보내세요. 링크는 한 번만 쓸 수 있어요.` : `Copied ${s.name}'s invite. Paste it into KakaoTalk. The link works once.`, type: 'success' }
+      : { text: isKo ? '복사에 실패했습니다. 다시 시도해 주세요.' : 'Copy failed. Please try again.', type: 'error' });
+  };
+
   return (
     <section className="text-left text-ink">
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className={staffUi.h2}>{isKo ? '학생 초대' : 'Invite students'}</h2>
           <p className={staffUi.sub}>
-            {isKo ? '학부모 이메일로 초대 링크를 보냅니다. 가입한 학생은 아래 학생 명단으로 옮겨집니다.' : 'Email each parent an invite link. Once they join, the student moves to the roster below.'}
+            {isKo ? '학부모 이메일로 초대를 보내거나, 이메일 없이 추가한 뒤 카카오톡으로 보낼 초대 문구를 복사하세요. 가입한 학생은 아래 학생 명단으로 옮겨집니다.' : 'Email each parent an invite, or add the student without an email and copy a KakaoTalk invite. Once they join, the student moves to the roster below.'}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -414,6 +432,17 @@ export const StudentInvitePanel: React.FC<Props> = ({
                             className={staffUi.iconBtn}
                           >
                             <PaperPlaneTilt size={18} weight="bold" />
+                          </button>
+                        )}
+                        {s.status === 'invited' && !s.parentEmail && s.inviteCode && (
+                          <button
+                            type="button"
+                            onClick={() => void copyKakaoInvite(s)}
+                            title={isKo ? '카카오톡 초대 문구 복사' : 'Copy KakaoTalk invite'}
+                            className={staffUi.quietBtn}
+                          >
+                            <ChatCircle size={16} weight="bold" aria-hidden="true" />
+                            {isKo ? '카톡 초대' : 'Kakao invite'}
                           </button>
                         )}
                         {s.status === 'invited' && !s.parentEmail && (

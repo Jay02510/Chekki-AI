@@ -98,12 +98,12 @@ export const FAQ_DATA: FaqItem[] = [
   {
     id: 't4',
     category: 'teacher',
-    tagKo: '7일 무료 체험',
-    tagEn: '7-Day Free Trial',
-    questionKo: '학원용 7일 무료 체험 신청 조건 및 승인 절차는 어떻게 되나요?',
-    questionEn: 'What is required for the 7-Day Academy Free Trial?',
-    answerKo: '학원명과 원장님 이메일로 가입하시면 7일 체험이 바로 시작됩니다. 신용카드나 사업자번호는 필요 없습니다.',
-    answerEn: 'Sign up with your academy name and email and the 7-day trial starts right away. No credit card or business registration needed.'
+    tagKo: '14일 무료 체험',
+    tagEn: '14-Day Free Trial',
+    questionKo: '학원용 14일 무료 체험 신청 조건 및 승인 절차는 어떻게 되나요?',
+    questionEn: 'What is required for the 14-Day Academy Free Trial?',
+    answerKo: '학원명과 원장님 이메일로 가입하시면 14일 체험이 바로 시작됩니다. 신용카드나 사업자번호는 필요 없습니다.',
+    answerEn: 'Sign up with your academy name and email and the 14-day trial starts right away. No credit card or business registration needed.'
   },
   {
     id: 't5',
