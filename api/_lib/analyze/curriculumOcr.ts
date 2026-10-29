@@ -60,6 +60,7 @@ Return ONLY valid JSON matching this schema:
     : `You are an expert curriculum parser for English Kindergarten & Elementary textbooks and worksheets.
 Extract the core teaching components and parent answer key from the provided textbook/worksheet page image(s).
 You are analyzing ${rawImageList.length} page(s)/image(s).
+Answer sources: for every detected answer, set "source" to "printed" if the answer is printed on the page (an answer-key or teacher's-guide page), "handwritten" if a teacher wrote it in by hand (a filled-in teacher copy: treat those handwritten answers as the key), or "inferred" if the page shows no answer and you worked it out yourself. Never label a worked-out answer "printed" or "handwritten".
 
 Provide both an overall aggregated unit summary AND a page-by-page breakdown for each page uploaded.
 
@@ -76,6 +77,7 @@ Return ONLY valid JSON matching this schema:
       "questionText": string,
       "answer": string,
       "category": string,
+      "source": "printed" | "handwritten" | "inferred",
       "bounding_box": { "ymin": number, "xmin": number, "ymax": number, "xmax": number } (the question's location on ITS OWN page image, coordinates 0-1000 scaled to that page's width/height — same convention as a normal graded-worksheet scan. Omit this field for a question if you can't confidently locate it, rather than guessing.)
     }
   ],
@@ -94,6 +96,7 @@ Return ONLY valid JSON matching this schema:
           "questionText": string,
           "answer": string,
           "category": string,
+          "source": "printed" | "handwritten" | "inferred",
           "bounding_box": { "ymin": number, "xmin": number, "ymax": number, "xmax": number } (0-1000 scale, that page's own image — omit if unsure)
         }
       ]

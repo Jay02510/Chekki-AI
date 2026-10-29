@@ -612,6 +612,7 @@ export const NativeTeacherLogForm: React.FC<Props> = ({
           key={voiceFillKey}
           isNight={isNight}
           currentFields={{ lessonTopic, textbook, energyLevel, activities, generalComments }}
+          studentNames={effectiveRoster.map((s) => s.name)}
           onApply={handleVoiceApply}
           onUndo={handleVoiceUndo}
           onClose={() => setShowVoiceFill(false)}

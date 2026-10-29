@@ -248,6 +248,11 @@ export const WorksheetItemCard: React.FC<WorksheetItemCardProps> = memo(
                       <div className="min-w-0">
                         <p className="text-[13px] font-semibold text-ink-3">
                           {!graded ? (ko ? '정답' : 'Answer') : ko ? '정답' : 'Correct answer'}
+                          {item.graded_against_key && (
+                            <span className="ml-2 font-bold text-correct">
+                              {ko ? '· 선생님 정답지 기준' : "· From your teacher's answer key"}
+                            </span>
+                          )}
                         </p>
                         <p
                           className={`mt-0.5 font-extrabold break-words ${isAnswerLong ? 'text-xl' : 'text-[28px] leading-tight'} ${

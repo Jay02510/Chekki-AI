@@ -151,7 +151,7 @@ const faqBody = (lang: 'ko' | 'en') =>
 const BODIES: Record<keyof typeof ROUTE_META, Record<'ko' | 'en', string>> = {
   home: {
     ko: `<h1>채키 AI: 영어 숙제 AI 채점, 발음 코칭, 학원 학부모 리포트</h1>
-      <p>채점은 채키가, 칭찬은 엄마가. 아이가 종이에 푼 영어 숙제를 사진 한 장으로 5초 안에 채점하고, 영어에 자신 없는 엄마도 아이를 도울 수 있도록 한국어 코칭 가이드와 원어민 발음을 제공합니다.</p>
+      <p>채점은 채키가, 칭찬은 엄마가. 아이가 종이에 푼 영어 숙제를 사진 한 장으로 채점하고, 영어에 자신 없는 엄마도 아이를 도울 수 있도록 한국어 코칭 가이드와 원어민 발음을 제공합니다.</p>
       <ul>
         <li>영유·어학원 교재와 시판 교재 모두 템플릿 없이 AI(Google Gemini 멀티모달 OCR)로 채점.</li>
         <li>북미 표준 영어 음성 합성·음성 인식 기반 어린이 발음 코칭.</li>
@@ -160,11 +160,11 @@ const BODIES: Record<keyof typeof ROUTE_META, Record<'ko' | 'en', string>> = {
       </ul>
       <p><a href="/faq">자주 묻는 질문</a> &middot; <a href="/schools">학원용 채키 AI</a> &middot; <a href="/en">English</a></p>`,
     en: `<h1>Chekki AI: AI Homework Help for Korean Families and English-Language Academies</h1>
-      <p>Chekki AI helps parents check their child's paper homework in seconds using AI-powered worksheet scanning and pronunciation coaching, and helps English-language academies (hagwons) automate class logging and Korean-language parent reporting.</p>
+      <p>Chekki AI helps parents check their child's paper homework using AI-powered worksheet scanning and pronunciation coaching, and helps English-language academies (hagwons) automate class logging and Korean-language parent reporting.</p>
       <ul>
-        <li>Scan any handwritten worksheet or academy workbook and get instant answer checking, powered by Google Gemini multimodal OCR.</li>
+        <li>Scan any handwritten worksheet or academy workbook and get the answers checked, powered by Google Gemini multimodal OCR.</li>
         <li>Pronunciation coaching using North American English text-to-speech and speech recognition, calibrated for children.</li>
-        <li>Free tier: 3 scans per day. Pro tier: unlimited scans.</li>
+        <li>Free accounts get free scans every day. Pro: unlimited scans.</li>
         <li>For academies: Foreign Teacher class logs are turned into Korean-language KakaoTalk parent updates, reviewed by a Korean Teacher before sending.</li>
       </ul>
       <p><a href="/en/faq">Frequently asked questions</a> &middot; <a href="/en/schools">Chekki AI for academies</a> &middot; <a href="/">한국어</a></p>`,

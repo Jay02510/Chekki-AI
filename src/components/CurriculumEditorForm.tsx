@@ -12,7 +12,7 @@ import {
   CheckCircle,
   Trash,
 } from '@phosphor-icons/react';
-import { UserProfile } from '../../types';
+import { UserProfile, AnswerKeyEntry } from '../../types';
 import { staffUi } from './staffUi';
 interface Props {
   isNight: boolean;
@@ -72,9 +72,10 @@ interface Props {
   setCurriculumPassage: (v: string) => void;
   curriculumOther: string;
   setCurriculumOther: (v: string) => void;
-  curriculumAnswerKey?: Array<{ questionText: string; answer: string }>;
+  curriculumAnswerKey?: AnswerKeyEntry[];
   handleRemoveAnswerKeyEntry?: (index: number) => void;
   handleEditAnswerKeyEntry?: (index: number, field: 'questionText' | 'answer', value: string) => void;
+  handleConfirmAnswerKeyEntries?: (index?: number) => void;
   curriculumLastEditedByName?: string;
   curriculumLastEditedAt?: string;
   worksheetType: string;
@@ -164,6 +165,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
   curriculumAnswerKey = [],
   handleRemoveAnswerKeyEntry,
   handleEditAnswerKeyEntry,
+  handleConfirmAnswerKeyEntries,
   curriculumLastEditedByName,
   curriculumLastEditedAt,
   worksheetType,
@@ -178,6 +180,7 @@ export const CurriculumEditorForm: React.FC<Props> = ({
   const isThemeNight = isNight;
   const [showScannerTip, setShowScannerTip] = useState(true);
   const [showOtherExample, setShowOtherExample] = useState(true);
+  const inferredCount = curriculumAnswerKey.filter((entry) => entry.inferred).length;
   return (
     <div className="mx-auto max-w-3xl text-left text-ink">
       <div>
@@ -914,7 +917,12 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 }`}
               />
             </div>
+            </>)}
 
+            {/* Shown on the Answer key tab too: that's where teachers upload,
+                and AI-inferred answers can only be confirmed from this list.
+                It used to sit inside the syllabus-only block, which no
+                sidebar links to, so inferred answers stayed ungraded. */}
             {curriculumAnswerKey.length > 0 && (
               <div className={`p-4 sm:p-5 rounded-lg border space-y-2 text-left ${
                 'bg-right-soft border-rule'
@@ -927,6 +935,24 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                     ? '워크시트 스캔에서 추출된 정답입니다. 채점 시 AI가 이 정답을 우선적으로 참고합니다. 잘못 인식된 항목은 직접 수정하거나 삭제할 수 있습니다.'
                     : "Extracted from your worksheet scans. Grading checks against these directly instead of guessing. Fix a misread entry in place, or remove it."}
                 </p>
+                {inferredCount > 0 && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-surface px-3 py-2">
+                    <p className="text-[12px] font-semibold text-ink-2 break-keep">
+                      {isKo
+                        ? `AI가 푼 답 ${inferredCount}개: 페이지에 정답이 없었어요. 확인 전에는 채점에 쓰지 않아요.`
+                        : `${inferredCount} answers the AI worked out (none printed on the page). Grading skips them until you confirm.`}
+                    </p>
+                    {handleConfirmAnswerKeyEntries && (
+                      <button
+                        type="button"
+                        onClick={() => handleConfirmAnswerKeyEntries()}
+                        className="min-h-9 shrink-0 rounded-md border border-rule px-3 text-[12px] font-bold text-ink hover:bg-sunken"
+                      >
+                        {isKo ? '모두 확인' : 'Confirm all'}
+                      </button>
+                    )}
+                  </div>
+                )}
                 <ul className="space-y-1 max-h-48 overflow-y-auto text-xs">
                   {curriculumAnswerKey.map((entry, i) => (
                     <li key={i} className={`flex items-center gap-2 px-3 py-1.5 rounded-md bg-surface`}>
@@ -942,8 +968,18 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                         value={entry.answer}
                         onChange={(e) => handleEditAnswerKeyEntry?.(i, 'answer', e.target.value)}
                         disabled={!handleEditAnswerKeyEntry}
-                        className="w-24 shrink-0 bg-transparent outline-none font-bold text-correct focus:underline decoration-dotted"
+                        className={`w-24 shrink-0 bg-transparent outline-none font-bold focus:underline decoration-dotted ${entry.inferred ? 'text-ink-3' : 'text-correct'}`}
                       />
+                      {entry.inferred && handleConfirmAnswerKeyEntries && (
+                        <button
+                          type="button"
+                          onClick={() => handleConfirmAnswerKeyEntries(i)}
+                          title={isKo ? 'AI가 푼 답이에요. 맞으면 확인' : 'The AI worked this out. Confirm if right'}
+                          className="shrink-0 rounded-md border border-rule px-2 py-0.5 text-[11px] font-bold text-ink-2 hover:bg-sunken"
+                        >
+                          {isKo ? 'AI 추정 · 확인' : 'AI guess · Confirm'}
+                        </button>
+                      )}
                       {handleRemoveAnswerKeyEntry && (
                         <button
                           type="button"
@@ -959,7 +995,6 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 </ul>
               </div>
             )}
-            </>)}
 
             {/* DEMO: AI Worksheet Generator (generate-new-worksheet, distinct
                 from the answer-key scan above) hidden — newest, least

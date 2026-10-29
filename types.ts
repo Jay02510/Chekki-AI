@@ -31,6 +31,16 @@ export interface WorksheetItem {
   custom_coords?: { top: number; left: number };
   student_response?: string;
   is_correct?: boolean;
+  graded_against_key?: boolean;
+}
+
+// One question/answer pair in a class's weekly answer key. `inferred` marks
+// an answer the AI worked out itself (nothing printed or handwritten on the
+// page); grading ignores it until a teacher confirms or edits it.
+export interface AnswerKeyEntry {
+  questionText: string;
+  answer: string;
+  inferred?: boolean;
 }
 
 export interface UserProfile {

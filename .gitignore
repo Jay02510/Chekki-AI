@@ -46,3 +46,8 @@ local.properties
 brag-output*/
 test-results/
 playwright-report/
+
+# Grading eval: rendered pages and photos of the paid Chekki English book, regenerated locally
+scripts/grading-eval/pages/
+scripts/grading-eval/cases/
+scripts/report-eval/results-*.json

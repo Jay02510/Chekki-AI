@@ -1,4 +1,4 @@
-import { Type } from '@google/genai';
+import { Type, HarmCategory, HarmBlockThreshold } from '@google/genai';
 
 // Hardened system prompt to prevent jailbreaking / prompt injection
 export const SYSTEM_PROMPT = `
@@ -145,6 +145,25 @@ export const CONSOLIDATED_SCHEMA = {
       description: 'Detailed analysis of each question found in the worksheet.',
       items: {
         type: Type.OBJECT,
+        // Gemini writes properties alphabetically unless told otherwise,
+        // which put correct_answer and is_correct before student_response:
+        // the model decided the grade before reading the child's mark, and
+        // then "read" the right answer into it. Read first, then grade.
+        propertyOrdering: [
+          'id',
+          'type',
+          'question_text',
+          'question_translation',
+          'bounding_box',
+          'student_response',
+          'correct_answer',
+          'is_correct',
+          'graded_against_key',
+          'korean_guide',
+          'english_guide',
+          'teaching_script_ko',
+          'teaching_script_en',
+        ],
         properties: {
           id: { type: Type.INTEGER },
           type: { type: Type.STRING },
@@ -166,6 +185,11 @@ export const CONSOLIDATED_SCHEMA = {
             type: Type.BOOLEAN,
             description:
               "True if the student's answer matches the correct answer contextually, false otherwise.",
+          },
+          graded_against_key: {
+            type: Type.BOOLEAN,
+            description:
+              "True ONLY if this question matched an entry in the teacher's Known Answer Key and correct_answer was taken from it. False otherwise, including when no answer key was provided.",
           },
           korean_guide: { type: Type.STRING },
           english_guide: { type: Type.STRING },
@@ -190,6 +214,7 @@ export const CONSOLIDATED_SCHEMA = {
           'correct_answer',
           'student_response',
           'is_correct',
+          'graded_against_key',
           'korean_guide',
           'english_guide',
           'teaching_script_ko',
@@ -202,8 +227,111 @@ export const CONSOLIDATED_SCHEMA = {
   required: ['worksheet_summary', 'items'],
 };
 
+const normalizeAnswer = (s: unknown) =>
+  String(s ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣]/g, '');
+
+// The model's graded_against_key claim is kept only when its correct_answer
+// actually contains one of the teacher's key answers. Parents and teachers
+// read this flag as "checked against the real key", so an unverified claim
+// is dropped rather than shown.
+export function verifyKeyGrounding(items: any[], answerKey: { answer?: string }[]): any[] {
+  const answers = answerKey.map((a) => normalizeAnswer(a.answer)).filter(Boolean);
+  for (const item of items) {
+    const answer = normalizeAnswer(item.correct_answer);
+    item.graded_against_key =
+      item.graded_against_key === true && answers.some((a) => answer.includes(a));
+  }
+  return items;
+}
+
 // --- Teacher-log -> bilingual parent report generation (task: 'generate_report') ---
 // Folded in from api/generate-report.ts (was its own file) when the Vercel
 // Hobby plan's 12-function limit blocked deployment. Same auth + rate-limit
 // gate above already covers this task; it just skips the OCR-specific
 // idempotency/scan-limit logic further down, which doesn't apply here.
+
+// Everything the scan sends to Gemini, built here so scripts/grading-eval
+// can run the exact production prompt without Firestore.
+export const SCAN_USER_TEXT =
+  "Analyze this worksheet for summary and answer key. IMPORTANT: All 'correct_answer' fields must be the FULL text of the answer, including choice letters (e.g. 'A. Text content'). NEVER provide just a letter.";
+
+export function buildCurriculumContext(c: {
+  schoolName: string;
+  className: string;
+  week: number | string;
+  vocab: string[];
+  phonics: string[];
+  passage: string;
+  answerKey: { questionText?: string; answer?: string }[];
+}): string {
+  const answerKeyLines = c.answerKey.map((a) => `- "${a.questionText}" → ${a.answer}`);
+  return `\n\nB2B SCHOOL & CURRICULUM CONTEXT:
+The student belongs to the partner school "${c.schoolName}" and is enrolled in the class "${c.className}".
+This week's active learning curriculum details (Week ${c.week}):
+- Target Vocabulary Words: [${c.vocab.join(', ')}]
+- Target Phonics Rules/Sounds: [${c.phonics.join(', ')}]
+${c.passage ? `- Reference Reading Passage:\n"""\n${c.passage}\n"""` : ''}
+${answerKeyLines.length > 0 ? `- Known Answer Key for this week's and last week's worksheets (question → correct answer, from the teacher's own upload):\n${answerKeyLines.join('\n')}` : ''}
+
+CRITICAL OCR & SPELLING GRADING INSTRUCTIONS:
+1. Use the vocabulary list, phonics rules, and reading passage above to guide your OCR analysis of handwritten responses. If the student's handwriting closely resembles a target vocabulary word (allowing for minor spelling mistakes or malformed characters), match it.
+2. Cross-reference answers with the provided reading passage to evaluate reading comprehension accuracy.
+${answerKeyLines.length > 0 ? "2a. ANSWER KEY PRIORITY: If a question on the scanned worksheet matches (or closely matches) one of the questions in the Known Answer Key above, use that key's answer as ground truth instead of inferring the correct answer yourself — the teacher already confirmed it — and set graded_against_key to true for that item. Only fall back to your own judgment for questions not covered by the key." : ''}
+3. BLANK / UNANSWERED WORKSHEET DETECTION: If the scanned image contains no handwritten student responses in the designated answer areas (i.e., an unattempted or blank worksheet page), do NOT score it as 100% correct or 0 mistakes. Mark unanswered items clearly so that scanning a blank sheet does not pollute the teacher's error-tracking statistics.
+4. ENCOURAGING RESCAN PROMPT FOR MOMS: If any student mistakes are found, include a warm, encouraging Korean rescan callout encouraging mom to have the child fix the answer on the paper and rescan: "아이가 틀린 단어를 종이에 다시 고쳐 쓴 뒤 2차 재도전 스캔을 올려주시면 바로 2차 채점 및 완벽 마스터로 업데이트됩니다!";`;
+}
+
+export function buildScanSystemPrompt(o: {
+  curriculumContext: string;
+  childAge?: unknown;
+  childEnglishLevel?: unknown;
+  parentEnglishLevel?: unknown;
+  language: string;
+}): string {
+  const { childAge, childEnglishLevel, parentEnglishLevel, language } = o;
+  let prompt = SYSTEM_PROMPT + o.curriculumContext;
+  if (childAge && childEnglishLevel) {
+    prompt += `\n\nCRITICAL CONTEXT: The student is ${childAge} years old and has an English experience level of "${childEnglishLevel}". Strictly tailor your teaching scripts, vocabulary, and pedagogy to match this child's development stage. Use simpler terms and explanations for younger or beginner students.`;
+  }
+  if (parentEnglishLevel) {
+    prompt += `\nAdditionally, the PARENT's English level is "${parentEnglishLevel}". Tailor the complexity of the korean_guide and english_guide to suit the parent's understanding.`;
+  }
+
+  if (language === 'ko') {
+    prompt += `\n\nPRIMARY LANGUAGE: Korean. You must focus your pedagogical explanations and overviews in Korean. Provide rich, detailed Korean guides (korean_guide, teaching_script_ko). The English fields can be brief literal translations.`;
+  } else {
+    prompt += `\n\nPRIMARY LANGUAGE: English. You must focus your pedagogical explanations exclusively in English. Write the 'overview_ko' field entirely in English. Provide rich, detailed English guides (english_guide, teaching_script_en), while the Korean fields can be brief literal translations.`;
+  }
+  return prompt;
+}
+
+export function scanGenerateConfig(systemInstruction: string): any {
+  return {
+    systemInstruction,
+    responseMimeType: 'application/json',
+    responseSchema: CONSOLIDATED_SCHEMA as any,
+    // Grading should give the same answer for the same photo; the default
+    // (1.0) let a clear circle be read differently from run to run.
+    temperature: 0.1,
+    safetySettings: [
+      {
+        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+    ],
+  };
+}
