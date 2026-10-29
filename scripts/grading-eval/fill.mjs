@@ -30,6 +30,32 @@ function rng(seedText) {
 
 const optionsOf = (item) => (item.kind === 'yn' ? ['Yes', 'No'] : ['A', 'B', 'C']);
 
+// A child's wrong answer on a written item: a misspelling of the word, or
+// another word from the same page.
+function childMistake(item, pageWords, rand) {
+  const w = item.answer;
+  const swaps = { b: 'd', d: 'b', a: 'e', e: 'i', i: 'e', o: 'u', u: 'o', c: 'k' };
+  const tries = [
+    () =>
+      w.slice(0, 1 + Math.floor(rand() * (w.length - 1))) +
+      w.slice(2 + Math.floor(rand() * (w.length - 2))), // drop a letter
+    () => {
+      const i = Math.floor(rand() * (w.length - 1));
+      return w.slice(0, i) + w[i + 1] + w[i] + w.slice(i + 2); // swap neighbours
+    },
+    () => {
+      const i = [...w].findIndex((ch) => swaps[ch]);
+      return i < 0 ? w + w.at(-1) : w.slice(0, i) + swaps[w[i]] + w.slice(i + 1); // b/d, vowel or c/k slip
+    },
+    () => pageWords.filter((x) => x !== w)[Math.floor(rand() * (pageWords.length - 1))] || w + 's', // wrong word
+  ];
+  for (let k = 0; k < 8; k++) {
+    const guess = tries[Math.floor(rand() * tries.length)]();
+    if (guess && guess.toLowerCase() !== w.toLowerCase()) return guess;
+  }
+  return w + w.at(-1);
+}
+
 const browser = await chromium.launch();
 const page = await browser.newPage({
   viewport: { width: 900, height: 1250 },
@@ -45,7 +71,17 @@ for (const file of fs
   for (let v = 0; v < variants; v++) {
     const rand = rng(`${meta.pageId}#${v}`);
     const mistakeRate = v === 0 ? 0.35 : 0.15;
+    const pageWords = meta.items.map((i) => i.answer);
     const items = meta.items.map((item) => {
+      if (item.kind === 'write') {
+        const childAnswer =
+          rand() < mistakeRate ? childMistake(item, pageWords, rand) : item.answer;
+        return {
+          ...item,
+          childAnswer,
+          isCorrect: childAnswer.toLowerCase() === item.answer.toLowerCase(),
+        };
+      }
       const options = optionsOf(item);
       const wrong = options.filter((o) => o !== item.answer);
       const childAnswer =
@@ -63,11 +99,18 @@ for (const file of fs
       width: 3 + rand() * 2.5,
       start: rand() * Math.PI * 2,
       phase: [rand() * 6.28, rand() * 6.28],
+      font: ['Gaegu', 'Schoolbell', 'Patrick Hand'][Math.floor(rand() * 3)],
+      lean: (rand() - 0.5) * 8,
     }));
+    if (meta.items.some((i) => i.kind === 'write')) {
+      await page.addStyleTag({
+        url: 'https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Patrick+Hand&family=Schoolbell&display=block',
+      });
+    }
     const tilt = (rand() - 0.5) * 5;
     const ok = await page.evaluate(
-      ({ marks, tilt }) => {
-        const els = [...document.querySelectorAll('.item.pm, .item.wo, .item.yn')];
+      async ({ marks, tilt }) => {
+        const els = [...document.querySelectorAll('.item.pm, .item.wo, .item.yn, .witem')];
         if (els.length !== marks.length)
           return `found ${els.length} items, expected ${marks.length}`;
         const sheet = document.querySelector('.page');
@@ -78,8 +121,19 @@ for (const file of fs
           'style',
           'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:50'
         );
+        for (const m of marks)
+          if (m.kind === 'write') await document.fonts.load(`700 30px "${m.font}"`);
         els.forEach((el, i) => {
           const m = marks[i];
+          if (m.kind === 'write') {
+            // Handwritten word sitting on the blank line, a little crooked.
+            const r = el.querySelector('.wblank').getBoundingClientRect();
+            const word = document.createElement('div');
+            word.textContent = m.pick;
+            word.style.cssText = `position:absolute;z-index:50;left:${r.left - base.left + 6}px;top:${r.top - base.top - 14}px;font:700 34px "${m.font}";color:${m.colour};opacity:.85;transform:rotate(${m.lean}deg);transform-origin:left bottom`;
+            sheet.appendChild(word);
+            return;
+          }
           const targets =
             m.kind === 'pm'
               ? [...el.querySelectorAll('.tile')].map((t) => [

@@ -8,6 +8,8 @@
     "test": "vitest run",
     "test:rules": "firebase emulators:exec --only firestore --project demo-chekki \"vitest run --config vitest.rules.config.ts\"",
     "eval:grading": "tsx scripts/grading-eval/run.ts",
+    "eval:reports": "tsx scripts/report-eval/run.ts",
+    "eval:ocr": "tsx scripts/grading-eval/ocr.ts",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write \"**/*.{ts,tsx,css,md}\"",

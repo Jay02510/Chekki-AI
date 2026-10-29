@@ -19,7 +19,7 @@ import {
 
 type Item = {
   n: string;
-  kind: 'pm' | 'wo' | 'yn';
+  kind: 'pm' | 'wo' | 'yn' | 'write';
   sentence: string;
   answer: string;
   options?: Record<string, string>;
@@ -31,6 +31,8 @@ type Case = { id: string; image: string; items: Item[] };
 const arg = (name: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split('=')[1];
 const model = arg('model') || 'gemini-2.5-flash';
 const limit = Number(arg('limit') || Infinity);
+// e.g. --thinking=LOW or MINIMAL (Gemini 3+); omitted = the model's default
+const thinking = arg('thinking');
 const casesDir = path.join(path.dirname(new URL(import.meta.url).pathname), 'cases');
 try {
   process.loadEnvFile('.env');
@@ -47,12 +49,14 @@ const cases: Case[] = JSON.parse(fs.readFileSync(path.join(casesDir, 'cases.json
 // What a teacher's upload of the book's answer-key page would give.
 function answerKeyFor(c: Case) {
   return c.items.map((i) =>
-    i.kind === 'wo'
-      ? {
-          questionText: `${i.n}. Circle the sentence that matches the picture.`,
-          answer: `${i.answer}. ${i.sentence}`,
-        }
-      : { questionText: `${i.n}. ${i.sentence}`, answer: i.answer }
+    i.kind === 'write'
+      ? { questionText: `${i.n}. ${i.sentence.replace(i.answer, '____')}`, answer: i.answer }
+      : i.kind === 'wo'
+        ? {
+            questionText: `${i.n}. Circle the sentence that matches the picture.`,
+            answer: `${i.answer}. ${i.sentence}`,
+          }
+        : { questionText: `${i.n}. ${i.sentence}`, answer: i.answer }
   );
 }
 
@@ -75,7 +79,11 @@ function overlap(a: Set<string>, b: Set<string>) {
 function match(truth: Item[], got: any[]) {
   const scored: [number, number, number][] = [];
   truth.forEach((t, ti) => {
-    const want = words([t.sentence, ...Object.values(t.options || {})].join(' '));
+    const want = words(
+      [t.sentence, t.kind === 'write' ? t.childAnswer : '', ...Object.values(t.options || {})].join(
+        ' '
+      )
+    );
     got.forEach((g, gi) =>
       scored.push([overlap(want, words(`${g.question_text} ${g.correct_answer}`)), ti, gi])
     );
@@ -123,10 +131,20 @@ async function grade(c: Case, withKey: boolean) {
             ],
           },
         ],
-        config: scanGenerateConfig(buildScanSystemPrompt({ curriculumContext, language: 'ko' })),
+        config: {
+          ...scanGenerateConfig(buildScanSystemPrompt({ curriculumContext, language: 'ko' })),
+          ...(thinking ? { thinkingConfig: { thinkingLevel: thinking } } : {}),
+        },
       });
       const parsed = JSON.parse((res.text || '{}').replace(/```json\n?|```/g, '').trim());
-      return { items: verifyKeyGrounding(parsed.items || [], answerKey), ms: Date.now() - started };
+      return {
+        items: verifyKeyGrounding(parsed.items || [], answerKey),
+        ms: Date.now() - started,
+        tokensIn: res.usageMetadata?.promptTokenCount ?? 0,
+        tokensOut:
+          (res.usageMetadata?.candidatesTokenCount ?? 0) +
+          (res.usageMetadata?.thoughtsTokenCount ?? 0),
+      };
     } catch (e: any) {
       if (
         attempt < 2 &&
@@ -167,6 +185,8 @@ await Promise.all(
         case: job.c.id,
         withKey: job.withKey,
         ms: r.ms,
+        tokensIn: (r as any).tokensIn ?? 0,
+        tokensOut: (r as any).tokensOut ?? 0,
         error: r.error,
         items: score(job.c, r.items),
       });
@@ -176,7 +196,9 @@ await Promise.all(
 );
 
 const pct = (a: number, b: number) => (b ? `${((100 * a) / b).toFixed(1)}%` : '-');
-console.log(`\n\nmodel ${model}, ${cases.length} pages`);
+console.log(
+  `\n\nmodel ${model}${thinking ? ` (thinking ${thinking})` : ''}, ${cases.length} pages`
+);
 for (const withKey of [false, true]) {
   const rs = results.filter((r) => r.withKey === withKey);
   const its = rs.flatMap((r) => r.items);
@@ -205,12 +227,14 @@ for (const withKey of [false, true]) {
   console.log(
     `  avg latency          ${(rs.reduce((s, r) => s + r.ms, 0) / Math.max(1, rs.length) / 1000).toFixed(1)}s`
   );
+  const avg = (k: string) => Math.round(rs.reduce((s, r) => s + r[k], 0) / Math.max(1, rs.length));
+  console.log(`  avg tokens           ${avg('tokensIn')} in / ${avg('tokensOut')} out (incl. thinking)`);
   const errors = rs.filter((r) => r.error).length;
   if (errors) console.log(`  API errors           ${errors}`);
 }
 const out = path.join(
   casesDir,
-  `results-${model}-${new Date().toISOString().replace(/[:.]/g, '-')}.json`
+  `results-${model}${thinking ? `-${thinking}` : ''}-${new Date().toISOString().replace(/[:.]/g, '-')}.json`
 );
 fs.writeFileSync(out, JSON.stringify(results, null, 1));
 console.log(`\nper-item results: ${out}`);
