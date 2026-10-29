@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { GoogleGenAI, Type } from '@google/genai';
 import { handleVoiceLogFillTask } from '../../api/_lib/analyze/voiceLogFill';
 import { handleGenerateReportTask } from '../../api/_lib/analyze/staffReports';
 
@@ -148,6 +149,46 @@ const CASES: Case[] = [
   },
 ];
 
+const CLASS_TEXTBOOK: Record<string, string> = {
+  "let's go": "Let's Go 1",
+  'chekki english': 'Chekki English 1',
+  bricks: 'Bricks Reading 30',
+};
+
+// A second model reads each draft against the teacher's notes and lists
+// sentences that say something the notes don't: promises, feelings, results,
+// details. Translation and rewording are fine.
+async function unsupported(notes: unknown, drafts: string[]) {
+  const r = await new GoogleGenAI({ apiKey: process.env.API_KEY }).models.generateContent({
+    model: 'gemini-3.8-flash',
+    contents: `A Korean report to parents was drafted from a teacher's notes. List every sentence in the drafts that states something the notes do not support: an invented detail, feeling, result, plan or promise. Translating, rewording, and restating the energy level or activity list in natural words are fine; do not list those. Quote the sentence exactly and name the unsupported claim.
+
+TEACHER NOTES (JSON):
+${JSON.stringify(notes)}
+
+DRAFTS:
+${drafts.map((d, i) => `[${i + 1}] ${d}`).join('\n')}`,
+    config: {
+      responseMimeType: 'application/json',
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          unsupported: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: { sentence: { type: Type.STRING }, claim: { type: Type.STRING } },
+              required: ['sentence', 'claim'],
+            },
+          },
+        },
+        required: ['unsupported'],
+      },
+    },
+  });
+  return (JSON.parse(r.text || '{}').unsupported ?? []) as { sentence: string; claim: string }[];
+}
+
 // What the class roster would send; includes names that aren't in any case.
 const ROSTER = ['Ji-ho', 'Seo-yeon', 'Min-jun', 'Yuna', 'Do-yun', 'Ha-eun', 'Ji-woo', 'Eun-seo'];
 
@@ -180,7 +221,13 @@ async function call(handler: (res: any, body: any) => Promise<any>, body: any) {
 
 function speak(c: Case): string {
   const file = path.join(os.tmpdir(), `chekki-report-eval-${c.id}.aiff`);
-  execFileSync('say', ['-v', c.voice, '--data-format=BEI16@16000', '-o', file, c.script]);
+  // `say` sometimes hangs; a second try works.
+  const args = ['-v', c.voice, '--data-format=BEI16@16000', '-o', file, c.script];
+  try {
+    execFileSync('say', args, { timeout: 20000 });
+  } catch {
+    execFileSync('say', args, { timeout: 20000 });
+  }
   return fs.readFileSync(file).toString('base64');
 }
 
@@ -197,7 +244,8 @@ for (const c of CASES.filter((x) => !only || x.id === only).slice(0, limit)) {
     audio: speak(c),
     mimeType: 'audio/aiff',
     history: [],
-    currentFields: {},
+    // The log form prefills the class's curriculum textbook before recording.
+    currentFields: c.textbook ? { textbook: CLASS_TEXTBOOK[c.textbook] } : {},
     studentNames: ROSTER,
     language: 'ko',
   });
@@ -227,6 +275,7 @@ for (const c of CASES.filter((x) => !only || x.id === only).slice(0, limit)) {
 
   // Draft only when a teacher could submit: required fields present.
   let summary: any, notes: any[] = [], rewrite: any;
+  let invented: { sentence: string; claim: string }[] = [];
   let draftMs = 0;
   if (f.lessonTopic && f.textbook) {
     const t1 = Date.now();
@@ -266,6 +315,12 @@ for (const c of CASES.filter((x) => !only || x.id === only).slice(0, limit)) {
     ).body;
 
     const ko = [summary?.korean, ...notes.map((n) => n?.text)].join('\n');
+    invented = await unsupported({ ...payload, students: ex }, [
+      summary?.korean,
+      ...notes.map((n) => n?.text),
+      rewrite?.korean,
+    ].filter(Boolean));
+    checks.nothingInvented = invented.length === 0;
     checks.summaryNotFallback = summary?.fallback === false;
     checks.notesNotFailed = notes.every((n) => n?.failed === false);
     checks.haeyo = !formalEnding(ko) && !formalEnding(rewrite?.korean ?? '');
@@ -283,7 +338,7 @@ for (const c of CASES.filter((x) => !only || x.id === only).slice(0, limit)) {
   );
 
   const stock = STOCK_KO.filter((w) => (summary?.korean ?? '').includes(w)).length;
-  results.push({ id: c.id, checks, stock, fillMs, draftMs, fill: fill.body, summary, notes, rewrite });
+  results.push({ id: c.id, checks, invented, stock, fillMs, draftMs, fill: fill.body, summary, notes, rewrite });
 }
 console.log('\n');
 
@@ -298,6 +353,9 @@ for (const k of keys) {
 }
 const avg = (k: string) =>
   Math.round(results.reduce((s, r) => s + r[k], 0) / Math.max(1, results.length) / 100) / 10;
+const allInvented = results.flatMap((r) => r.invented.map((x: any) => `${r.id}: ${x.sentence} -- ${x.claim}`));
+console.log(`  invented sentences   ${allInvented.length}`);
+for (const line of allInvented) console.log(`    ${line}`);
 console.log(`  stock words/summary  ${(results.reduce((s, r) => s + r.stock, 0) / results.length).toFixed(1)}`);
 console.log(`  avg voice fill       ${avg('fillMs')}s`);
 console.log(`  avg drafts           ${avg('draftMs')}s (summary + notes in parallel)`);
