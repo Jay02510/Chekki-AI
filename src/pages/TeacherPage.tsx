@@ -550,24 +550,24 @@ export default function TeacherPage({ isNight = true }: Props) {
   const teacherObSteps = [
     {
       img: '/assets/teacher_ob_create_class.png',
-      titleEn: 'Your Class & Parent Join Code',
-      titleKo: '담당 학급 & 6자리 학부모 코드',
-      descEn: "Your director sets up your class and assigns you to it — share the 6-digit join code they give you with parents for instant home homework sync.",
-      descKo: '원장님이 학급을 개설하고 선생님을 배정합니다. 전달받은 6자리 코드를 학부모님께 공유하면 가정에서 스캔한 오답과 점수가 실시간 연동됩니다.',
+      titleEn: 'Your Class',
+      titleKo: '담당 학급',
+      descEn: 'Your director sets up your class, assigns you to it and invites each family by email. When a parent scans homework at home, the score and mistakes show up here.',
+      descKo: '원장님이 학급을 개설하고 선생님을 배정한 뒤, 가정마다 이메일로 초대합니다. 학부모님이 집에서 숙제를 스캔하면 점수와 오답이 여기에 표시돼요.',
     },
     {
       img: '/assets/teacher_ob_seed_curriculum.png',
-      titleEn: 'Zero-Typing Curriculum Upload',
-      titleKo: '3초 교재 AI 자동 등록 (0타이핑 정답지)',
-      descEn: 'Drop your textbook photo or PDF. Chekki AI automatically extracts target vocabulary and answer keys in seconds.',
-      descKo: '교재 사진이나 PDF 한 장만 드롭하면 끝. Chekki AI가 주간 어휘와 정답지를 3초 만에 자동 생성합니다.',
+      titleEn: 'Upload the Answer Key',
+      titleKo: '정답지 올리기',
+      descEn: "Photograph the answer-key pages, or a copy you filled in yourself. Chekki reads the answers and grades parents' scans against them. Check any answer marked as an AI guess.",
+      descKo: '정답지 페이지나 선생님이 직접 답을 적은 학습지를 찍어 올리세요. 채키가 정답을 읽어 학부모 스캔을 그 기준으로 채점해요. AI 추정으로 표시된 답은 확인해 주세요.',
     },
     {
       img: '/assets/teacher_ob_share_code.png',
-      titleEn: 'Zero-Prep Insights & 1-Click Reports',
-      titleKo: '실시간 취약점 분석 & 1초 학부모 성장 리포트',
-      descEn: 'View auto-synced home mistake patterns before class starts, and export encouraging 1-click progress reports without manual writing.',
-      descKo: '가정 스캔 오답(빨간 테두리 항목)을 수업 전 미리 확인하고, 작성 부담 없이 1초 만에 학부모 성장 리포트를 발송하세요.',
+      titleEn: 'Mistakes Before Class, Reports After',
+      titleKo: '수업 전엔 오답, 수업 후엔 리포트',
+      descEn: "See which words the class missed at home before you teach. After class, log the day by typing or talking; the Korean teacher checks the Korean report before parents get it.",
+      descKo: '수업 전에 반 아이들이 집에서 틀린 단어를 확인하세요. 수업 후 일지를 글이나 말로 남기면, 한국인 선생님이 한국어 리포트를 확인한 뒤 학부모님께 보내요.',
     },
   ];
 
