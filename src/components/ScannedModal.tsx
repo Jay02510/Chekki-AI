@@ -182,7 +182,7 @@ export function ScannedModal({
                 <Sparkle size={20} weight="bold" className="shrink-0 text-line-ink" />
                 <div>
                   <p className="font-bold">
-                    {isKo ? '체키 앱 학부모 스캔 화면과 동일한 AI 정답지 오버레이' : 'Identical AI Answer Ink Overlay as Chekki Parent App'}
+                    {isKo ? '채키 앱 학부모 스캔 화면과 동일한 AI 정답지 오버레이' : 'Identical AI Answer Ink Overlay as Chekki Parent App'}
                   </p>
                   <p className="text-[12px] text-ink-3 mt-0.5">
                     {isKo

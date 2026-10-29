@@ -411,7 +411,7 @@ export const ProgressiveOnboardingModal: React.FC<Props> = ({
             {step === 0 &&
               renderEducationalStep(
                 '/assets/slide1_welcome_mascot.png',
-                '체키에 오신 걸 환영해요',
+                '채키에 오신 걸 환영해요',
                 'Welcome to Chekki',
                 '숙제 사진 한 장이면, 아이와 같이 볼 설명을 만들어 드려요.',
                 "One photo of the homework, and we'll explain it so you can go over it together.",

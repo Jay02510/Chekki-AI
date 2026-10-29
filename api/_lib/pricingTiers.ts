@@ -38,7 +38,7 @@ export const PLAN_LABELS: Record<string, { nameEn: string; nameKo: string }> = {
   trial: { nameEn: '14-Day Free Academy Trial', nameKo: '14일 무료 학원 체험' },
   solo: { nameEn: 'Solo Tutor & Study Room (1 Seat)', nameKo: '공부방 / 개인 교습소 (1석 단독)' },
   starter: { nameEn: 'Starter Academy Pack', nameKo: '스타터 학원 패키지' },
-  school_pro: { nameEn: 'Chekki Master School Pro (All-in-One Bundle)', nameKo: '체키 마스터 스쿨 프로 (완전 통합 패키지)' },
+  school_pro: { nameEn: 'Chekki Master School Pro (All-in-One Bundle)', nameKo: '채키 마스터 스쿨 프로 (완전 통합 패키지)' },
   enterprise: { nameEn: 'Large Academy & Franchise', nameKo: '대형 학원 & 프랜차이즈 네트워크' },
 };
 

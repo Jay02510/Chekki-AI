@@ -60,7 +60,7 @@ export const FAQ_DATA: FaqItem[] = [
     tagEn: 'Pricing & Trial',
     questionKo: '학부모용 Chekki 모바일 앱 이용 가격은 어떻게 되나요?',
     questionEn: 'How much does the Chekki Parent Mobile App cost?',
-    answerKo: '웹에서 가입 없이 바로 채점해 볼 수 있고, 무료 계정은 하루 무료 채점이 제공돼요. 더 쓰고 싶으면 앱에서 월 9,900원 또는 연 99,000원으로 구독할 수 있고, 7일 무료 체험부터 시작해요. 체키를 쓰는 학원에 다니면 학원 초대로 무료로 이용할 수 있어요.',
+    answerKo: '웹에서 가입 없이 바로 채점해 볼 수 있고, 무료 계정은 하루 무료 채점이 제공돼요. 더 쓰고 싶으면 앱에서 월 9,900원 또는 연 99,000원으로 구독할 수 있고, 7일 무료 체험부터 시작해요. 채키를 쓰는 학원에 다니면 학원 초대로 무료로 이용할 수 있어요.',
     answerEn: 'You can try grading on the web without signing up, and free accounts get free scans every day. For more, subscribe in the app for ₩9,900 a month or ₩99,000 a year, starting with a 7-day free trial. If your academy uses Chekki, its invite makes it free for you.'
   },
 

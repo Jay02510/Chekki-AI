@@ -58,6 +58,7 @@ import { WeekCalendarModal } from '../components/WeekCalendarModal';
 import { ReportCardModal } from '../components/ReportCardModal';
 import { UnifiedAccountActivation } from '../components/UnifiedAccountActivation';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { levelLabel } from '../components/staffUi';
 
 interface Props {
   isNight?: boolean;
@@ -1459,7 +1460,7 @@ export default function TeacherPage({ isNight = true }: Props) {
                   >
                     {realClasses.map((cls) => (
                       <option key={cls.id} value={cls.id}>
-                        {cls.name} ({cls.level})
+                        {cls.name}{cls.level ? ` (${levelLabel(cls.level, isKo)})` : ''}
                       </option>
                     ))}
                   </select>

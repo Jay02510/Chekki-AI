@@ -329,7 +329,7 @@ export default function Home() {
           <div>
             <p className="text-[15px] font-bold text-line-ink">{isKo ? '학원에 다닌다면' : 'If your child goes to an academy'}</p>
             <h2 className="mt-2 text-[26px] font-extrabold tracking-[-0.02em] text-ink sm:text-[30px]">
-              {isKo ? '학원이 체키를 쓰면, 엄마는 무료예요' : "If the academy uses Chekki, it's free for you"}
+              {isKo ? '학원이 채키를 쓰면, 엄마는 무료예요' : "If the academy uses Chekki, it's free for you"}
             </h2>
             <ul className="mt-4 space-y-2.5">
               {(isKo

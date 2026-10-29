@@ -29,3 +29,13 @@ export const staffUi = {
 
 export const msgTone = (type: 'error' | 'success' | string) =>
   `text-[14px] font-bold ${type === 'error' ? 'text-wrong' : 'text-correct'}`;
+
+// Class levels are stored in English (CreateClassModal's option values).
+const LEVEL_KO: Record<string, string> = {
+  '5-year-old': '5세반',
+  '6-year-old': '6세반',
+  '7-year-old': '7세반',
+  'Elementary Grade 1': '초등 1학년',
+  'Elementary Grade 2': '초등 2학년',
+};
+export const levelLabel = (level: string | undefined, isKo: boolean) => (level && isKo ? LEVEL_KO[level] || level : level || '');
