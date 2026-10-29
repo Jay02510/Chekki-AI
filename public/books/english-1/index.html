@@ -382,6 +382,8 @@ footer a{color:var(--ink-2);font-weight:700}
         <img src="/books/english-1/img/chekki-point.webp" width="360" height="492" alt="" style="width:84px;margin:0 auto" loading="lazy">
         <a class="btn pri ko" data-link="sampler_ko" href="#">무료 샘플 받기</a>
         <a class="btn pri en" data-link="sampler_en" href="#">Get the free sampler</a>
+        <!-- 체험단 button: remove on 6 Nov 2026 -->
+        <a class="btn out ko" href="https://docs.google.com/forms/d/e/1FAIpQLSd-mWp5UExQbwCLH_qhMTRTAL63oe7xYlBaZOXTQmr2FKGv_g/viewform" target="_blank" rel="noopener">체험단 신청하기 (11/5까지)</a>
         <p class="consent"><span class="ko">샘플 발송을 위해 이메일 주소만 받아요. 새 책 소식은 따로 동의하신 분께만 보내고, 언제든 수신 거부할 수 있어요. 만 14세 이상 보호자만 신청해 주세요. <a href="/privacy#books-ko">개인정보 처리방침</a></span><span class="en">We only ask for your email to send the sampler. News about new books goes only to people who opt in, and you can unsubscribe at any time. <a href="/privacy#books">Privacy policy</a></span></p>
       </div>
     </div>
@@ -393,7 +395,7 @@ footer a{color:var(--ink-2);font-weight:700}
   <div class="wrap">
     <div class="sec-h">
       <h2><span class="ko">어디서 살 수 있나요?</span><span class="en">Get the book</span></h2>
-      <p><span class="ko">한국어판 PDF (A4, 컬러판 + 흑백판)는 결제하면 바로 내려받을 수 있어요.</span><span class="en">The English edition comes as a printable PDF (US Letter + A4, color + black-and-white) or, soon, a paperback.</span></p>
+      <p><span class="ko">한국어판 PDF (A4, 컬러판 + 흑백판)는 결제하면 바로 내려받을 수 있어요.</span><span class="en">The English edition comes as a printable PDF (US Letter + A4, color + black-and-white) or a paperback.</span></p>
     </div>
     <div class="stores ko">
       <div class="store"><div class="top"><b>한국어판 PDF</b><span class="price" data-price="smartstore"></span></div><p>컬러판 + 흑백판 · 결제 후 바로 내려받기 (Gumroad 결제, 해외결제 가능 카드·PayPal)</p><a class="btn pri" data-link="smartstore" href="#">구매하기</a></div>
@@ -459,10 +461,10 @@ var LINKS = {
   gumroad: 'https://chekkiai.gumroad.com/l/chekki-english-1',
   etsy: 'https://www.etsy.com/listing/4601495161/esl-kindergarten-workbook-with-audio',
   tpt: 'https://www.teacherspayteachers.com/Product/First-English-Sentences-Workbook-with-Audio-ESL-Kindergarten-Pre-K-to-1st-18050621',
-  amazon: ''  // after the Amazon page appears: 'https://www.amazon.com/dp/<ASIN>', PRICES.amazon '$12.99'
+  amazon: 'https://www.amazon.com/dp/B0HPMVTQBZ'
 };
 /* Prices shown on the store cards. Empty = no price shown. */
-var PRICES = { smartstore: '9,900원', gumroad: '$14.99', etsy: '', tpt: '$14.99', amazon: '' };
+var PRICES = { smartstore: '9,900원', gumroad: '$14.99', etsy: '', tpt: '$14.99', amazon: '$12.99' };
 
 (function () {
   var d = document.documentElement;

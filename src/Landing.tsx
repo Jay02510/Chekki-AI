@@ -364,6 +364,43 @@ export default function Home() {
         </div>
       </section>
 
+      {/* WORKBOOK */}
+      <section className="mx-auto max-w-5xl px-4 pb-12 md:pb-16">
+        <div className="flex flex-col gap-5 rounded-lg bg-surface p-6 ring-1 ring-inset ring-rule sm:flex-row sm:items-center md:p-8">
+          <img
+            src={isKo ? '/books/english-1/img/cover-ko.webp' : '/books/english-1/img/cover-en.webp'}
+            width={720}
+            height={1019}
+            alt={isKo ? '체키 영어 1: 첫 문장 읽기 앞표지' : 'Front cover of My First English Sentences'}
+            loading="lazy"
+            className="w-28 shrink-0 rounded-sm shadow-md ring-1 ring-rule"
+          />
+          <div className="flex-1">
+            <p className="text-[15px] font-bold text-line-ink">{isKo ? '워크북 · 만 4–7세' : 'Workbook · Ages 4–7'}</p>
+            <h2 className="mt-1 text-[22px] font-extrabold tracking-[-0.02em] text-ink sm:text-[26px]">
+              {isKo ? '체키 영어 1: 첫 문장 읽기' : 'My First English Sentences'}
+            </h2>
+            <p className="mt-1.5 text-[15px] leading-relaxed text-ink-2">
+              {isKo
+                ? '듣고, 읽고, 알맞은 그림에 동그라미. QR 영어 음원과 함께 하루 10분, 한 장씩이면 충분해요.'
+                : 'Listen, read and circle the matching picture. Audio through QR codes on every page, about 10 minutes a day.'}
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:w-52">
+            <a
+              href="/books/english-1/#sampler"
+              className="btn-press inline-flex min-h-12 items-center justify-center rounded-md bg-sign px-6 text-[16px] font-bold text-on-sign dark:bg-ink dark:text-ground"
+            >
+              {isKo ? '무료 샘플 받기' : 'Get the free sampler'}
+            </a>
+            <a href="/books/english-1/" className="inline-flex min-h-11 items-center justify-center gap-1.5 text-[15px] font-bold text-line-ink">
+              {isKo ? '자세히 보기' : 'See the book'}
+              <ArrowRight size={16} weight="bold" />
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* PRICING */}
       <section id="pricing" className="mx-auto max-w-5xl px-4 pb-12 md:pb-16">
         <h2 className="text-[26px] font-extrabold tracking-[-0.02em] text-ink sm:text-[32px]">{isKo ? '요금' : 'Pricing'}</h2>
