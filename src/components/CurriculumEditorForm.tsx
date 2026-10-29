@@ -917,7 +917,12 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 }`}
               />
             </div>
+            </>)}
 
+            {/* Shown on the Answer key tab too: that's where teachers upload,
+                and AI-inferred answers can only be confirmed from this list.
+                It used to sit inside the syllabus-only block, which no
+                sidebar links to, so inferred answers stayed ungraded. */}
             {curriculumAnswerKey.length > 0 && (
               <div className={`p-4 sm:p-5 rounded-lg border space-y-2 text-left ${
                 'bg-right-soft border-rule'
@@ -990,7 +995,6 @@ export const CurriculumEditorForm: React.FC<Props> = ({
                 </ul>
               </div>
             )}
-            </>)}
 
             {/* DEMO: AI Worksheet Generator (generate-new-worksheet, distinct
                 from the answer-key scan above) hidden — newest, least
