@@ -369,7 +369,7 @@ export function TeacherAuthView({ loginRole, setLoginRole, inviteSlug, activatio
             {isPlanSignup
               ? (isKo
                   ? `${planLabel.nameKo} 원장님 계정 만들기 — 원어민 선생님 ${planSeats.ft}명, 한국인 선생님 ${planSeats.kt}명`
-                  : `Create your director account for ${planLabel.nameEn}: ${planSeats.ft} foreign teacher and ${planSeats.kt} Korean teacher seats`)
+                  : `${planLabel.nameEn}: create your director account (seats for ${planSeats.ft} foreign and ${planSeats.kt} Korean ${planSeats.ft + planSeats.kt === 1 ? 'teacher' : 'teachers'})`)
               : authMode === 'login'
               ? (isKo ? '로그인' : 'Sign in')
               : (loginRole === 'director' ? (isKo ? '원장님 계정 생성' : 'Create Director Account') : (isKo ? '교사 계정 생성' : 'Create Teacher Account'))}
