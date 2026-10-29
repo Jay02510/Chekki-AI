@@ -82,10 +82,12 @@ export const ReportCardModal: React.FC<Props> = ({
         .map((d) => d.data() as any)
         .filter((l) => (l.enrolledStudentUids || []).includes(studentUid) || (l.aiStudentReports || []).some((r: any) => r.studentUid === studentUid));
 
+      // The teacher's own notes, not the AI drafts made from them, so a
+      // detail a draft invented can't come back as a talking point.
       const historicalLogs = rangeLogs
         .map((l) => {
-          const exception = (l.aiStudentReports || []).find((r: any) => r.studentUid === studentUid);
-          return [l.date, l.aiKoreanSummary, exception?.koreanUpdate].filter(Boolean).join(' — ');
+          const exception = (l.exceptions || []).find((e: any) => e.studentUid === studentUid);
+          return [l.date, l.lessonTopic, l.generalComments, exception?.details].filter(Boolean).join(' — ');
         })
         .filter(Boolean)
         .join('\n');

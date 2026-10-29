@@ -80,9 +80,11 @@ export function KtInbox({ isNight, isKo, logs, loadError, academyName, user, app
 
   // Bulk send for a KT with a stack of logs that need no edits. Only clean
   // drafts qualify: anything the AI flagged (template summary, failed
-  // translation) or a possible duplicate still needs a person to look.
+  // translation), a possible duplicate, or a concern about a child (the
+  // note a parent reads most closely) still needs a person to look.
   const isClean = (l: PendingClassLog) =>
     !l.aiSummaryFallback &&
+    !(l.aiStudentReports || []).some((r) => r.category === 'attention') &&
     !!l.aiKoreanSummary?.trim() &&
     !(l.aiStudentReports || []).some((r) => r.failed || isUntranslated(r.koreanUpdate || '')) &&
     (dupCounts.get(dupKey(l)) || 0) <= 1;
