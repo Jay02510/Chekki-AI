@@ -26,7 +26,7 @@ export const ROUTE_META: Record<'home' | 'faq' | 'schools', { path: string; ko: 
     },
     en: {
       title: 'Chekki AI FAQ | Pricing, Homework Grading & How It Works',
-      description: 'Answers about Chekki AI homework scanning, pronunciation coaching, pricing, and the 7-day academy free trial.',
+      description: 'Answers about Chekki AI homework scanning, pronunciation coaching, pricing, and the 14-day academy free trial.',
     },
   },
   schools: {

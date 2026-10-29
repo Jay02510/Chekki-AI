@@ -766,7 +766,7 @@ export default function TeacherPage({ isNight = true }: Props) {
         // action but a director had no way to act on it from here before).
         if (data.trialExpired) {
           setConfirmDialog({
-            title: (data.error || (isKo ? '7일 무료 체험이 종료되었습니다.' : 'Your 7-day trial has ended.')) +
+            title: (data.error || (isKo ? '14일 무료 체험이 종료되었습니다.' : 'Your 14-day trial has ended.')) +
               '\n\n' +
               (isKo ? '지금 업그레이드하시겠습니까?' : 'Upgrade now?'),
             confirmText: isKo ? '업그레이드' : 'Upgrade',
@@ -1616,17 +1616,14 @@ export default function TeacherPage({ isNight = true }: Props) {
               'bg-line-soft border-rule text-line-ink'
             }`}>
               <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-lg bg-line text-on-line flex items-center justify-center font-bold text-base shrink-0">
-                  
-                </div>
                 <div>
                   <h4 className="text-sm font-extrabold tracking-tight">
-                    {isKo ? '대시보드 미리보기 모드' : 'Dashboard Preview Mode'}
+                    {isKo ? '첫 학급부터 만들어 주세요' : 'Start with your first class'}
                   </h4>
                   <p className={`text-xs mt-0.5 text-line-ink`}>
                     {isKo
-                      ? '등록된 학급이 없어도 대시보드, 커리큘럼 관리, 원생 활동 화면을 둘러보실 수 있습니다.'
-                      : 'You can explore the dashboard, curriculum manager, and student views before creating a class.'}
+                      ? '학급 만들기 → 선생님 배정에서 선생님 초대 → 학생에서 학부모 초대. 세 단계면 첫 리포트를 보낼 수 있어요.'
+                      : 'Create a class, invite teachers under Teachers, then invite parents under Students. Three steps to your first report.'}
                   </p>
                 </div>
               </div>
@@ -1645,9 +1642,6 @@ export default function TeacherPage({ isNight = true }: Props) {
             <div className={`p-5 rounded-lg border mb-6 flex items-center gap-3.5 transition-[color,background-color,border-color,box-shadow,transform] ${
               'bg-line-soft border-rule text-line-ink'
             }`}>
-              <div className="w-10 h-10 rounded-lg bg-line text-on-line flex items-center justify-center font-bold text-base shrink-0">
-                
-              </div>
               <div>
                 <h4 className="text-sm font-extrabold tracking-tight">
                   {isKo ? '학급 배정 대기 중' : 'Waiting on a class assignment'}

@@ -80,7 +80,7 @@ async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsO
   // teachers, classes, and data fully accessible.
   if (schoolData.planId === 'trial' && schoolData.trialEndsAt && new Date(schoolData.trialEndsAt).getTime() < Date.now()) {
     return res.status(400).json({
-      error: 'Your 7-day trial has ended. Upgrade your plan to invite more teachers.',
+      error: 'Your 14-day trial has ended. Upgrade your plan to invite more teachers.',
       trialExpired: true,
     });
   }
@@ -151,11 +151,11 @@ async function handleCreateInvite(req: VercelRequest, res: VercelResponse, corsO
         to: cleanEmail,
         subject: `[Chekki AI] ${schoolData.name || 'Your academy'}에서 선생님을 초대했습니다 (${role.toUpperCase()})`,
         html: emailLayout(`
-          <p style="font-size: 15px; color: #e4e4e7;">${escapeHtml(schoolData.name || 'An academy')}에서 회원님을 <strong>${role === 'ft' ? '원어민 선생님(FT)' : '한국인 선생님(KT)'}</strong>으로 초대했습니다.</p>
-          <p style="font-size: 14px; color: #e4e4e7;">배정된 학급: <strong style="color: #f97316;">${escapeHtml(className)}</strong></p>
-          <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">아래 링크로 접속해 가입(또는 로그인)하면 바로 시작할 수 있습니다.</p>
+          <p style="font-size: 15px; color: #2b211a;">${escapeHtml(schoolData.name || 'An academy')}에서 회원님을 <strong>${role === 'ft' ? '원어민 선생님(FT)' : '한국인 선생님(KT)'}</strong>으로 초대했습니다.</p>
+          <p style="font-size: 14px; color: #2b211a;">배정된 학급: <strong style="color: #a84d06;">${escapeHtml(className)}</strong></p>
+          <p style="font-size: 14px; color: #5b4b3f; line-height: 1.6;">아래 링크로 접속해 가입(또는 로그인)하면 바로 시작할 수 있습니다.</p>
           ${emailButton(inviteUrl, '초대 수락하기')}
-          <p style="font-size: 12px; color: #71717a; text-align: center;">${inviteUrl}</p>
+          <p style="font-size: 12px; color: #76665a; text-align: center;">${inviteUrl}</p>
         `),
       })
     : false;
@@ -359,8 +359,8 @@ async function handleSendPendingDigests(_req: VercelRequest, res: VercelResponse
       to: email,
       subject: `[Chekki AI] 검토 대기 중인 수업 일지 ${totalCount}건`,
       html: emailLayout(`
-        <p style="font-size: 15px; color: #e4e4e7;">선생님들이 제출한 수업 일지 ${totalCount}건이 검토를 기다리고 있습니다.</p>
-        <ul style="font-size: 14px; color: #a1a1aa; line-height: 1.6; padding-left: 20px;">${listHtml}</ul>
+        <p style="font-size: 15px; color: #2b211a;">선생님들이 제출한 수업 일지 ${totalCount}건이 검토를 기다리고 있습니다.</p>
+        <ul style="font-size: 14px; color: #5b4b3f; line-height: 1.6; padding-left: 20px;">${listHtml}</ul>
         ${emailButton('https://www.chekkiai.com/teacher', '지금 검토하기')}
       `),
     });

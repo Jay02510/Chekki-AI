@@ -35,13 +35,13 @@ export const SCHOOLS_QA: { qKo: string; qEn: string; aKo: string; aEn: string }[
   {
     qKo: '비용은 얼마인가요?',
     qEn: 'What does it cost?',
-    aKo: `모든 학원은 7일 무료 체험으로 시작해요. 요금제는 월 ${won(low)}부터 ${won(high)}까지이고, 연 결제 시 약 20% 할인돼요.`,
-    aEn: `Every academy starts with a 7-day free trial. Plans run from ${won(low)} to ${won(high)} a month, about 20% less when billed yearly.`,
+    aKo: `모든 학원은 14일 무료 체험으로 시작해요. 요금제는 월 ${won(low)}부터 ${won(high)}까지이고, 연 결제 시 약 20% 할인돼요.`,
+    aEn: `Every academy starts with a 14-day free trial. Plans run from ${won(low)} to ${won(high)} a month, about 20% less when billed yearly.`,
   },
   {
     qKo: '어떻게 시작하나요?',
     qEn: 'How do we start?',
-    aKo: '학원명과 원장님 이메일로 가입하면 7일 체험이 바로 시작돼요. 반을 만들고 선생님과 학부모님을 초대한 뒤, 이번 주 정답지를 올리면 돼요.',
-    aEn: "Sign up with your academy name and email and the 7-day trial starts right away. Create classes, invite teachers and parents, then upload this week's answer key.",
+    aKo: '학원명과 원장님 이메일로 가입하면 14일 체험이 바로 시작돼요. 반을 만들고 선생님과 학부모님을 초대한 뒤, 이번 주 정답지를 올리면 돼요.',
+    aEn: "Sign up with your academy name and email and the 14-day trial starts right away. Create classes, invite teachers and parents, then upload this week's answer key.",
   },
 ];

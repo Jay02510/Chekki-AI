@@ -38,21 +38,21 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-// Shared shell for the dark, centered card every Chekki email uses.
+// Shared shell for the cream, centered card every Chekki email uses (brand tokens in tokens.css).
 export function emailLayout(bodyHtml: string): string {
   return `
-    <div style="font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #030305; color: #f4f4f5; border-radius: 16px;">
+    <div style="font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #fbf6ee; color: #2b211a; border-radius: 16px;">
       <div style="text-align: center; margin-bottom: 24px;">
-        <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #ffffff;">Chekki<span style="color: #f97316;">ai</span></h1>
+        <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #2b211a;">Chekki<span style="color: #a84d06;">AI</span></h1>
       </div>
       ${bodyHtml}
-      <p style="font-size: 12px; color: #71717a; text-align: center; margin-top: 24px;">
-        문의 사항이 있으시면 <a href="mailto:support@chekkiai.com" style="color: #f97316;">support@chekkiai.com</a> 로 연락해 주세요.
+      <p style="font-size: 12px; color: #76665a; text-align: center; margin-top: 24px;">
+        문의 사항이 있으시면 <a href="mailto:support@chekkiai.com" style="color: #a84d06;">support@chekkiai.com</a> 로 연락해 주세요.
       </p>
     </div>
   `;
 }
 
 export function emailButton(href: string, label: string): string {
-  return `<div style="text-align: center; margin: 24px 0;"><a href="${href}" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">${label}</a></div>`;
+  return `<div style="text-align: center; margin: 24px 0;"><a href="${href}" style="display: inline-block; background-color: #ef7c1c; color: #2b211a; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">${label}</a></div>`;
 }

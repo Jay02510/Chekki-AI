@@ -6,6 +6,19 @@ Lightweight decision records — context, decision, status, consequences. Newest
 
 ---
 
+## 027 — Academy trial is 14 days; roster-only students get a copyable KakaoTalk invite
+
+**Date:** 2026-10-29
+**Status:** Resolved
+
+**Context:** A readiness audit before school outreach found three things that would trip a partner academy. Outreach offered a 14-day pilot while `api/set-initial-role.ts` granted 7 days, so a director signing up from the email would hit "trial ended" a week early; 7 days also barely covers one homework-and-report cycle. Parent invites were email-only (#001, #017), but Korean academies reach parents on KakaoTalk and often don't hold parent emails. And an emailed invite only redeems for the account with that exact email (`api/redeem.ts`), which Kakao and Apple (Hide My Email) sign-ins usually don't match.
+
+**Decision:** The academy trial is 14 days (`trialEndsAt` in `set-initial-role.ts`, plan label in `pricingTiers.ts`, all /schools copy). The parent app's App Store 7-day trial is separate and unchanged. For a student added without a parent email, `StudentInvitePanel` now shows "카톡 초대", which copies a ready-to-paste Korean message with that student's single-use invite link. This narrows #017's "no code ever surfaced to staff": the code is still per-student and single-use, `/api/redeem` is rate-limited, and a roster-only invite already redeemed for any signed-in account, so no server rule changed. Emailed invites keep the email match; the invite email and login modal now tell parents to sign up with the invited email rather than Kakao/Apple.
+
+**Consequences:** Directors who want Kakao delivery add students without an email. If a parent with an emailed invite signs in with Kakao, they still hit the wrong-account dialog; relaxing that check (treating the emailed link itself as proof) is the next option if it shows up in pilots. Trial expiry still only blocks new classes and teacher invites; post-trial behaviour is undecided.
+
+---
+
 ## 026 — Scans and voice fill on gemini-3.8-flash; no speed numbers in copy; concern notes fact-checked
 
 **Date:** 2026-10-29

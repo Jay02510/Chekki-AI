@@ -168,12 +168,12 @@ async function handler(req: VercelRequest, res: VercelResponse) {
             seatsTotal: seats,
             usedByUids: [],
             createdAt: new Date().toISOString(),
-            // The "7-day free trial" promise was previously just landing-page
+            // The "14-day free trial" promise was previously just landing-page
             // copy — createdAt was stored but nothing ever read it to check
-            // whether 7 days had passed. trialEndsAt is the real, checkable
+            // whether 14 days had passed. trialEndsAt is the real, checkable
             // deadline that api/create-class.ts and api/create-teacher-invite.ts
             // gate new actions on.
-            trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
           };
           await adminDb.collection('schools').doc(resolvedSchoolId).set(schoolDoc, { merge: true });
         }

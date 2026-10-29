@@ -73,7 +73,7 @@ async function handleCreateClassAction(req: VercelRequest, res: VercelResponse, 
     // is gated, not access to what's already there.
     if (schoolData?.planId === 'trial' && schoolData?.trialEndsAt && new Date(schoolData.trialEndsAt).getTime() < Date.now()) {
       return res.status(400).json({
-        error: 'Your 7-day trial has ended. Upgrade your plan to create new classes.',
+        error: 'Your 14-day trial has ended. Upgrade your plan to create new classes.',
         trialExpired: true,
       });
     }
@@ -167,12 +167,13 @@ async function sendStudentInviteEmail(opts: {
     to: opts.parentEmail,
     subject: `[Chekki AI] ${opts.studentName} 학생 학급 등록 안내`,
     html: emailLayout(`
-      <p style="font-size: 15px; color: #e4e4e7;"><strong>${escapeHtml(opts.schoolName)}</strong>에서 <strong>${escapeHtml(opts.studentName)}</strong> 학생을 <strong>${escapeHtml(opts.className)}</strong> 학급에 등록했습니다.</p>
-      <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">아래 버튼을 누르면 가입 코드가 자동으로 연결됩니다 — 따로 입력하실 필요 없습니다. 계정이 없으시면 버튼을 누른 뒤 뜨는 화면에서 <strong>"Sign Up"</strong>을 눌러 새로 만들어 주시면 됩니다. 이미 계정이 있으시면 그 이메일로 로그인만 하시면 자동으로 연결됩니다.</p>
+      <p style="font-size: 15px; color: #2b211a;"><strong>${escapeHtml(opts.schoolName)}</strong>에서 <strong>${escapeHtml(opts.studentName)}</strong> 학생을 <strong>${escapeHtml(opts.className)}</strong> 학급에 등록했습니다.</p>
+      <p style="font-size: 14px; color: #5b4b3f; line-height: 1.6;">아래 버튼을 누른 뒤 <strong>이 메일을 받은 이메일 주소(${escapeHtml(opts.parentEmail)})</strong>로 가입하거나 로그인해 주세요. 학급에 자동으로 연결돼요.</p>
+      <p style="font-size: 13px; color: #5b4b3f; line-height: 1.6;">카카오나 Apple로 가입하면 이메일 주소가 달라 연결되지 않을 수 있어요. 화면 아래 <strong>"또는 이메일로"</strong> 칸에서 가입해 주세요.</p>
       ${emailButton(`https://www.chekkiai.com/?classCode=${opts.inviteCode}`, '지금 가입하기')}
-      <p style="font-size: 12px; color: #71717a; text-align: center; margin: 0 0 8px 0;">버튼이 안 열리면 이 코드를 앱/사이트에 직접 입력해 주세요 (1회용):</p>
-      <div style="background-color: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.3); border-radius: 12px; padding: 16px; text-align: center;">
-        <p style="margin: 0; font-size: 24px; font-weight: 900; color: #ffffff; letter-spacing: 4px; font-family: monospace;">${opts.inviteCode}</p>
+      <p style="font-size: 12px; color: #76665a; text-align: center; margin: 0 0 8px 0;">버튼이 안 열리면 이 코드를 앱/사이트에 직접 입력해 주세요 (1회용):</p>
+      <div style="background-color: #fdebd8; border: 1px solid #ef7c1c; border-radius: 12px; padding: 16px; text-align: center;">
+        <p style="margin: 0; font-size: 24px; font-weight: 900; color: #2b211a; letter-spacing: 4px; font-family: monospace;">${opts.inviteCode}</p>
       </div>
     `),
   });

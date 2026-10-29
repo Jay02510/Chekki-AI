@@ -199,7 +199,7 @@ async function handleListInvoices(res: VercelResponse, uid: string) {
 /**
  * Called by the director dashboard on load. Returns how many days are left
  * on a trial school's clock, and — as a side effect — sends a one-time
- * Resend reminder email once 2 or fewer days remain (day-5/6 of a 7-day
+ * Resend reminder email once 2 or fewer days remain (day 12/13 of a 14-day
  * trial), so expiry isn't a silent surprise on top of the create-class /
  * create-teacher-invite soft-lock. Idempotent via trialReminderSentAt on the
  * school doc: this is a lazy per-request check, not a cron job, so that flag
@@ -243,14 +243,14 @@ async function handleTrialStatus(res: VercelResponse, uid: string) {
             to: [toEmail],
             subject: `[Chekki AI] 무료 체험이 ${daysRemaining}일 후 종료됩니다`,
             html: `
-              <div style="font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #030305; color: #f4f4f5; border-radius: 16px;">
+              <div style="font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #fbf6ee; color: #2b211a; border-radius: 16px;">
                 <div style="text-align: center; margin-bottom: 24px;">
-                  <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #ffffff;">Chekki<span style="color: #f97316;">ai</span></h1>
+                  <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #2b211a;">Chekki<span style="color: #a84d06;">AI</span></h1>
                 </div>
-                <p style="font-size: 15px; color: #e4e4e7;">${schoolData.name || '학원'}의 무료 체험이 <strong>${daysRemaining}일 후</strong> 종료됩니다.</p>
-                <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">체험 종료 후에도 기존 학급과 데이터는 계속 볼 수 있지만, 새 학급 개설과 선생님 초대는 제한됩니다. 계속 사용하시려면 업그레이드해주세요.</p>
+                <p style="font-size: 15px; color: #2b211a;">${schoolData.name || '학원'}의 무료 체험이 <strong>${daysRemaining}일 후</strong> 종료됩니다.</p>
+                <p style="font-size: 14px; color: #5b4b3f; line-height: 1.6;">체험 종료 후에도 기존 학급과 데이터는 계속 볼 수 있지만, 새 학급 개설과 선생님 초대는 제한됩니다. 계속 사용하시려면 업그레이드해주세요.</p>
                 <div style="text-align: center; margin: 24px 0;">
-                  <a href="https://chekkiai.com/schools" style="display: inline-block; background-color: #f97316; color: #ffffff; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">플랜 업그레이드</a>
+                  <a href="https://chekkiai.com/schools" style="display: inline-block; background-color: #ef7c1c; color: #2b211a; font-weight: 900; padding: 14px 28px; border-radius: 12px; text-decoration: none;">플랜 업그레이드</a>
                 </div>
               </div>
             `,
