@@ -95,7 +95,7 @@ const SubscribePage: React.FC = () => {
         </h1>
         <p className="mt-2 text-[15px] leading-relaxed text-ink-2 break-keep">
           {isKo
-            ? '체키 앱을 받아서 7일 무료 체험을 시작하세요. 웹에서 쓰던 계정 그대로 로그인하면 돼요.'
+            ? '채키 앱을 받아서 7일 무료 체험을 시작하세요. 웹에서 쓰던 계정 그대로 로그인하면 돼요.'
             : 'Get the Chekki app and start the 7-day free trial. Sign in with the same account you use here.'}
         </p>
 

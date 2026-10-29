@@ -264,7 +264,7 @@ export const SettingsModal: React.FC<Props> = ({ onClose, isNight, setIsNight })
                       to invite their director instead of a dead-end form. */}
                   <p className="text-[15px] leading-relaxed text-ink-2 break-keep">
                     {language === 'ko'
-                      ? '다니는 학원이 체키 스쿨을 쓰면, 원장님 초대로 Premium을 무료로 쓸 수 있어요.'
+                      ? '다니는 학원이 학원용 채키를 쓰면, 원장님 초대로 Premium을 무료로 쓸 수 있어요.'
                       : "If your child's academy uses Chekki School, you get Premium free through their invite."}
                   </p>
                   <div className="rounded-md bg-sunken p-3.5">

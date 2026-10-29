@@ -8,7 +8,7 @@ import { TeacherInvitePanel } from './TeacherInvitePanel';
 import { TeacherRosterPanel } from './TeacherRosterPanel';
 import { SchoolBillingPanel } from './SchoolBillingPanel';
 import { useLogCompliance } from '../../hooks/useLogCompliance';
-import { staffUi } from './staffUi';
+import { staffUi, levelLabel } from './staffUi';
 import type { TabId } from '../../hooks/useTeacherTabs';
 
 interface Props {
@@ -217,7 +217,7 @@ export function DirectorTabContent(props: Props) {
                         <div className="min-w-0">
                           <p className="truncate text-[16px] font-bold">{c.name}</p>
                           <p className="truncate text-[13px] text-ink-3">
-                            {c.level || (isKo ? '일반' : 'General')} · {compliance?.teacherName || (isKo ? `교사 ${teacherCount}명` : `${teacherCount} ${teacherCount === 1 ? 'teacher' : 'teachers'}`)} · {isKo ? `원생 ${studentCount}명` : `${studentCount} ${studentCount === 1 ? 'student' : 'students'}`}
+                            {levelLabel(c.level, isKo) || (isKo ? '일반' : 'General')} · {compliance?.teacherName || (isKo ? `교사 ${teacherCount}명` : `${teacherCount} ${teacherCount === 1 ? 'teacher' : 'teachers'}`)} · {isKo ? `원생 ${studentCount}명` : `${studentCount} ${studentCount === 1 ? 'student' : 'students'}`}
                           </p>
                         </div>
                         <div className="flex shrink-0 items-center gap-3">

@@ -19,7 +19,7 @@ const LABELS: Record<string, { en: string; ko: string }> = {
   student_approved: { en: 'approved', ko: '승인함' },
   student_declined: { en: 'declined', ko: '거절함' },
   student_removed: { en: 'removed', ko: '삭제함' },
-  student_moved: { en: 'moved', ko: '이동시킴' },
+  student_moved: { en: 'moved', ko: '반을 옮김' },
 };
 
 /**
